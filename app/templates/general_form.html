@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ name }}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <link href="{{ URL_PREFIX + url_for('static', filename='css/forms.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ URL_PREFIX + url_for('static', filename='css/general.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ URL_PREFIX + url_for('static', filename='css/pool.css') }}" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="container">
+    <div id="poolContainer" class="file-manager" style="display: none;">
+        <h3>File Pool for <span id="userDisplay"></span></h3>
+        <form action="{{ URL_PREFIX + url_for('upload.upload_files') }}" method="post" enctype="multipart/form-data" id="runForm">
+            <div style="display: flex; align-items: center">
+                <label for="audioFile">Upload video or audio file:</label>
+                <input type="file" id="audioFile" name="audioFile" class="fileInput" multiple accept=".mp4,video/mp4,.wav,audio/wav,.mp3,audio/mpeg">
+                <div id="errorMessage" style="color: #FF0000;"></div>
+                <button type="button" id="runButton" style="padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;">Upload</button>
+            </div>
+        </form>
+        <div class="file-header">
+            <div class="col name sortable">Name<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
+            <div class="col type sortable">Type<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
+            <div class="col status sortable">Status<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
+            <div class="col duration sortable">Duration<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
+            <div class="col size sortable">Size<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
+        </div>
+        <ul id="fileList"></ul>
+        <div class="pagination">
+            <button id="prevPage" disabled>Previous</button>
+            <span id="pageInfo">Page 1</span>
+            <button id="nextPage">Next</button>
+        </div>
+    </div>
+</div>
+<script src="{{ URL_PREFIX + url_for('static', filename='js/Sortable.js') }}"></script>
+<script src="{{ URL_PREFIX + url_for('static', filename='js/general.js') }}"></script>
+{% if username %}
+<script>
+    {% if message %}
+        alert("{{ message }}");
+    {% endif %}
+    const audioInput = document.getElementById('audioFile');
+    const runButton = document.getElementById('runButton');
+    const errorMessage = document.getElementById('errorMessage');
+    const username = "{{ username }}";  // 直接插入 Flask 变量
+
+    // 检查文件格式和是否选择文件
+    function validateFile() {
+        const file = audioInput.files[0];
+        errorMessage.textContent = ''; // 清空之前的错误信息
+
+        if (!file) {
+            errorMessage.textContent = 'No video or audio provided';
+            return false;
+        }
+
+        const fileName = file.name.toLowerCase();
+        if (!(fileName.endsWith('.mp4') || fileName.endsWith('.wav') || fileName.endsWith('.mp3'))) {
+            errorMessage.textContent = 'Please upload MP4, MP3, WAV file';
+            return false;
+        }
+
+        // 如果文件有效，移除错误消息
+        errorMessage.textContent = '';
+        return true;
+    }
+
+    // 当点击 Run 按钮时触发验证
+    runButton.addEventListener('click', (event) => {
+        if (!validateFile()) {
+            event.preventDefault(); // 阻止表单提交
+        }
+    });
+
+    // 当文件选择更改时触发验证
+    audioInput.addEventListener('change', () => {
+        validateFile();
+    });
+
+    document.getElementById('runButton').addEventListener('click', async () => {
+        const fileInput = document.getElementById('audioFile');
+        const files = Array.from(fileInput.files);
+        const formData = new FormData();
+
+        for (const file of files) {
+            const ext = file.name.split('.').pop();
+            let baseName = file.name.substring(0, file.name.lastIndexOf('.'));
+            function sanitizeFileName(name) {
+                return name
+                    .replace(/[^\w]/g, '_')        // 替换非法字符为 `_`
+                    .replace(/_+/g, '_')           // 合并连续的 `_`
+                    .replace(/^_+|_+$/g, '');      // 去掉开头结尾的 `_`
+            }
+            baseName = sanitizeFileName(baseName);
+            let finalName = baseName;
+            let override = false;
+
+            // 检查是否重名
+            const checkRes = await fetch(`{{URL_PREFIX}}/check_file_exists?username=${username}&videoName=${finalName}`);
+            const { exists } = await checkRes.json();
+
+            if (exists) {
+                const confirmOverwrite = confirm(`File "${finalName}" already exists. Do you want to overwrite it? (previous annotation will be deleted)`);
+                if (confirmOverwrite) {
+                    override = true;
+                } else {
+                    // 自动生成 bark(2)、bark(3)... 直到不重名
+                    let index = 2;
+                    while (true) {
+                        {#const newName = `${baseName}(${index})`;#}
+                        const newName = `${baseName}__${index}`;
+                        const check = await fetch(`{{URL_PREFIX}}/check_file_exists?username=${username}&videoName=${newName}`);
+                        const { exists: existsAlt } = await check.json();
+                        if (!existsAlt) {
+                            finalName = newName;
+                            break;
+                        }
+                        index++;
+                    }
+                }
+            }
+            // 创建重命名后的 File 对象
+            const renamedFile = new File([file], `${finalName}.${ext}`, { type: file.type });
+            // 添加到 FormData
+            formData.append("audioFile", renamedFile);
+            formData.append(`override_${finalName}`, override); // 给后端识别是否需要清空 annotation 子目录
+        }
+        // 提交
+        const form = document.getElementById('runForm');
+        const action = form.getAttribute('action');
+        const res = await fetch(action, {
+            method: 'POST',
+            body: formData
+        });
+        if (res.ok) {
+            {#alert(" Upload succeed！");#}
+            window.location.reload();
+        } else {
+            alert(" Upload failed！");
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const poolContainer = document.getElementById("poolContainer");
+        const fileList = document.getElementById("fileList");
+        const userDisplay = document.getElementById("userDisplay");
+        const prevPageBtn = document.getElementById("prevPage");
+        const nextPageBtn = document.getElementById("nextPage");
+        const pageInfo = document.getElementById("pageInfo");
+
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let fileData = [];
+        let currentSort = { key: null, asc: true };
+
+        // 对应的 key 映射
+        const keyMap = {
+            name: "name",
+            type: "type",
+            status: "status",
+            duration: "duration",
+            size: "size"
+        };
+
+        // 请求服务器获取该用户的文件
+        fetch(`{{URL_PREFIX}}/${username}/files`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("User not found or no files available.");
+                    return;
+                }
+                console.log('data', data);
+                userDisplay.textContent = username;
+                {#fileData = data.files; // 存储所有文件#}
+                fileData = data.files.map((file, index) => ({
+                    ...file,
+                    originalIndex: index // 加上原始顺序
+                }));
+                currentPage = 1; // 重新加载数据时重置页码
+                renderPage();
+                poolContainer.style.display = "block";
+            })
+            .catch(error => console.error("Error loading files:", error));
+
+        function sortFileData(key, asc) {
+            fileData.sort((a, b) => {
+                const valA = getValue(a, key);
+                const valB = getValue(b, key);
+                if (valA < valB) return asc ? -1 : 1;
+                if (valA > valB) return asc ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // 用于提取比较值
+        function getValue(file, key) {
+            if (key === "name") return file.name.toLowerCase();
+            if (key === "type") return file.type.toLowerCase();
+            if (key === "status") return file.status === "Annotated" ? 1 : 0;
+            if (key === "duration") return parseFloat(file.duration);
+            if (key === "size") return parseFloat(file.size);
+            return file.name;
+        }
+
+        // 渲染当前页的文件
+        function renderPage() {
+            fileList.innerHTML = ""; // 清空旧文件列表
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageItems = fileData.slice(start, end); // 获取当前页数据
+
+            pageItems.forEach(file => {
+                let fileItem = document.createElement("li"); // 修改为 <li>
+                fileItem.classList.add("file-item");
+
+                // 创建文件图标
+                let fileIcon = document.createElement("img");
+                fileIcon.classList.add("file-icon");
+                {#fileIcon.src = "{{ URL_PREFIX }}/static/icons/video-icon.png"; // 视频文件图标#}
+                fileIcon.src = `{{ URL_PREFIX }}/static/icons/${
+                    file.type === "WAV" ? "audio" : file.type === "MP3" ? "audio1" : "video"
+                }-icon.png`;
+
+                // 创建文件名
+                let nameDiv = document.createElement("div");
+                nameDiv.classList.add("col", "name");
+                nameDiv.title = file.name
+                nameDiv.textContent = file.name;
+
+                // 创建修改日期
+                {#let dateDiv = document.createElement("div");#}
+                {#dateDiv.classList.add("col", "date");#}
+                {#dateDiv.textContent = file.date;#}
+
+                // 标注状态
+                let statusDiv = document.createElement("div");
+                statusDiv.classList.add("col", "status");
+                statusDiv.textContent = file.status;
+                statusDiv.style.color = file.status === "Annotated" ? "red" : "green"; // 绿色已标注，红色未标注
+
+                // **时长 (Duration)**
+                let durationDiv = document.createElement("div");
+                durationDiv.classList.add("col", "duration");
+                durationDiv.textContent = file.duration;
+
+                // 创建文件类型
+                let typeDiv = document.createElement("div");
+                typeDiv.classList.add("col", "type");
+                typeDiv.textContent = file.type;
+
+                // 创建文件大小
+                let sizeDiv = document.createElement("div");
+                sizeDiv.classList.add("col", "size");
+                sizeDiv.textContent = file.size;
+
+                // 组装 <li> 结构
+                fileItem.appendChild(fileIcon);
+                fileItem.appendChild(nameDiv);
+                {#fileItem.appendChild(dateDiv);#}
+                fileItem.appendChild(typeDiv);
+                fileItem.appendChild(statusDiv);
+                fileItem.appendChild(durationDiv);
+                fileItem.appendChild(sizeDiv);
+                fileList.appendChild(fileItem);
+            });
+
+            updatePaginationControls();
+        }
+
+        // 更新分页按钮状态
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(fileData.length / itemsPerPage);
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage >= totalPages;
+        }
+
+        // 监听 "Previous" 按钮
+        prevPageBtn.addEventListener("click", function () {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage();
+            }
+        });
+
+        // 监听 "Next" 按钮
+        nextPageBtn.addEventListener("click", function () {
+            if (currentPage < Math.ceil(fileData.length / itemsPerPage)) {
+                currentPage++;
+                renderPage();
+            }
+        });
+
+        document.querySelectorAll(".sortable").forEach(col => {
+            const key = col.classList[1]; // "type", "status", "duration", "size"
+            const actualKey = keyMap[key]; // 映射到真实字段
+
+            col.addEventListener("click", () => {
+                if (currentSort.key === actualKey) {
+                    if (currentSort.asc) {
+                        currentSort.asc = false;
+                    } else {
+                        currentSort.key = null;
+                        fileData.sort((a, b) => a.originalIndex - b.originalIndex); // 恢复原顺序
+                        updateSortIcons(); // 清除箭头
+                        renderPage();
+                        return;
+                    }
+                } else {
+                    currentSort = { key: actualKey, asc: true };
+                }
+                sortFileData(currentSort.key, currentSort.asc);
+                updateSortIcons();
+                renderPage();
+            });
+        });
+        function updateSortIcons() {
+            document.querySelectorAll(".sort-arrow").forEach(arrow => arrow.classList.remove("active"));
+            if (!currentSort.key) return;
+            const colKey = Object.keys(keyMap).find(k => keyMap[k] === currentSort.key);
+            const col = document.querySelector(`.col.${colKey}`);
+            if (!col) return;
+            const arrow = col.querySelector(`.sort-arrow.${currentSort.asc ? 'up' : 'down'}`);
+            if (arrow) arrow.classList.add("active");
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileList = document.getElementById("fileList"); // 获取文件列表
+        // 监听 `.mp4` 文件点击，直接上传并跳转
+        fileList.addEventListener("click", async function (event) {
+            let target = event.target;
+            while (target && !target.classList.contains("file-item")) {
+                target = target.parentElement;
+            }
+            if (target) {
+                // 只获取 .name 列的文件名
+                const fileName = target.querySelector(".name").textContent.trim();
+                console.log("Selected file:", fileName);
+                // 读取文件内容
+                const fileResponse = await fetch(`{{URL_PREFIX}}/static/videos/pool/${username}/${fileName}`); // 读取文件
+                const fileBlob = await fileResponse.blob(); // 转换为 Blob
+                // 创建 `File` 对象（模拟用户上传）
+                const selectedFile = new File([fileBlob], fileName, { type: "video/mp4" });
+                // 用 FormData 发送文件内容
+                const formData = new FormData();
+                formData.append("audioFile", selectedFile);
+                formData.append("username", username);
+                // 发送到 Flask 并跳转
+                fetch("{{ URL_PREFIX + url_for('general.general') }}", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => response.text())  //  解析 HTML
+                    .then(html => {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    })
+                    .catch(error => console.error("Error:", error));
+            }
+        });
+    });
+
+
+
+
+</script>
+{% else %}
+<script>
+    window.location.href = "{{ URL_PREFIX + url_for('login.login') }}";  // 未登录时跳转到登录页面
+</script>
+{% endif %}
+</body>
+</html>

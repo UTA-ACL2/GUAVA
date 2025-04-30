@@ -1,0 +1,342 @@
+#tier-container {
+    /*padding-left: 100px;*/
+    padding-right: 40px;
+    display: flex;
+    /*flex-direction: column;*/
+    flex-direction: row;
+    position: relative;
+    margin-top: 20px;
+}
+
+.interval-tier {
+    background-color: rgba(0, 0, 255, 0.1); /* 浅蓝色背景 */
+    position: relative;
+    height: 40px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    overflow: hidden; /* 防止内容超出边界 */
+}
+.point-tier {
+    background-color: rgba(19, 101, 62, 0.1);
+    position: relative;
+    height: 40px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    overflow: hidden; /* 防止内容超出边界 */
+}
+.interval-tier.selected {
+    background-color: #a0c4ff; /* 被选中的颜色 */
+}
+.point-tier.selected {
+    background-color: #a0c4ff; /* 被选中的颜色 */
+}
+
+.interval {
+    position: absolute;
+    height: 100%;
+    background-color: rgba(173, 216, 230, 0.6); /* 调整透明度 */
+    border: 1px solid #007bff;
+    cursor: move; /* 保留拖动光标 */
+    text-align: center;
+    line-height: 40px; /* 垂直居中 */
+    color: #fff; /* 保持文字为白色 */
+    border-radius: 5px; /* 添加圆角 */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* 添加阴影 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.point {
+    position: absolute;
+    height: 100%;
+    width: 5px;
+    background-color: red;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 1px; /* 添加圆角 */
+    box-shadow: 0px 2px 3px rgba(255, 0, 0, 0.5); /* 添加阴影 */
+}
+.interval::after, .point::after {
+    content: attr(data-text);
+    /*position: absolute;*/
+    /*left: 5px;*/
+    /*top: 50%;*/
+    /*transform: translateY(-50%);*/
+    font-size: 15px;
+    color: black;
+}
+.handle {
+    position: absolute;
+    width: 5px;
+    height: 100%;
+    background-color: rgb(51, 122, 183);
+    cursor: ew-resize;
+}
+.handle-left {
+    left: 0;
+}
+.handle-right {
+    right: 0;
+}
+
+#name-container {
+    justify-content: space-evenly;
+    gap: 12px;
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+    margin-bottom: 10px; /* 与 tier-control 的间距 */
+    flex-direction: column;
+}
+.name-input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    text-align: center;
+    width: 100px; /* 固定输入框宽度 */
+    margin-right: 10px; /* 输入框之间的间距 */
+    font-size: 14px; /* 字体大小 */
+    outline: none; /* 移除聚焦时的外边框 */
+}
+.name-input:focus {
+    border-color: #007bff; /* 聚焦时边框颜色 */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* 聚焦时的阴影效果 */
+}
+
+.context-menu {
+    position: fixed;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 1000;
+    padding: 5px 0;
+}
+.context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.context-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.context-menu li.header {
+    font-weight: bold;  /* 加粗 */
+    background-color: #f0f0f0; /* 统一背景色，防止 hover 变化 */
+    cursor: default;  /* 鼠标样式固定，防止变成小手 */
+    padding: 10px 12px; /* 适当增加 padding，让标题更突出 */
+    text-align: center; /* 居中显示 */
+    pointer-events: none; /* 禁止点击事件 */
+}
+.context-menu li:hover {
+    background-color: #f0f0f0;
+}
+.context-menu label {
+    cursor: pointer; /* 文字部分显示手型光标 */
+}
+
+.context-submenu {
+    position: fixed;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: none;
+    min-width: 150px;
+}
+.context-submenu label {
+    cursor: pointer; /* 文字部分显示手型光标 */
+}
+.context-submenu li {
+    cursor: default; /* 除复选框和文字外，其余区域为默认光标 */
+}
+
+/*.context-menu {*/
+/*    display: none;*/
+/*    position: fixed;*/
+/*    background-color: #ffffff;*/
+/*    border: 1px solid #ccc;*/
+/*    list-style: none;*/
+/*    padding: 5px 0;*/
+/*    margin: 0;*/
+/*    border-radius: 5px;*/
+/*    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);*/
+/*    min-width: 200px;*/
+/*}*/
+/*!* 主菜单项 *!*/
+/*.context-menu > ul > li {*/
+/*    padding: 10px 20px;*/
+/*    cursor: pointer;*/
+/*    position: relative;*/
+/*    font-size: 14px;*/
+/*}*/
+/*!* 子菜单 *!*/
+/*.context-submenu {*/
+/*    display: none;*/
+/*    position: fixed;*/
+/*    left: 100%;*/
+/*    top: 0;*/
+/*    background-color: #ffffff;*/
+/*    border: 1px solid #ccc;*/
+/*    border-radius: 5px;*/
+/*    padding: 5px 0;*/
+/*    list-style: none;*/
+/*    margin: 0;*/
+/*    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);*/
+/*    min-width: 150px;*/
+/*}*/
+/*!* 子菜单项 *!*/
+/*.context-submenu li {*/
+/*    padding: 5px 15px;*/
+/*    cursor: pointer;*/
+/*}*/
+/* 悬停显示子菜单 */
+.context-menu > ul > li:hover > .context-submenu {
+    display: block; /* 显示子菜单 */
+    position: absolute; /* 绝对定位 */
+    top: 0; /* 子菜单与父菜单顶端对齐 */
+    left: 100%; /* 子菜单显示在右边 */
+    transform: translateY(-75%); /* 向上移动，使其对齐到右上角 */
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 5px 0;
+    list-style: none;
+    min-width: 150px;
+}
+/*!* 鼠标悬停效果 *!*/
+/*.context-menu li:hover {*/
+/*    background-color: #f0f0f0;*/
+/*}*/
+/*!* 多选框样式 *!*/
+/*.context-menu input[type="checkbox"] {*/
+/*    margin-right: 5px;*/
+/*}*/
+
+
+.tier-option {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.tier-option:hover {
+    background-color: #f0f0f0;
+}
+.tier-option.disabled {
+    color: #ccc;
+    pointer-events: none;
+}
+.show-tiers-button {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+.show-tiers-button::after {
+    content: "▶"; /* 下拉箭头符号 */
+    margin-left: 5px;
+    font-size: 12px;
+    color: #333; /* 箭头颜色 */
+}
+.deleteButton,
+.okButton {
+    display: block; /* 让按钮独占一行 */
+    width: 80px; /* 适中的宽度 */
+    padding: 8px 12px; /* 内边距，增加可点击区域 */
+    margin: 10px auto; /* 上下间距，居中 */
+    background-color: #007bff; /* 现代感的蓝色 */
+    color: white; /* 文字颜色 */
+    border: none; /* 移除默认边框 */
+    border-radius: 5px; /* 圆角 */
+    font-size: 14px; /* 适当的文字大小 */
+    font-weight: bold; /* 加粗字体 */
+    cursor: pointer; /* 鼠标悬停时变为手型 */
+    transition: all 0.3s ease-in-out; /* 添加平滑过渡效果 */
+}
+/* 悬停时的效果 */
+.deleteButton:hover,
+.okButton:hover {
+    background-color: #0056b3; /* 深一点的蓝色 */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影 */
+}
+.deleteButton:hover {
+    background-color: #9b1b1b;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* 添加阴影 */
+}
+/* 按下时的效果 */
+.deleteButton:active,
+.okButton:active {
+    background-color: #00408a; /* 更深的蓝色 */
+    transform: scale(0.95); /* 轻微缩小，增加点击反馈 */
+}
+
+/* 遮罩层 */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Dialog 样式 */
+.dialog {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.dialog button {
+    margin: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.checkbox-input {
+    padding: 5px;
+    margin-right: 5px;
+}
+
+.add-checkbox {
+    /*background-color: green;*/
+    color: white;
+    margin-left: 5px;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.remove-checkbox {
+    /*background-color: red;*/
+    color: white;
+    margin-left: 5px;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.annotation-category {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    position: relative;
+}
