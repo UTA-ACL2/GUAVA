@@ -330,12 +330,12 @@
         height: 20,
         insertPosition: 'beforebegin',
         {#timeInterval: 0.1,#}
-        primaryLabelInterval: 5,
+        {#primaryLabelInterval: 5,#}
         {#primaryLabelSpacing: 1,#}
-        secondaryLabelInterval: 1,
+        {#secondaryLabelInterval: 1,#}
         {#secondaryLabelSpacing: 1,#}
         formatTimeCallback: (seconds) => {
-            return seconds.toFixed(0) + "s";  // 例如：0.12345s
+            return seconds.toFixed(3) + "s";  // 例如：0.12345s
         },
         style: {
             fontSize: '14px',
@@ -636,20 +636,6 @@
             annotation.dataset.end = region.end.toFixed(5);
         }
         {#autoSaveAnnotations();#}
-        // 同步 spectrogram 和 pitch 图 overlay
-        {#const updateOverlay = (container) => {#}
-        {#    const overlay = container.querySelector(`.region-overlay[data-region-id="${region.id}"]`);#}
-        {#    if (overlay) {#}
-        {#        const startX = (region.start / wavesurfer.getDuration()) * wavesurfer.getWrapper().scrollWidth - wavesurfer.getScroll();#}
-        {#        const width = ((region.end - region.start) / wavesurfer.getDuration()) * wavesurfer.getWrapper().scrollWidth;#}
-        {#        overlay.style.left = `${startX}px`;#}
-        {#        overlay.style.width = `${width}px`;#}
-        {#    }#}
-        {#};#}
-        {#const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;#}
-        {#const pitchDiv = document.getElementById('chart');#}
-        {#if (spectrogramDiv) updateOverlay(spectrogramDiv);#}
-        {#if (pitchDiv) updateOverlay(pitchDiv);#}
         updateAllRegionOverlays()
     });
 
@@ -751,6 +737,8 @@
     });
 
     wavesurfer.on('zoom', function (pxPerSec) {
+        console.log('soundSeconds',soundSeconds)
+        console.log('ggg',pxPerSec)
         $(".interval-tier, .point-tier").css("width", (soundSeconds * pxPerSec) + "px");
         $('#slider').val(pxPerSec)
         zoom(soundSeconds * pxPerSec)
@@ -2116,7 +2104,24 @@
                 if (videoElement) {
                     setInterval(autoSaveAnnotations, 120000);
                 }
-                window.addEventListener('beforeunload', autoSaveOnExit);
+                {#window.addEventListener('beforeunload', autoSaveOnExit);#}
+                let currentLockedFile = fileName;
+                window.addEventListener("beforeunload", function () {
+                    autoSaveOnExit();  // 你原来的保存逻辑
+                    if (currentLockedFile) {
+                        navigator.sendBeacon(
+                            "{{ URL_PREFIX }}/unlock_file",
+                            new Blob([
+                                JSON.stringify({
+                                    username: currentUsername,
+                                    filename: currentLockedFile
+                                })
+                            ], { type: "application/json" })
+                        );
+                    }
+                });
+
+
             });
             wavesurfer.on('ready', function () {
                 loadAnnotations()

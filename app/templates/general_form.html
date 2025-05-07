@@ -349,6 +349,21 @@
                 // 只获取 .name 列的文件名
                 const fileName = target.querySelector(".name").textContent.trim();
                 console.log("Selected file:", fileName);
+
+                const fileName2 = fileName.split(".")[0];  //  这就丢了后缀
+
+                const lockRes = await fetch(`{{URL_PREFIX}}/lock_file`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, filename: fileName2 })
+                });
+                const lockData = await lockRes.json();
+                if (!lockData.success) {
+                    alert("This file is currently being used by another session.");
+                    return;
+                }
+
+
                 // 读取文件内容
                 const fileResponse = await fetch(`{{URL_PREFIX}}/static/videos/pool/${username}/${fileName}`); // 读取文件
                 const fileBlob = await fileResponse.blob(); // 转换为 Blob
