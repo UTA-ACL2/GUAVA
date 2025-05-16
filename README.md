@@ -34,6 +34,8 @@ GUAVA is a browser-based annotation platform built on [Praat](https://www.fon.hu
 ### Export
 - Export to TextGrid: Download annotations as a `.TextGrid` file compatible with Praat.
 
+**To explore the full features of GUAVA, please refer to the [GUAVA Tutorial](https://youtu.be/-rjM8eFayUA).**
+
 ## Annotation Storage
 
 All annotation data and files generated during processing are stored per file per user under the following structure:
@@ -44,39 +46,63 @@ static/videos/pool/{user}/{file_name}
 
 Each uploaded file is saved under the logged-in username, and annotations persist independently per user.
 
-### Required External Tools
+## Try It Out
 
-| Tool      | Required? | Setup Notes                          |
-| --------- | --------- | ------------------------------------ |
-| ffmpeg    | Yes       | Add to system `PATH`                 |
-| praat.exe | Yes       | Set full path in `general_routes.py` |
+You can run GUAVA locally by following these steps:
 
-### Edit the following in `general_routes.py`:
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/UTA-ACL2/GUAVA.git
+cd GUAVA
+```
+
+### 2. Create and Activate Virtual Environment
+
+```bash
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+```
+
+### 3. Install Required Packages
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Set Up External Tools
+
+- Install [`ffmpeg`](https://ffmpeg.org/) and ensure it is added to your system `PATH`
+
+- Download `praat.exe` and set its path in `general_routes.py`:
 
 ```python
 PRAAT_LOCATION = "D:/praat.exe"
 ```
 
-## Try It Out
+### 5. Configure User Accounts
 
-You can use GUAVA in two ways:
+Open `login_routes.py` and define allowed usernames in `VALID_ACCOUNTS`.
 
-### 1. Access the ACL2 Server
-
-Open in browser:  
-**http://10.33.48.248/praat**
-
-> If you are off UTA campus, please connect to VPN first.
-
-### 2. Run Locally
-
-Start the Flask app:
+### 6. Run the Flask App
 
 ```bash
-python app.py
+python run.py
 ```
+
+### 7. Open in Browser
+
+Visit http://127.0.0.1:5000 to use it.
 
 ## Contact
 
-**Peter (Weiran Zhang)**
- Email: wxz9630@mavs.uta.edu
+**Peter (Weiran Zhang)**  
+Email: wxz9630@mavs.uta.edu
+
+## Acknowledgments
+
+This tool was inspired by the design of *Praat on the Web* (Domínguez et al., 2016).  
+We gratefully acknowledge their contribution to web-based speech annotation platforms.
