@@ -1,7 +1,5 @@
 from flask import Blueprint, jsonify, request, session
-import time
 import os
-import subprocess
 import json
 
 lock_bp = Blueprint("lock_routes", __name__)  # 创建 Blueprint

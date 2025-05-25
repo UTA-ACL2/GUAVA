@@ -1,0 +1,10 @@
+#  Python 缓存文件
+__pycache__/
+*.py[cod]
+
+#  虚拟环境
+venv/
+
+#  IDE 设置
+.idea/
+

@@ -590,7 +590,7 @@
             });
         });
 
-        // ========== 添加同步 Region 到 spectrogram 和 pitch 图层 ==========
+        //  添加同步 Region 到 spectrogram 和 pitch 图层
         const createOverlay = (container, region) => {
             Array.from(container.querySelectorAll('.region-overlay')).forEach(e => e.remove());
             const duration = wavesurfer.getDuration();
@@ -737,8 +737,6 @@
     });
 
     wavesurfer.on('zoom', function (pxPerSec) {
-        console.log('soundSeconds',soundSeconds)
-        console.log('ggg',pxPerSec)
         $(".interval-tier, .point-tier").css("width", (soundSeconds * pxPerSec) + "px");
         $('#slider').val(pxPerSec)
         zoom(soundSeconds * pxPerSec)
