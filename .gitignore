@@ -8,3 +8,9 @@ venv/
 #  IDE 设置
 .idea/
 
+# 忽略特殊 JSON 文件
+users.json
+app/locks.json
+
+# 忽略用户pool
+app/static/videos/pool/
