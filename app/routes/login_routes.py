@@ -7,7 +7,10 @@ from app.config import URL_PREFIX
 login_bp = Blueprint('login', __name__)
 
 VALID_ACCOUNTS = ["peter", "kenny", "theron", "essam", "tuan", "hridayesh", "birds", "cats", "corvids", "guest", "pranjal"]
-USER_FILE = 'users.json'
+# USER_FILE = 'users.json'
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # `app/` 目录
+USER_FILE = os.path.join(BASE_DIR, 'users.json')  # 用户密码文件路径
 
 
 def load_users():

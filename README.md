@@ -4,6 +4,10 @@ A web-based multimodal annotation tool for acoustic and video data
 
 GUAVA is a browser-based annotation platform built on [Praat](https://www.fon.hum.uva.nl/praat/) functionality. It supports real-time waveform, spectrogram, pitch, and intensity visualization. Users can annotate audio and video files directly in the browser with features like region labeling, tier control, and auto-saving.
 
+## Example
+
+<img src="app/static/images/demo.png" alt="GUAVA Screenshot" width="800" style="display: block; margin-left: 0;"/>
+
 ## Key Features
 
 ### File Upload
