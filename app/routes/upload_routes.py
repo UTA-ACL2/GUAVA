@@ -1,14 +1,14 @@
 import re
 import shutil
-from flask import Blueprint, request, session, redirect, url_for, render_template, flash, jsonify
+from flask import Blueprint, request, session, redirect, url_for, flash, jsonify
 import os
 from app.config import URL_PREFIX
 
 upload_bp = Blueprint('upload', __name__)
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # 获取 app 目录
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "videos", "pool")  # 存储上传的视频
-ALLOWED_EXTENSIONS = {'mp4', 'wav', 'mp3'}  # 允许的文件格式
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Get the 'app/' directory
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "videos", "pool")  # Store the uploaded video
+ALLOWED_EXTENSIONS = {'mp4', 'wav', 'mp3'}  # Allowed file formats
 
 
 def allowed_file(filename):
@@ -17,11 +17,11 @@ def allowed_file(filename):
 
 def safe_filename(filename):
     name, ext = os.path.splitext(filename)
-    # 替换非法字符为 `_`
+    # Replace illegal characters with `_`
     safe_name = re.sub(r'[^\w]', '_', name)
-    # 合并连续的 `_` 为一个 `_`
+    # Merge consecutive `_` into a single `_`
     safe_name = re.sub(r'_+', '_', safe_name)
-    # 去掉开头结尾的 `_`
+    # Remove the leading and trailing `_`
     safe_name = safe_name.strip('_')
     return safe_name + ext
 
@@ -32,12 +32,12 @@ def upload_files():
         flash("You must be logged in to upload files.", "error")
         return redirect(URL_PREFIX + url_for('login.login'))
 
-    username = session['username']  # 获取当前登录用户
-    user_folder = os.path.join(UPLOAD_FOLDER, username)  # 用户的 pool 目录
+    username = session['username']  # Get the currently logged-in user
+    user_folder = os.path.join(UPLOAD_FOLDER, username)  # User's pool directory
     annotation_folder = os.path.join(user_folder, "annotation")
-    os.makedirs(annotation_folder, exist_ok=True)  # 确保目录存在
+    os.makedirs(annotation_folder, exist_ok=True)  # Ensure the directory exists
 
-    files = request.files.getlist("audioFile")  # 获取多个文件
+    files = request.files.getlist("audioFile")  # Get multiple files
     uploaded_files = []
 
     for file in files:
@@ -45,7 +45,7 @@ def upload_files():
             filename = safe_filename(file.filename)
             basename = os.path.splitext(filename)[0]
 
-            # 若前端传了 override 标记为 true，清空 annotation 中对应文件夹
+            # If the frontend sends the `override` flag as true, clear the corresponding folder in `annotation`
             override_key = f"override_{basename}"
             override = request.form.get(override_key, "false") == "true"
 
@@ -53,7 +53,7 @@ def upload_files():
 
             if override and os.path.exists(video_annotation_dir):
                 shutil.rmtree(video_annotation_dir, ignore_errors=True)
-                # 删除同名前缀的 .mp4 和 .wav 文件
+                # Delete `.mp4` and `.wav` files with the same prefix name
                 for ext in ['.mp4', '.wav', 'mp3']:
                     file_path = os.path.join(user_folder, f"{basename}{ext}")
                     if os.path.exists(file_path):
@@ -75,8 +75,8 @@ def upload_files():
 @upload_bp.route('/check_file_exists', methods=['GET'])
 def check_file_exists():
     username = request.args.get("username")
-    video_name = request.args.get("videoName")  # 不带扩展名
-    # 判断该用户名目录下是否已存在同名文件(判断前缀)
+    video_name = request.args.get("videoName")  # Without file extension.
+    # Check if a file with the same prefix already exists in the user's directory
     user_folder = os.path.join(UPLOAD_FOLDER, username)
     video_file_path = os.path.join(user_folder, f"{video_name}.mp4")
     audio_file_path = os.path.join(user_folder, f"{video_name}.wav")

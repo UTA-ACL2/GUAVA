@@ -1,5 +1,4 @@
-
-# True 表示服务器，False 表示本地
+# `True` indicates server, `False` indicates local
 IS_SERVER = False
-# 设置全局 URL 前缀
+# Set the global URL prefix
 URL_PREFIX = "/praat" if IS_SERVER else ""

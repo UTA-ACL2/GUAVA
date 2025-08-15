@@ -4,14 +4,14 @@ from flask import Blueprint, request, jsonify
 
 annotation_bp = Blueprint("annotation", __name__)
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # 获取 app 目录
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Get the 'app/' directory
 
 
 @annotation_bp.route("/save_annotation", methods=["POST"])
 def save_annotation():
-    """接收前端自动保存的 JSON 并存储到服务器"""
+    """Receive the auto-saved JSON from the frontend and store it on the server"""
     try:
-        data = request.get_json(force=True)  # ✅ 更稳健，兼容 navigator.sendBeacon
+        data = request.get_json(force=True)  # More robust, compatible with `navigator.sendBeacon`
     except Exception as e:
         print("Failed to parse JSON:", e)
         return jsonify({"success": False, "message": "Invalid JSON"}), 400
@@ -24,11 +24,7 @@ def save_annotation():
     annotation = data["annotations"]
 
     annotation_folder = os.path.join(BASE_DIR, "static", "videos", "pool", username, "annotation", video_name)
-
-    # annotation_folder = f"app/static/videos/pool/{username}/annotation/{video_name}"
-    # print("Received data:", data)
-    # print("Creating directory:", annotation_folder)
-    os.makedirs(annotation_folder, exist_ok=True)  # 创建目录
+    os.makedirs(annotation_folder, exist_ok=True)  # Create directory
 
     json_path = os.path.join(annotation_folder, "annotations.json")
     with open(json_path, "w", encoding="utf-8") as f:
@@ -39,7 +35,7 @@ def save_annotation():
 
 @annotation_bp.route("/load_annotation", methods=["GET"])
 def load_annotation():
-    """加载已保存的 JSON 标注信息"""
+    """Load the saved JSON annotation data"""
     username = request.args.get("username")
     video_name = request.args.get("videoName")
 

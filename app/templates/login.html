@@ -5,7 +5,7 @@
     <title>Login</title>
 </head>
 <body>
-    <div id="loginModal" class="modal" style="display: flex;  position: fixed;
+<div id="loginModal" class="modal" style="display: flex;  position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -15,21 +15,21 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;">
-        <div class="modal-content" style=" background: #fff;
+    <div class="modal-content" style=" background: #fff;
             padding: 20px;
             border-radius: 5px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <p>Enter your username & password to log in:</p>
-            <form method="POST" action="{{ URL_PREFIX + url_for('login.login') }}">
-                <input type="text" name="username" placeholder="Username" required />
-                <input type="password" name="password" placeholder="Password" required /><br>
-                <button type="submit">Log In</button>
-            </form>
-            {% if error %}
-                <p style="color: red;">{{ error }}</p>
-            {% endif %}
-        </div>
+        <p>Enter your username & password to log in:</p>
+        <form method="POST" action="{{ URL_PREFIX + url_for('login.login') }}">
+            <input type="text" name="username" placeholder="Username" required />
+            <input type="password" name="password" placeholder="Password" required /><br>
+            <button type="submit">Log In</button>
+        </form>
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
     </div>
+</div>
 </body>
 </html>

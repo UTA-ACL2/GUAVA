@@ -2,20 +2,20 @@ from flask import Blueprint, jsonify, request, session
 import os
 import json
 
-lock_bp = Blueprint("lock_routes", __name__)  # 创建 Blueprint
+lock_bp = Blueprint("lock_routes", __name__)
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # `app/` 目录
-LOCK_FILE = os.path.join(BASE_DIR, 'locks.json')  # 锁文件路径
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Get the 'app/' directory
+LOCK_FILE = os.path.join(BASE_DIR, 'locks.json')  # Lock file path
 
 
-# 初始化 session_id（确保每个会话唯一）
+# Initialize `session_id` (ensure each session is unique)
 def ensure_session_id():
     if 'session_id' not in session:
         import uuid
         session['session_id'] = str(uuid.uuid4())
 
 
-# 读取锁
+# read lock
 def load_locks():
     if not os.path.exists(LOCK_FILE):
         return {}
@@ -23,28 +23,28 @@ def load_locks():
         return json.load(f)
 
 
-# 保存锁
+# save lock
 def save_locks(locks):
     with open(LOCK_FILE, 'w') as f:
         json.dump(locks, f)
 
 
-# 加锁逻辑
+# Locking logic
 def lock_file(username, filename):
     ensure_session_id()
     locks = load_locks()
     user_locks = locks.get(username, {})
     if filename in user_locks:
         if user_locks[filename] == session['session_id']:
-            return True  # 自己已锁
-        return False     # 被别人锁了
+            return True  # Already locked by self
+        return False     # Locked by someone else
     user_locks[filename] = session['session_id']
     locks[username] = user_locks
     save_locks(locks)
     return True
 
 
-# 解锁逻辑
+# Unlocking logic
 def unlock_file(username, filename):
     ensure_session_id()
     locks = load_locks()

@@ -72,7 +72,7 @@ class r extends e {
 
     constructor(t) {
         super(t || {}), this.options = Object.assign({}, s, t), this.timelineWrapper = this.initTimelineWrapper(),
-            this.timelineTicks = []; // 用于集中管理所有 tick DOM 元素
+            this.timelineTicks = []; // Used to centrally manage all tick DOM elements
     }
 
     static create(t) {
@@ -119,15 +119,15 @@ class r extends e {
     }
 
     virtualAppend(x, tickEl) {
-        tickEl.dataset.tickLeft = x; // 存 px 位置
+        tickEl.dataset.tickLeft = x; // Save px location
         tickEl.style.left = `${x}px`;
-        this.timelineTicks.push(tickEl); // 暂存，不立即 append
+        this.timelineTicks.push(tickEl); // Temporarily store, do not append immediately
     }
 
 
 
     initTimeline() {
-        this.timelineTicks = []; // 清空旧的 tick 缓存
+        this.timelineTicks = []; // Clear the old tick cache
 
         var t, e, i, s, r, o, l, a;
         const h = null !== (i = null !== (e = null === (t = this.wavesurfer) || void 0 === t ? void 0 : t.getDuration()) && void 0 !== e ? e : this.options.duration) && void 0 !== i ? i : 0;
@@ -197,7 +197,7 @@ class r extends e {
                 i.style.opacity = "1";
 
                 i.setAttribute("part", "timeline-notch timeline-notch-primary");
-                this.virtualAppend(px, i); //  只缓存，不 append
+                this.virtualAppend(px, i); // Only cache, no append
             }
 
 
@@ -219,7 +219,7 @@ class r extends e {
             });
         };
 
-        // 初始执行一次
+        // Initial execution once
         const unsub = this.wavesurfer.on("scroll", updateVisibleTicks);
         this.subscriptions.push(unsub);
 

@@ -4,12 +4,12 @@ import json
 
 category_bp = Blueprint("custom_categories", __name__)
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # 获取 app 目录
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Get the 'app/' directory
 
 
 @category_bp.route("/save_custom_category", methods=["POST"])
 def save_custom_category():
-    """保存新的类别"""
+    """Save new category"""
     data = request.json
     username = data["username"]
     category = data["category"]
@@ -17,19 +17,19 @@ def save_custom_category():
 
     custom_path = os.path.join(BASE_DIR, "static", "videos", "pool", username, "custom_categories.json")
 
-    # 读取已有的类别信息
+    # Read existing category information
     if os.path.exists(custom_path):
         with open(custom_path, "r", encoding="utf-8") as f:
             categories = json.load(f)
     else:
         categories = []
 
-    # 添加新的 Category
+    # Add new Category
     if not any(cat["category"] == category for cat in categories):
         new_category = {"category": category, "options": options}
         categories.append(new_category)
 
-    # 保存到 JSON
+    # Save to JSON.
     with open(custom_path, "w", encoding="utf-8") as f:
         json.dump(categories, f, indent=4)
 
@@ -38,7 +38,7 @@ def save_custom_category():
 
 @category_bp.route("/load_custom_categories", methods=["GET"])
 def load_custom_categories():
-    """加载用户已保存的 Categories"""
+    """Load user saved Categories"""
     username = request.args.get("username")
     custom_path = os.path.join(BASE_DIR, "static", "videos", "pool", username, "custom_categories.json")
 
@@ -53,10 +53,9 @@ def load_custom_categories():
 
 @category_bp.route("/delete_custom_category", methods=["POST"])
 def delete_custom_category():
-    """删除指定的 category"""
+    """Delete the specified category"""
     data = request.json
     username = session['username']
-    # username = data.get("username")
     category_to_delete = data.get("category")
 
     if not username or not category_to_delete:
@@ -64,18 +63,18 @@ def delete_custom_category():
 
     custom_path = os.path.join(BASE_DIR, "static", "videos", "pool", username, "custom_categories.json")
 
-    # 检查 json 是否存在
+    # Check if the JSON exists
     if not os.path.exists(custom_path):
         return jsonify({"status": "error", "message": "custom_categories.json not found"}), 404
 
-    # 读取 json
+    # Read json
     with open(custom_path, "r", encoding="utf-8") as f:
         categories = json.load(f)
 
-    # 删除对应 category
+    # Delete the corresponding category.
     new_categories = [c for c in categories if c.get("category") != category_to_delete]
 
-    # 覆盖写入
+    # Overwrite and write.
     with open(custom_path, "w", encoding="utf-8") as f:
         json.dump(new_categories, f, indent=4, ensure_ascii=False)
 

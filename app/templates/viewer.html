@@ -9,37 +9,14 @@
     <link href="{{ URL_PREFIX + url_for('static', filename='css/general.css') }}" rel="stylesheet" type="text/css"/>
     <link href="{{ URL_PREFIX + url_for('static', filename='css/annotation.css') }}" rel="stylesheet" type="text/css"/>
     <link href="{{ URL_PREFIX + url_for('static', filename='css/category.css') }}" rel="stylesheet" type="text/css"/>
-    <title>Praat</title>
+    <title>GUAVA Workspace</title>
 </head>
 <body class="bg-color0">
 <div class="container">
-{#    <div class="page-header">#}
-{#        <h1 class="file-title">{{ userName }}: {{ fileName }}</h1>#}
-{#        <a href="{{ URL_PREFIX + url_for('login.general_form') }}" class="right back">Back#}
-{#            <span class="glyphicon glyphicon-hand-left"></span>#}
-{#        </a>#}
-{#        <a href="{{ URL_PREFIX + url_for('login.logout') }}" class="right back">Logout#}
-{#            <span class="glyphicon glyphicon-hand-left"></span>#}
-{#        </a>#}
-{#    </div>#}
     <div id="autoSaveMessage" style="position: fixed; top: 10px; right: 20px; color: red; font-size: 16px; display: none; transition: opacity 2s ease-in-out;">
         auto save: <span id="autoSaveTime">----</span>
     </div>
-    {#    <div id="tooltip" class="bg-color1 border-color5 color5">#}
-    {#        <span id="title" class="medium-font">FEATURES:</span>#}
-    {#        <span id="features" class="medium-font"></span>#}
-    {#    </div>#}
     <div class="container-fluid" style="text-align: center">
-{#        <p class="row">#}
-            {#        <div class="textgrid-overflow col-xs-12">#}
-{#        <div class="container">#}
-{#            <div class="video-container">#}
-{#                <video id="videoPlayer" width="480" height="270" controls >#}
-{#                    <source id="videoSource" src="{{ videoFile }}" type="video/mp4">#}
-{#                    Your browser does not support the video tag.#}
-{#                </video>#}
-{#            </div>#}
-{#        </div>#}
         <div style="display: flex">
             <div style="flex: 1; min-width: 150px;">
                 <p><strong>User:</strong> {{ userName }}</p>
@@ -49,7 +26,7 @@
                 <a href="{{ URL_PREFIX + url_for('login.logout') }}" class="btn btn-primary">Logout</a>
                 <a href="{{ URL_PREFIX + url_for('login.general_form') }}" class="btn btn-primary">Back</a>
             </div>
-            <!-- 右侧视频显示区域 -->
+            <!-- Right-side video display area -->
             <div style="flex: 2;">
                 <video id="videoPlayer" width="480" height="270" controls>
                     <source id="videoSource" src="{{ videoFile }}" type="video/mp4">
@@ -75,7 +52,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 130px; /* 按你的 Spectrogram 高度调整 */
+    height: 130px;
     font-size: 15px;
     color: black;
 ">
@@ -101,14 +78,14 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 110px; /* 按你的 Spectrogram 高度调整 */
+    height: 110px;
     font-size: 13px;
     color: black;
 ">
                 <div>5k Hz</div>
-{#                <div>4k Hz</div>#}
+                {#                <div>4k Hz</div>#}
                 <div>3k Hz</div>
-{#                <div>2k Hz</div>#}
+                {#                <div>2k Hz</div>#}
                 <div>1k Hz</div>
             </div>
             <div id="waveform" ></div>
@@ -141,22 +118,17 @@
         <div class="col-xs-1">
             <i class="glyphicon glyphicon-zoom-in icon-large" style="cursor: pointer"></i>
         </div>
-        </p>
 
         <div id="tier-container">
             <div id="name-container" style="display: flex; width: 100px">
-                {#                <input type="text" class="name-input" placeholder="Tier 1 ">#}
-                {#                <input type="text" class="name-input" placeholder="Tier 2 ">#}
             </div>
             <div id="tier-control" style="width: 100%; overflow: hidden; position: relative;">
-                {#                <div id="tier1" class="interval-tier"></div>#}
-                {#                <div id="tier2" class="point-tier"></div>#}
             </div>
         </div>
         <div id="video-menu" class="context-menu">
             <ul>
-{#                <li data-size="1280x720">Large (1280x720)</li>#}
-{#                <li data-size="1024x576">Medium (1024x576)</li>#}
+                {#                <li data-size="1280x720">Large (1280x720)</li>#}
+                {#                <li data-size="1024x576">Medium (1024x576)</li>#}
                 <li data-size="800x450">Small (800x450)</li>
                 <li data-size="640x360">Extra Small (640x360)</li>
                 <li data-size="480x270">Tiny (480x270)</li>
@@ -195,7 +167,7 @@
             <div class ="category-btn" style="display: flex;
   justify-content: space-between;
   gap: 8px; padding: 0 8px;">
-                <button class="okButton">OK</button> <!-- 这里是OK按钮 -->
+                <button class="okButton">OK</button>
                 <button class="deleteButton">Delete</button>
             </div>
         </div>
@@ -206,15 +178,11 @@
             </ul>
         </div>
         <div id="tier-submenu" class="context-submenu" style="display: none;"></div>
-        </p>
 
         <div class="col-xs-6">
             <button id="add-tier" class="btn btn-textgrid btn-lg">+ Add Tier</button>
-            {#            <button id="add-interval-tier" class="btn btn-textgrid btn-lg" >+ Interval Tier</button>#}
-            {#            <button id="add-point-tier" class="btn btn-textgrid btn-lg" >+ Point Tier</button>#}
-            {#            <button id="remove-tier" class="btn btn-textgrid btn-lg" >- Remove Last Tier</button>#}
         </div>
-        <!-- 选择 Tier 类型的对话框 -->
+        <!-- Dialog box for selecting Tier type -->
         <div id="tierTypeDialog" class="overlay">
             <div class="dialog">
                 <h3>Tier Type</h3>
@@ -223,7 +191,7 @@
                 <button id="closeTierDialog">Cancel</button>
             </div>
         </div>
-        <!-- 选择标注种类的对话框（仅对 Interval Tier） -->
+        <!-- Dialog box for selecting annotation category (Interval Tier only) -->
         <div id="categoryDialog" class="overlay">
             <div class="dialog">
                 <h3>Annotation Category</h3>
@@ -258,7 +226,7 @@
             </div>
         </div>
 
-        <!-- 新增 Category 表单 -->
+        <!-- Form for adding a new Category -->
         <div id="newCategoryDialog" class="overlay" style="display: none;">
             <div class="dialog">
                 <h3>Add New Category</h3>
@@ -276,11 +244,7 @@
                 <button id="cancelNewCategory">Cancel</button>
             </div>
         </div>
-        {#        <div class="col-xs-6 text-right" style="width: 40%; display: flex; justify-content: space-between;/* 两端对齐*/" >#}
-        <div class="col-xs-6 text-right" style="width: 40%; justify-content: space-between;/* 两端对齐*/" >
-            {#            <button id="playPause" class="btn btn-textgrid btn-lg" >#}
-            {#                <span class="glyphicon glyphicon-play"></span> Play#}
-            {#            </button>#}
+        <div class="col-xs-6 text-right" style="width: 40%; justify-content: space-between;" >
             <button id="downloadTextGrid" class="btn btn-textgrid btn-lg">Export</button>
         </div>
     </div>
@@ -297,19 +261,15 @@
 
     import WaveSurfer from "{{ URL_PREFIX + url_for('static', filename='js/wavesurfer.esm.js') }}"
     import Spectrogram from "{{ URL_PREFIX + url_for('static', filename='js/spectrogram.esm.js') }}"
+    import spectrogram_emu from "{{ URL_PREFIX }}/static/js/spectrogram_emu.esm.js";
     import TimelinePlugin from "{{ URL_PREFIX + url_for('static', filename='js/timeline.esm.js') }}"
     import RegionsPlugin from "{{ URL_PREFIX + url_for('static', filename='js/regions.esm.js') }}"
     import ZoomPlugin from "{{ URL_PREFIX + url_for('static', filename='js/zoom.esm.js') }}"
     import Hover from "{{ URL_PREFIX + url_for('static', filename='js/hover.esm.js') }}"
 
-    import spectrogram_emu from "{{ URL_PREFIX }}/static/js/spectrogram_emu.esm.js";
-    {#import { SpectrogramZoomHelper } from "{{ URL_PREFIX }}/static/js/SpectrogramZoomHelper.js";#}
-
     var soundSeconds = 0;
     var timeline;
-    var spectrogram;
     var videoDuration;
-    {#let isPlaying = false;#}
     let selectedTier = null;
     let selectedAnotation = null;
     let addAnnotation;
@@ -335,7 +295,7 @@
         {#secondaryLabelInterval: 1,#}
         {#secondaryLabelSpacing: 1,#}
         formatTimeCallback: (seconds) => {
-            return seconds.toFixed(3) + "s";  // 例如：0.12345s
+            return seconds.toFixed(3) + "s";  // example：0.12345s
         },
         style: {
             fontSize: '14px',
@@ -367,7 +327,7 @@
         labelColor: '#fff',
         labelSize: '11px',
         formatTimeCallback: (seconds) => {
-            return seconds.toFixed(5) + "s";  // 例如：0.12345s
+            return seconds.toFixed(5) + "s";  // example：0.12345s
         },
     })
 
@@ -376,21 +336,15 @@
     });
 
     var wavesurfer = WaveSurfer.create({
-        {#height: 150,#}
-        {#scrollParent: true,#}
+        normalize: true,
         autoScroll: false,
-        {#waveColor: '#3fb0ac',#}
-        {#progressColor: '#547980',#}
         fillParent: false,
-
         container: '#waveform',
         waveColor: 'rgb(200, 0, 200)',
         progressColor: 'rgb(100, 0, 100)',
-        {#url: '{{ audioFile }}',#}
         media: document.querySelector('video'),
         sampleRate: 11025,
         minPxPerSec: 100,
-        {#dragToSeek: true,#}
         plugins: [
             topTimeline,
             {#bottomTimeline,#}
@@ -401,26 +355,19 @@
         ],
     });
 
-    {#console.log('video',{{ 1 if videoFile else 0 }});#}
-    {#console.log('audio',{{ 1 if audioFile else 0 }});#}
-
-
-    let isSelecting = false; // 是否正在滑动选择
     let isintervalSelecting = false
     const container = document.querySelector(`${wavesurfer.options.container} > div`);
     container.style.backgroundColor = "white";
 
     var videoPlayer = document.getElementById('videoPlayer');
-    var isSyncing = false; // 标志位，防止事件冲突
-    {#let activeRegion = null#}
 
     window.addEventListener('DOMContentLoaded', () => {
         const observer = new IntersectionObserver(async (entries) => {
-            // 检测从 >=0.5 ➜ <0.5（进入遮挡区）
+            // Detect transition from >=0.5 ➜ <0.5 (entered hidden zone)
             if (entries[0].intersectionRatio < 0.5) {
                 await videoPlayer.requestPictureInPicture();
             }
-            // 检测从 <0.5 ➜ >=0.5（回到视口）
+            // Detect transition from <0.5 ➜ >=0.5 (back to viewport)
             if (entries[0].intersectionRatio >= 0.5 ) {
                 await document.exitPictureInPicture();
             }
@@ -431,19 +378,17 @@
     });
 
     regions.on('region-clicked', (region, event) => {
-        event.stopPropagation(); // 阻止事件冒泡
-        {#activeRegion = region#}
+        event.stopPropagation(); // Prevent event bubbling
         const start = region.start;
         const end = region.end;
         videoPlayer.currentTime = start;
-        {#region.play(true)#}
         region.play()
         const checkEndTime = () => {
             if (videoPlayer.currentTime >= end) {
                 videoPlayer.pause();
                 return;
             }
-            requestAnimationFrame(checkEndTime); // 持续高频检查
+            requestAnimationFrame(checkEndTime); // Continuous high-frequency checking
         };
         requestAnimationFrame(checkEndTime);
     });
@@ -462,12 +407,12 @@
     regions.on('region-created', (region) => {
         regions.getRegions().forEach(existingRegion => {
             if (existingRegion.id !== region.id) {
-                existingRegion.remove(); // 删除其他区域
+                existingRegion.remove(); // Remove other regions
             }
         });
         if(selectedTier && selectedTier.dataset.category && !isintervalSelecting){
             const data = {type: 'interval', start: region.start, end: region.end, id: region.id};
-            console.log('data',data)
+            {#console.log('data',data)#}
             addAnnotation(selectedTier, data);
         } else if (!selectedTier) {
             alert('Select Tier！');
@@ -478,63 +423,61 @@
         closeAllMenus();
         selectedAnotation = region.id
         region.element.title = `Start: ${region.start.toFixed(5)}s,\nEnd: ${region.end.toFixed(5)}s,\nDuration: ${(region.end - region.start).toFixed(5)}s`;
-        {#isintervalSelecting = true#}
         const div = document.getElementById(selectedAnotation)
         const oldMenu  = document.getElementById("annotation-menu")
         const newMenu = oldMenu.cloneNode(true);
-        // 替换 annotationMenu（清除旧事件监听器）
+        // Replace annotationMenu (remove old event listeners)
         oldMenu .replaceWith(newMenu);
         const annotationMenu = newMenu;
         region.element.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             event.stopPropagation();
-            console.log(' 右键 region 成功！', region);
             closeAllMenus();
             const selectedValues = div.dataset.text ? div.dataset.text.split(', ').map(val => val.trim()) : [];
             annotationMenu.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = selectedValues.includes(checkbox.value);
             });
-            // 根据 category 选择要显示的部分
-            annotationMenu.querySelectorAll('ul').forEach(ul => ul.style.display = 'none'); // 先隐藏所有分类
-            const safeCategoryName = `${selectedTier.dataset.category.trim() // 去除首尾空格
-                .replace(/^\d+/, "n$&") // 数字开头加前缀 "n"
-                .replace(/\s+/g, "-") // 空格换成 "-"
-                .replace(/[^a-zA-Z0-9-_]/g, "")}`; // 只保留字母、数字、"-" 和 "_"
+            // Select the part to be displayed according to category
+            annotationMenu.querySelectorAll('ul').forEach(ul => ul.style.display = 'none'); // Hide all category first
+            const safeCategoryName = `${selectedTier.dataset.category.trim() // Remove leading and trailing spaces
+                .replace(/^\d+/, "n$&") // If it starts with digits, prefix them with "n"
+                .replace(/\s+/g, "-") // Replace all spaces with "-"
+                .replace(/[^a-zA-Z0-9-_]/g, "")}`; // Remove any characters except letters, numbers, "-" and "_"
             annotationMenu.querySelector(`.${safeCategoryName}-menu`).style.display = "block";
-            // 设置菜单位置
+            // Set menu location
             let menuX = event.clientX;
             let menuY = event.clientY;
-            annotationMenu.style.display = 'block'; // 先让菜单显示，获取其高度
+            annotationMenu.style.display = 'block'; // First let the menu display and get its height
             let menuHeight = annotationMenu.offsetHeight;
             let menuWidth = annotationMenu.offsetWidth;
-            // 计算是否超出屏幕底部
+            // Calculate whether it exceeds the bottom of the screen
             if (menuY + menuHeight > window.innerHeight) {
-                menuY = window.innerHeight - menuHeight - 10; // 让菜单向上浮动，留 10px 间隙
+                menuY = window.innerHeight - menuHeight - 10; // Float the menu upwards, leaving a 10px gap
             }
-            // 计算是否超出屏幕右侧
+            // Calculate whether it exceeds the right side of the screen
             if (menuX + menuWidth > window.innerWidth) {
-                menuX = window.innerWidth - menuWidth - 10; // 让菜单向左移动，留 10px 间隙
+                menuX = window.innerWidth - menuWidth - 10; // Move the menu to the left, leaving a 10px gap
             }
             annotationMenu.style.left = `${menuX}px`;
             annotationMenu.style.top = `${menuY}px`;
         });
         document.addEventListener('click', (event) => {
             if (!annotationMenu.contains(event.target) && !event.target.classList.contains('okButton')) {
-                annotationMenu.style.display = 'none'; // 关闭菜单
+                annotationMenu.style.display = 'none'; // Close menu
             }
         });
         document.addEventListener("scroll", () => {
             annotationMenu.style.display = 'none';
         });
-        // 获取菜单选项顺序
+        // Get the order of menu options
         const menuOptions = Array.from(annotationMenu.querySelectorAll('input[type="checkbox"]')).map(
             (checkbox) => checkbox.value
         );
         annotationMenu.querySelectorAll('.okButton').forEach(okButton => {
             okButton.addEventListener('click', (event) => {
-                event.stopPropagation(); // 阻止冒泡，防止点击 OK 触发 body 的 click 事件
-                console.log("OK clicked, confirming selection...");
-                annotationMenu.style.display = 'none'; // 点击 OK 后隐藏菜单
+                event.stopPropagation();
+                {#console.log("OK clicked, confirming selection...");#}
+                annotationMenu.style.display = 'none';
             });
         });
         annotationMenu.querySelectorAll("li").forEach(li => {
@@ -551,46 +494,45 @@
             if (event.target.type === 'checkbox') {
                 const value = event.target.value;
                 const checked = event.target.checked;
-                console.log(` Value: ${value}, Checked: ${checked}`);
-                // 初始化或更新 div.dataset.text
+                {#console.log(` Value: ${value}, Checked: ${checked}`);#}
+                // Initialize or update div.dataset.text
                 const currentValues = div.dataset.text ? div.dataset.text.split(', ') : [];
-                // 根据复选框的选中状态更新值
+                // Update the value based on the check state of the checkbox
                 if (checked) {
-                    // 如果选中，添加值
+                    // If selected, add value
                     if (!currentValues.includes(value)) {
                         currentValues.push(value);
                     }
                 } else {
-                    // 如果取消选中，移除值
+                    // If unchecked, remove the value
                     const index = currentValues.indexOf(value);
                     if (index > -1) {
                         currentValues.splice(index, 1);
                     }
                 }
-                // 按菜单顺序排序 currentValues
+                // Sort by menu order currentValues
                 currentValues.sort((a, b) => menuOptions.indexOf(a) - menuOptions.indexOf(b));
-                // 更新 div.dataset.text 并设置为逗号分隔的字符串
+                // Update div.dataset.text and set it to a comma-delimited string
                 div.dataset.text = currentValues.join(', ');
                 div.title = currentValues.join(', ');
-                div.setAttribute('data-text', currentValues.join(', ')); // 用于前端展示
+                div.setAttribute('data-text', currentValues.join(', ')); // For front-end display
                 regions.getRegions()[0].setOptions({ content: currentValues.join(', ') });
             }
         });
         annotationMenu.querySelectorAll('.deleteButton').forEach(okButton => {
             okButton.addEventListener('click', (event) => {
-                event.stopPropagation(); // 阻止冒泡，防止点击 OK 触发 body 的 click 事件
-                console.log("Delete clicked, confirming delete...");
-                annotationMenu.style.display = 'none'; // 点击 OK 后隐藏菜单
+                event.stopPropagation(); // Prevent bubbling and click OK from triggering the body's click event
+                {#console.log("Delete clicked, confirming delete...");#}
+                annotationMenu.style.display = 'none'; // Click OK to hide the menu
                 selectedTier.removeChild(div);
                 regions.clearRegions();
                 const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
                 const pitchDiv = document.getElementById('chart');
                 [spectrogramDiv, pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
-                {#autoSaveAnnotations();#}
             });
         });
 
-        //  添加同步 Region 到 spectrogram 和 pitch 图层
+        //  Add synchronized Region to spectrogram and pitch layers
         const createOverlay = (container, region) => {
             Array.from(container.querySelectorAll('.region-overlay')).forEach(e => e.remove());
             const duration = wavesurfer.getDuration();
@@ -606,14 +548,14 @@
             overlay.style.backgroundColor = region.color;
             overlay.style.pointerEvents = 'none';
             overlay.style.zIndex = '1';
-            // 设置 ID，便于后续删除或同步更新
+            // Set an ID to facilitate subsequent deletion or synchronous update
             overlay.dataset.regionId = region.id;
             container.appendChild(overlay);
         };
-        // 获取两个容器
+        // Get two containers
         const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
         const pitchDiv = document.getElementById('chart');
-        // 创建两个 overlay
+        // Create two overlays
         if (spectrogramDiv) createOverlay(spectrogramDiv, region);
         if (pitchDiv) createOverlay(pitchDiv, region);
 
@@ -622,27 +564,21 @@
     regions.on('region-update', (region) => {
         videoPlayer.currentTime = region.start
         region.element.title = `Start: ${region.start.toFixed(5)}s,\nEnd: ${region.end.toFixed(5)}s,\nDuration: ${(region.end - region.start).toFixed(5)}s`;
-        // 找到对应的 annotation 块
+        // Find the corresponding annotation block
         const annotation = selectedTier.querySelector(`.interval[id="${region.id}"]`);
         if (annotation) {
-            // 计算新的样式
+            // Calculate new styles
             const startPercentage = (region.start / wavesurfer.getDuration()) * 100;
             const widthPercentage = ((region.end - region.start) / wavesurfer.getDuration()) * 100;
-            // 更新 annotation 的样式
+            // Update the annotation style
             annotation.style.left = `${startPercentage}%`;
             annotation.style.width = `${widthPercentage}%`;
-            // 更新 annotation 的数据
+            // Update the annotation data
             annotation.dataset.start = region.start.toFixed(5);
             annotation.dataset.end = region.end.toFixed(5);
         }
-        {#autoSaveAnnotations();#}
         updateAllRegionOverlays()
     });
-
-    {#const playButton = document.querySelector('#playPause')#}
-    {#playButton.onclick = () => {#}
-    {#    wavesurfer.playPause()#}
-    {#}#}
 
     const downloadTextGridButton = document.querySelector('#downloadTextGrid')
     downloadTextGridButton.onclick = ()=>{
@@ -662,17 +598,17 @@
     }
 
     function updatePlayLine2() {
-        const tiers = document.querySelectorAll("#tier-control > div"); // 获取所有 tier 容器
+        const tiers = document.querySelectorAll("#tier-control > div"); // Get all tier containers
         tiers.forEach(tier => {
             const tierWidth = tier.offsetWidth;
             const linePosition = (videoPlayer.currentTime / videoDuration) * tierWidth;
-            // 确保竖线在 tier 容器范围内
+            // Make sure the vertical line is within the tier container
             if (linePosition >= 0 && linePosition <= tierWidth) {
-                let playLine = tier.querySelector(".play-line2"); // 查找当前容器内的竖线
+                let playLine = tier.querySelector(".play-line2"); // Find the vertical line in the current container
                 if (playLine) {
-                    playLine.style.left = `${linePosition}px`; // 更新位置
+                    playLine.style.left = `${linePosition}px`; // Update location
                 } else {
-                    // 如果没有竖线，创建一个新的竖线
+                    // If there is no vertical line, create a new one
                     playLine = document.createElement("div");
                     playLine.classList.add("play-line2");
                     playLine.style.position = "absolute";
@@ -681,35 +617,34 @@
                     playLine.style.width = "1px";
                     playLine.style.backgroundColor = "black";
                     playLine.style.left = `${linePosition}px`;
-                    {#playLine.style.pointerEvents = "none"; // 禁止响应鼠标事件#}
-                    tier.style.position = "relative"; // 确保父容器是相对定位
+                    tier.style.position = "relative"; // Make sure the parent container is relatively positioned
                     tier.appendChild(playLine);
                 }
             }
         });
     }
 
-        function updateAllRegionOverlays() {
-            const regionsList = regions.getRegions();
-            const duration = wavesurfer.getDuration();
-            const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
-            const pitchDiv = document.getElementById('chart');
-            const containers = [spectrogramDiv, pitchDiv];
-            const scrollLeft = wavesurfer.getScroll();
-            const scrollWidth = wavesurfer.getWrapper().scrollWidth;
-            regionsList.forEach(region => {
-                containers.forEach(container => {
-                    if (!container) return;
-                    const overlay = container.querySelector(`.region-overlay[data-region-id="${region.id}"]`);
-                    if (overlay) {
-                        const startX = (region.start / duration) * scrollWidth - scrollLeft;
-                        const width = ((region.end - region.start) / duration) * scrollWidth;
-                        overlay.style.left = `${startX}px`;
-                        overlay.style.width = `${width}px`;
-                    }
-                });
+    function updateAllRegionOverlays() {
+        const regionsList = regions.getRegions();
+        const duration = wavesurfer.getDuration();
+        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
+        const pitchDiv = document.getElementById('chart');
+        const containers = [spectrogramDiv, pitchDiv];
+        const scrollLeft = wavesurfer.getScroll();
+        const scrollWidth = wavesurfer.getWrapper().scrollWidth;
+        regionsList.forEach(region => {
+            containers.forEach(container => {
+                if (!container) return;
+                const overlay = container.querySelector(`.region-overlay[data-region-id="${region.id}"]`);
+                if (overlay) {
+                    const startX = (region.start / duration) * scrollWidth - scrollLeft;
+                    const width = ((region.end - region.start) / duration) * scrollWidth;
+                    overlay.style.left = `${startX}px`;
+                    overlay.style.width = `${width}px`;
+                }
             });
-        }
+        });
+    }
 
     wavesurfer.on('ready', function () {
         soundSeconds = wavesurfer.getDuration();
@@ -723,11 +658,11 @@
         $('#slider').val(pxPerSec);
     });
 
-    // 监听鼠标滚轮事件，实现缩放
+    // Listen for mouse wheel events to achieve zooming
     document.getElementById('drawings').addEventListener('wheel', function(event) {
         event.preventDefault();
-        let newZoom = event.deltaY < 0 ? currentZoom + 500 : currentZoom - 500; // 滚轮向上放大，向下缩小
-        newZoom = Math.max(pxPerSec, Math.min(80000, newZoom)); // 限制缩放范围
+        let newZoom = event.deltaY < 0 ? currentZoom + 500 : currentZoom - 500; // Scroll wheel up to zoom in, scroll wheel down to zoom out
+        newZoom = Math.max(pxPerSec, Math.min(80000, newZoom)); // Limit zoom range
         wavesurfer.zoom(newZoom);
         $('#slider').val(newZoom);
         zoom(soundSeconds * newZoom);
@@ -757,14 +692,6 @@
         updateAllRegionOverlays();
     });
 
-    {#wavesurfer.on('play', function () {#}
-    {#    $("#playPause").html("<i class='glyphicon glyphicon-pause'></i> Pause");#}
-    {#});#}
-    {##}
-    {#wavesurfer.on('pause', function () {#}
-    {#    $("#playPause").html("<i class='glyphicon glyphicon-play'></i> Play");#}
-    {#});#}
-
     var slider = document.querySelector('#slider');
     slider.oninput = function () {
         var zoomLevel = Number(slider.value);
@@ -775,47 +702,47 @@
         updatePlayLine2();
     };
 
-        const zoomInBtn = document.querySelector(".glyphicon-zoom-in");
-        const zoomOutBtn = document.querySelector(".glyphicon-zoom-out");
+    const zoomInBtn = document.querySelector(".glyphicon-zoom-in");
+    const zoomOutBtn = document.querySelector(".glyphicon-zoom-out");
 
-        zoomInBtn.addEventListener("click", () => {
-            const newValue = Number(slider.value) + 800;
+    zoomInBtn.addEventListener("click", () => {
+        const newValue = Number(slider.value) + 800;
+        currentZoom = newValue
+        wavesurfer.zoom(newValue);
+        zoom(soundSeconds * newValue);
+        updatePlayLine1();
+        updatePlayLine2();
+    });
+
+    zoomOutBtn.addEventListener("click", () => {
+        const newValue = Number(slider.value) - 800;
+        if (newValue>pxPerSec) {
             currentZoom = newValue
             wavesurfer.zoom(newValue);
             zoom(soundSeconds * newValue);
             updatePlayLine1();
             updatePlayLine2();
-        });
+        }
+    });
 
-        zoomOutBtn.addEventListener("click", () => {
-            const newValue = Number(slider.value) - 800;
-            if (newValue>pxPerSec) {
-                currentZoom = newValue
-                wavesurfer.zoom(newValue);
-                zoom(soundSeconds * newValue);
-                updatePlayLine1();
-                updatePlayLine2();
-            }
-        });
-
-        videoPlayer.addEventListener('seeked', () => {
-            if (slider.value > 1000) {
-                const wrapper = wavesurfer.getWrapper();
-                const totalWidth = wrapper.scrollWidth;
-                const visibleDuration = wavesurfer.getDuration() * (wavesurfer.getWidth()  / totalWidth); // 计算可见时间宽度
-                const centerTime = videoPlayer.currentTime - visibleDuration / 2;
-                wavesurfer.setScrollTime(centerTime);
-            }
-        });
-        videoPlayer.addEventListener('pause', () => {
-            if (slider.value > 1000) {
-                const wrapper = wavesurfer.getWrapper();
-                const totalWidth = wrapper.scrollWidth;
-                const visibleDuration = wavesurfer.getDuration() * (wavesurfer.getWidth() / totalWidth);
-                const centerTime = videoPlayer.currentTime - visibleDuration / 2;
-                wavesurfer.setScrollTime(centerTime);
-            }
-        });
+    videoPlayer.addEventListener('seeked', () => {
+        if (slider.value > 1000) {
+            const wrapper = wavesurfer.getWrapper();
+            const totalWidth = wrapper.scrollWidth;
+            const visibleDuration = wavesurfer.getDuration() * (wavesurfer.getWidth()  / totalWidth); // Calculate visible time width
+            const centerTime = videoPlayer.currentTime - visibleDuration / 2;
+            wavesurfer.setScrollTime(centerTime);
+        }
+    });
+    videoPlayer.addEventListener('pause', () => {
+        if (slider.value > 1000) {
+            const wrapper = wavesurfer.getWrapper();
+            const totalWidth = wrapper.scrollWidth;
+            const visibleDuration = wavesurfer.getDuration() * (wavesurfer.getWidth() / totalWidth);
+            const centerTime = videoPlayer.currentTime - visibleDuration / 2;
+            wavesurfer.setScrollTime(centerTime);
+        }
+    });
 
     function setGraphParams(newWidth) {
         margin = {top: 20, right: 40, bottom: 30, left: 100},
@@ -825,7 +752,6 @@
         parseTime = d3.time.format("%S.%L").parse;
 
         x = d3.time.scale().range([0, width]);
-        {#x = d3.scale.linear().range([0, width]);#}
         y0 = d3.scale.linear().range([height, 0]);
         y1 = d3.scale.linear().range([height, 0]);
 
@@ -869,7 +795,6 @@
             .attr("id", "lines")
             .attr("class", "bg-colorWhite")
             .append("g");
-        //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     }
 
     function initializeGraph() {
@@ -877,7 +802,6 @@
             if (error) throw error;
 
             data.forEach(function (d) {
-                {#d.time = parseTime(d.time);#}
                 d.time = parseFloat(d.time) * 1000;
                 d.pitch = +d.pitch;
                 d.intensity = +d.intensity;
@@ -943,7 +867,7 @@
             .attr("stroke-width", 0.8);
     }
 
-    // 波形同步，更新竖线的位置
+    // Waveform synchronization, update the position of the vertical line
     wavesurfer.on('timeupdate', function (currentTime) {
         updatePlayLine1();
         updatePlayLine2();
@@ -953,10 +877,6 @@
         $("svg").attr("width", value + "px");
         width = value;
         x = d3.time.scale().range([0, width]);
-        {#x = d3.scale.linear().range([0, width]);#}
-        {#xAxis = d3.svg.axis().scale(x)#}
-        {#    .orient("bottom").ticks(d3.time.seconds, 1)#}
-        {#    .tickFormat(d3.time.format("%M:%S"));#}
 
         $(".y.axis.a-right").attr("transform", "translate(" + Math.min($("#lines").outerWidth(), $("#chart").outerWidth()) + " ,0)");
 
@@ -964,7 +884,6 @@
             var svg = d3.select("#drawings").transition();
 
             data.forEach(function (d) {
-                {#d.time = parseTime(d.time);#}
                 d.time = parseFloat(d.time) * 1000;
                 d.pitch = +d.pitch;
                 d.intensity = +d.intensity;
@@ -992,63 +911,60 @@
         });
     }
 
-        function generateTickFormat() {
-            return function (d) {
-                console.log('Number(slider.value)',Number(slider.value))
-                if (Number(slider.value) < 100) {
-                    return (d / 1000).toFixed(0) + "s";
-                } else {
-                    return (d / 1000).toFixed(1) + "s";
-                }
-            };
-        }
+    function generateTickFormat() {
+        return function (d) {
+            {#console.log('Number(slider.value)',Number(slider.value))#}
+            if (Number(slider.value) < 100) {
+                return (d / 1000).toFixed(0) + "s";
+            } else {
+                return (d / 1000).toFixed(1) + "s";
+            }
+        };
+    }
 
-        function getSmartTickCount(xScale) {
-            const domain = xScale.domain();
-            const duration = domain[1] - domain[0];  // 毫秒
-            {#console.log('duration-domin2',duration)#}
-            const maxTickDensity = 100; // 每隔 100ms 一个 tick = 0.1s
-            const maxTicks = Math.floor(duration / maxTickDensity);  // 最多 tick 数
-            const defaultTickCount = Math.floor(width / 50);  // 原始逻辑
-            return Math.min(defaultTickCount, maxTicks);  // 不超过 maxTicks
-        }
+    function getSmartTickCount(xScale) {
+        const domain = xScale.domain();
+        const duration = domain[1] - domain[0];  // millisecond
+        const maxTickDensity = 100; // One tick every 100ms = 0.1s
+        const maxTicks = Math.floor(duration / maxTickDensity);  // Maximum number of ticks
+        const defaultTickCount = Math.floor(width / 50);  // original logic
+        return Math.min(defaultTickCount, maxTicks);  // No more than maxTicks
+    }
 
-    // 高亮逻辑
+    // Highlight logic
     wavesurfer.on('audioprocess', () => {
         const currentTime = wavesurfer.getCurrentTime();
-        // 高亮 Interval
+        // Highlight Interval
         document.querySelectorAll('.interval').forEach(interval => {
             const start = parseFloat(interval.dataset.start);
             const end = parseFloat(interval.dataset.end);
             if (currentTime >= start && currentTime <= end) {
-                interval.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // 高亮橙色
-                {#region.update({ color: 'rgba(255, 165, 0, 0.6)' });#}
+                interval.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // Highlight orange
             } else {
                 interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)";
-                {#region.update({ color: 'rgba(0, 123, 255, 0.5)' });#}
             }
         });
-        // 高亮 Point
+        // Highlight Point
         document.querySelectorAll('.point').forEach(point => {
             const time = parseFloat(point.dataset.time);
             if (Math.abs(currentTime - time) < 0.1) {
-                point.style.backgroundColor = "rgba(255, 0, 0, 0.6)"; // 高亮红色
+                point.style.backgroundColor = "rgba(255, 0, 0, 0.6)"; // Highlight red
             } else {
                 point.style.backgroundColor = "rgba(144, 238, 144, 0.6)";
             }
         });
     });
 
-    // 收集标注数据
+    // Collect annotation
     const collectAnnotations = () => {
-        const tiers = Array.from(document.querySelectorAll("#tier-control > div")); // 获取所有 tier
+        const tiers = Array.from(document.querySelectorAll("#tier-control > div")); // Get all tiers
         const annotations = [];
 
         tiers.forEach(tier => {
             const tierType = tier.classList.contains("interval-tier") ? "interval" : "point";
             const tierId = tier.id;
             const tierInput = document.getElementById(`${tierId}name`);
-            const tierName = tierInput?.value || tierId; // 使用输入框值或默认 ID 作为名称
+            const tierName = tierInput?.value || tierId; // Use the input box value or the default ID as the name
             const category = tier.dataset.category || "default";
 
             if (tierType === "interval") {
@@ -1077,11 +993,10 @@
                 });
             }
         });
-
         return annotations;
     };
 
-    // 生成 TextGrid 文件内容
+    // Generate TextGrid file content
     const generateTextGridContent = (annotations, videoDuration) => {
         let content = `File type = "ooTextFile"\nObject class = "TextGrid"\n\n`;
         content += `xmin = 0\nxmax = ${videoDuration}\ntiers? <exists>\nsize = ${annotations.length}\nitem []:\n`;
@@ -1107,7 +1022,7 @@
         return content;
     };
     const fileName = "{{ fileName }}";
-    // 文件下载逻辑
+    // File download logic
     const downloadTextGrid = () => {
         const annotations = collectAnnotations();
         const textGridContent = generateTextGridContent(annotations, videoDuration);
@@ -1120,30 +1035,29 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        {#autoSaveAnnotations();#}
     };
 
     document.addEventListener("DOMContentLoaded", () => {
         const nameContainer = document.getElementById("name-container")
         const tierContainer = document.getElementById("tier-control");
-        // 绑定 Tier 单击事件的函数
+        // Bind the function of Tier click event
         const bindTierClickEvent = (tier, tierType) => {
             let clickTimeout;
             tier.addEventListener("click", (event) => {
                 if (event.target.classList.contains("handle-left") || event.target.classList.contains("handle-right")) {
-                    // 获取父元素 interval
+                    // Get the parent element interval
                     const intervalElement = event.target.parentElement;
                     if (intervalElement && intervalElement.classList.contains("interval")) {
-                        // 获取 interval 的 dataset.start
+                        // Get the interval's dataset.start
                         const start = parseFloat(intervalElement.dataset.start);
                         const end = parseFloat(intervalElement.dataset.end);
-                        videoPlayer.currentTime = start; // 跳转到 interval 的开始时间
-                        // 重置所有 interval 的背景颜色为默认蓝色
+                        videoPlayer.currentTime = start; // Jump to the start time of the interval
+                        // Reset the background color of all intervals to the default blue
                         document.querySelectorAll(".interval").forEach((interval) => {
-                            interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // 蓝色
+                            interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // blue
                         });
-                        // 将当前点击的 interval 设置为橙色
-                        intervalElement.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // 橙色
+                        // Set the currently clicked interval to orange
+                        intervalElement.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // orange
 
                         selectedAnotation = intervalElement.id;
                         isintervalSelecting = true;
@@ -1152,147 +1066,29 @@
                             id: selectedAnotation,
                             content: intervalElement.title,
                             start: start,
-                            end: end, // 初始化时 start 和 end 相同
+                            end: end, // Initially, start and end are the same.
                             color: 'rgba(0, 123, 255, 0.5)'
                         });
-
-                        // 定义时间更新监听函数
-                        {#const checkEndTime = () => {#}
-                        {#    if (videoPlayer.currentTime >= end) {#}
-                        {#        videoPlayer.pause();#}
-                        {#videoPlayer.currentTime = end; // 精确对齐#}
-                        {#        return;#}
-                        {#    }#}
-                        {#    requestAnimationFrame(checkEndTime); // 持续高频检查#}
-                        {#};#}
-                            {#requestAnimationFrame(checkEndTime);#}
-                            {#console.log(`跳转到起始时间: ${start}，开始播放至 ${end}`);#}
-                        }
-                        return; // 直接返回，避免执行新标注的逻辑
                     }
-                    // 如果点击到的是 "point" 或 "interval"，直接跳转到相应时间
-                    if (event.target.classList.contains("point") || event.target.classList.contains("interval")) {
-                        // 重置所有 interval 的背景颜色为默认蓝色
-                        document.querySelectorAll(".interval").forEach((interval) => {
-                            interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // 蓝色
-                        });
-                        // 将当前点击的 interval 设置为橙色
-                        event.target.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // 橙色
-                        if (event.target.classList.contains("point")) {
-                            const time = parseFloat(event.target.dataset.time);
-                            videoPlayer.currentTime = time; // 跳转到对应时间点
-                            console.log(`Point clicked, jumping to time: ${time}`);
-                        } else if (event.target.classList.contains("interval")) {
-                            // 处理点击 "interval" 的逻辑
-                            const start = parseFloat(event.target.dataset.start);
-                            const end = parseFloat(event.target.dataset.end);
-
-                            selectedAnotation = event.target.id;
-                            isintervalSelecting = true;
-                            regions.clearRegions()
-                            regions.addRegion({
-                                id: selectedAnotation,
-                                content: event.target.title,
-                                start: start,
-                                end: end, // 初始化时 start 和 end 相同
-                                color: 'rgba(0, 123, 255, 0.5)'
-                            });
-                            // 跳转到起始时间并开始播放
-                            videoPlayer.currentTime = start;
-                            // 定义高频检查函数
-                            {#const checkEndTime = () => {#}
-                            {#    if (videoPlayer.currentTime >= end) {#}
-                            {#        videoPlayer.pause();#}
-                            {#videoPlayer.currentTime = end; // 强制对齐到精确的结束时间#}
-                            {#videoPlayer.removeEventListener('timeupdate', checkEndTime); // 移除监听#}
-                            {#        return;#}
-                            {#    }#}
-                            {#    requestAnimationFrame(checkEndTime); // 持续检查#}
-                            {#};#}
-                                {#// 启动首次检查#}
-                                {#requestAnimationFrame(checkEndTime);#}
-                            }
-                            return; // 直接返回，避免执行新标注的逻辑
-                        }
-                        clearTimeout(clickTimeout); // 清除双击的影响
-                        {#clickTimeout = setTimeout(() => {#}
-                        {#    const tierWidth = tier.offsetWidth;#}
-                        {#    if (tierWidth === 0) {#}
-                        {#        console.error("Tier width is 0.");#}
-                        {#        return;#}
-                        {#    }#}
-                        {#    const relativeTime = (event.offsetX / tierWidth) * videoDuration;#}
-                        {#    videoPlayer.currentTime = relativeTime#}
-                        {#    if (tierType === "interval") {#}
-                        {#        const start = relativeTime;#}
-                        {#        const end = start + 2; // 默认持续 2 秒#}
-                        {#        console.log(`Interval Annotation: Start Time: ${start}, End Time: ${end}`);#}
-                        {#        addAnnotation(tier, { start, end, type: "interval" });#}
-                        {#    } else if (tierType === "point") {#}
-                        {#        console.log(`Point Annotation: Time: ${relativeTime}`);#}
-                        {#        addAnnotation(tier, { time: relativeTime, type: "point" });#}
-                        {#    }#}
-                        //}, 300); // 设置一个超时时间，区分双击
+                    return; // Return directly to avoid executing the new annotation logic
+                }
+                // If you click on a "point" or "interval", jump directly to the corresponding time
+                if (event.target.classList.contains("point") || event.target.classList.contains("interval")) {
+                    // Reset the background color of all intervals to the default blue
+                    document.querySelectorAll(".interval").forEach((interval) => {
+                        interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // blue
                     });
-                };
-
-                // 添加标注的函数
-                addAnnotation = (tier, data) => {
-                    const div = document.createElement("div");
-                    if (data.type === "interval") {
-                        {#videoPlayer.currentTime = parseFloat(data.start.toFixed(2));#}
-                        div.className = "interval";
-                        div.id = data.id; // 关联 region 的 ID
-                        div.title = data.text ? data.text : "";
-                        div.dataset.start = data.start.toFixed(5);
-                        div.dataset.end = data.end.toFixed(5);
-                        div.dataset.text = data.text ? data.text : "";
-                        console.log('videoDuration22',videoDuration)
-                        const startPercentage = Math.max(0, Math.min((data.start / videoDuration) * 100, 100));
-                        const widthPercentage = Math.max(0, Math.min(((data.end - data.start) / videoDuration) * 100, 100));
-                        div.style.left = startPercentage + "%";
-                        div.style.width = widthPercentage + "%";
-
-                        const handleLeft = document.createElement('div');
-                        handleLeft.className = 'handle handle-left';
-                        const handleRight = document.createElement('div');
-                        handleRight.className = 'handle handle-right';
-                        {#div.appendChild(handleLeft);#}
-                        {#div.appendChild(handleRight);#}
-                    } else if (data.type === "point") {
-                        {#videoPlayer.currentTime = parseFloat(data.time.toFixed(2));#}
-                        div.className = "point";
-                        div.dataset.time = data.time.toFixed(5);
-                        const timePercentage = Math.max(0, Math.min((data.time / videoDuration) * 100, 100));
-                        div.style.left = timePercentage + "%";
-                    }
-                    // 右键修改 Annotation
-                    {#div.addEventListener("contextmenu", (event) => {#}
-                    {#    event.preventDefault();#}
-                    {#    event.stopPropagation(); // 阻止事件冒泡，防止触发父元素的 contextmenu 事件#}
-                    {#    const newText = prompt("Enter new annotation text:", "");#}
-                    {#    if (newText !== null) {#}
-                    {#        //div.textContent = newText;#}
-                    {#        div.dataset.text = newText;#}
-                    {#        div.setAttribute("data-text", newText); // 用于前端展示#}
-                    {#    }#}
-                    //});
-                    tier.appendChild(div);
-                    {#enableDragAndResize(tier); // 绑定拖拽逻辑#}
-                    {#autoSaveAnnotations();#}
-
-                    const annotationMenu = document.getElementById("annotation-menu").cloneNode(true);
-                    document.body.appendChild(annotationMenu); // 添加到页面中
-                    div.addEventListener('contextmenu', (event) => {
-                        event.stopPropagation(); // 阻止事件冒泡，防止触发父元素的 contextmenu 事件
-                        event.preventDefault(); // 阻止默认右键菜单
-                        closeAllMenus();
-                        document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
-                        document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
-                        tier.classList.add('selected');
-                        selectedTier = tier; // 获取选中的 tier ID
+                    // Set the currently clicked interval to orange
+                    event.target.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // orange
+                    if (event.target.classList.contains("point")) {
+                        const time = parseFloat(event.target.dataset.time);
+                        videoPlayer.currentTime = time; // Jump to the corresponding time point
+                        {#console.log(`Point clicked, jumping to time: ${time}`);#}
+                    } else if (event.target.classList.contains("interval")) {
+                        // Handle click event logic for "interval"
                         const start = parseFloat(event.target.dataset.start);
                         const end = parseFloat(event.target.dataset.end);
+
                         selectedAnotation = event.target.id;
                         isintervalSelecting = true;
                         regions.clearRegions()
@@ -1300,1259 +1096,1158 @@
                             id: selectedAnotation,
                             content: event.target.title,
                             start: start,
-                            end: end, // 初始化时 start 和 end 相同
-                            color: 'rgba(0, 123, 255, 0.5)',
+                            end: end, // Initially, start and end are the same.
+                            color: 'rgba(0, 123, 255, 0.5)'
                         });
+                        // Jump to the start time and start playing
                         videoPlayer.currentTime = start;
-                        document.querySelectorAll(".interval").forEach((interval) => {
-                            interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // 蓝色
-                        });
-                        div.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // 橙色
-                        const selectedValues = div.dataset.text ? div.dataset.text.split(', ').map(val => val.trim()) : [];
-                        annotationMenu.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                            checkbox.checked = selectedValues.includes(checkbox.value);
-                        });
-                        // 根据 category 选择要显示的部分
-                        annotationMenu.querySelectorAll('ul').forEach(ul => ul.style.display = 'none'); // 先隐藏所有分类
-
-                        const safeCategoryName = `${tier.dataset.category.trim() // 去除首尾空格
-                        .replace(/^\d+/, "n$&") // 数字开头加前缀 "n"
-                        .replace(/\s+/g, "-") // 空格换成 "-"
-                        .replace(/[^a-zA-Z0-9-_]/g, "")}`; // 只保留字母、数字、"-" 和 "_"
-                        annotationMenu.querySelector(`.${safeCategoryName}-menu`).style.display = "block";
-                        // 设置菜单位置
-                        let menuX = event.clientX;
-                        let menuY = event.clientY;
-                        annotationMenu.style.display = 'block'; // 先让菜单显示，获取其高度
-                        let menuHeight = annotationMenu.offsetHeight;
-                        let menuWidth = annotationMenu.offsetWidth;
-                        // 计算是否超出屏幕底部
-                        if (menuY + menuHeight > window.innerHeight) {
-                            menuY = window.innerHeight - menuHeight - 10; // 让菜单向上浮动，留 10px 间隙
-                        }
-                        // 计算是否超出屏幕右侧
-                        if (menuX + menuWidth > window.innerWidth) {
-                            menuX = window.innerWidth - menuWidth - 10; // 让菜单向左移动，留 10px 间隙
-                        }
-                        annotationMenu.style.left = `${menuX}px`;
-                        annotationMenu.style.top = `${menuY}px`;
-                    });
-                    document.addEventListener('click', (event) => {
-                        if (!annotationMenu.contains(event.target) && !event.target.classList.contains('okButton')) {
-                            annotationMenu.style.display = 'none'; // 关闭菜单
-                        }
-                    });
-                    document.addEventListener("scroll", () => {
-                        annotationMenu.style.display = 'none';
-                    });
-                    // 获取菜单选项顺序
-                    const menuOptions = Array.from(annotationMenu.querySelectorAll('input[type="checkbox"]')).map(
-                        (checkbox) => checkbox.value
-                    );
-                    annotationMenu.querySelectorAll('.okButton').forEach(okButton => {
-                        okButton.addEventListener('click', (event) => {
-                            event.stopPropagation(); // 阻止冒泡，防止点击 OK 触发 body 的 click 事件
-                            console.log("OK clicked, confirming selection...");
-                            annotationMenu.style.display = 'none'; // 点击 OK 后隐藏菜单
-                            {#autoSaveAnnotations();#}
-                        });
-                    });
-                    annotationMenu.querySelectorAll("li").forEach(li => {
-                        li.addEventListener("click", (e) => {
-                            const checkbox = li.querySelector('input[type="checkbox"]');
-                            if (!checkbox) return;
-                            if (e.target === checkbox) return;
-                            checkbox.checked = !checkbox.checked;
-                            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
-                            e.preventDefault();
-                        });
-                    });
-                    // 监听多选框的选择状态
-                    annotationMenu.addEventListener('change', (event) => {
-                        if (event.target.type === 'checkbox') {
-                            {#const category = event.target.closest('ul').previousSibling.textContent.trim();#}
-                            const value = event.target.value;
-                            const checked = event.target.checked;
-                            console.log(` Value: ${value}, Checked: ${checked}`);
-                            // 初始化或更新 div.dataset.text
-                            const currentValues = div.dataset.text ? div.dataset.text.split(', ') : [];
-                            // 根据复选框的选中状态更新值
-                            if (checked) {
-                                // 如果选中，添加值
-                                if (!currentValues.includes(value)) {
-                                    currentValues.push(value);
-                                }
-                            } else {
-                                // 如果取消选中，移除值
-                                const index = currentValues.indexOf(value);
-                                if (index > -1) {
-                                    currentValues.splice(index, 1);
-                                }
-                            }
-                            // 按菜单顺序排序 currentValues
-                            currentValues.sort((a, b) => menuOptions.indexOf(a) - menuOptions.indexOf(b));
-                            // 更新 div.dataset.text 并设置为逗号分隔的字符串
-                            div.dataset.text = currentValues.join(', ');
-                            div.title = currentValues.join(', ');
-                            div.setAttribute('data-text', currentValues.join(', ')); // 用于前端展示
-                            regions.getRegions()[0].setOptions({ content: currentValues.join(', ') });
-                        }
-                    });
-                    annotationMenu.querySelectorAll('.deleteButton').forEach(okButton => {
-                        okButton.addEventListener('click', (event) => {
-                            event.stopPropagation(); // 阻止冒泡，防止点击 OK 触发 body 的 click 事件
-                            console.log("Delete clicked, confirming delete...");
-                            annotationMenu.style.display = 'none'; // 点击 OK 后隐藏菜单
-                            tier.removeChild(div);
-                            regions.clearRegions();
-                            const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
-                            const pitchDiv = document.getElementById('chart');
-                            [spectrogramDiv, pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
-                            {#autoSaveAnnotations();#}
-                        });
-                    });
-                };
-
-
-                document.getElementById("add-tier").addEventListener("click", () => {
-                    document.getElementById("tierTypeDialog").style.display = "flex";
-                });
-
-                // 监听 Tier 类型选择
-                document.querySelectorAll(".tier-type").forEach(button => {
-                    button.addEventListener("click", function () {
-                        let tierType = this.dataset.type;
-                        if (tierType === "interval") {
-                            document.getElementById("tierTypeDialog").style.display = "none"; // 关闭 Tier 选择
-                            document.getElementById("categoryDialog").style.display = "flex"; // 打开 Annotation Category 选择
-                        } else {
-                            addPointTier()
-                            closeAllDialogs();
-                        }
-                    });
-                });
-                // 监听 Annotation Category 选择（仅对 Interval Tier）
-                document.addEventListener("click", function (event) {
-                    if (event.target.closest('.delete-icon')) return;
-                    const button = event.target.closest('.annotation-category');
-                    if (button) {
-                        const category = button.querySelector('.category-text')?.textContent;
-                        addIntervalTier(category, category);
-                        closeAllDialogs();
                     }
-                });
-
-                // 关闭对话框
-                document.getElementById("closeTierDialog").addEventListener("click", closeAllDialogs);
-                document.getElementById("closeCategoryDialog").addEventListener("click", closeAllDialogs);
-
-                function closeAllDialogs() {
-                    document.getElementById("tierTypeDialog").style.display = "none";
-                    document.getElementById("categoryDialog").style.display = "none";
+                    return; // Return directly to avoid executing the new annotation logic
                 }
+                clearTimeout(clickTimeout); // Clear the effects of double-click
+            });
+        };
 
+        // add annotation function
+        addAnnotation = (tier, data) => {
+            const div = document.createElement("div");
+            if (data.type === "interval") {
+                div.className = "interval";
+                div.id = data.id; // Link the region ID
+                div.title = data.text ? data.text : "";
+                div.dataset.start = data.start.toFixed(5);
+                div.dataset.end = data.end.toFixed(5);
+                div.dataset.text = data.text ? data.text : "";
+                const startPercentage = Math.max(0, Math.min((data.start / videoDuration) * 100, 100));
+                const widthPercentage = Math.max(0, Math.min(((data.end - data.start) / videoDuration) * 100, 100));
+                div.style.left = startPercentage + "%";
+                div.style.width = widthPercentage + "%";
 
+                const handleLeft = document.createElement('div');
+                handleLeft.className = 'handle handle-left';
+                const handleRight = document.createElement('div');
+                handleRight.className = 'handle handle-right';
+            } else if (data.type === "point") {
+                div.className = "point";
+                div.dataset.time = data.time.toFixed(5);
+                const timePercentage = Math.max(0, Math.min((data.time / videoDuration) * 100, 100));
+                div.style.left = timePercentage + "%";
+            }
+            tier.appendChild(div);
 
-                let targetTier = null; // 当前右键的目标 Tier
-                const contextMenu = document.getElementById("context-menu");
-                const tierSubmenu = document.getElementById("tier-submenu");
-                // 添加 Interval Tier 的按钮逻辑
-                {#document.getElementById("add-interval-tier").addEventListener("click", () => {#}
-                function addIntervalTier(Category, TierName) {
-                    {#const existingTiers = tierContainer.children.length;#}
-                    {#const newTierId = `tier${existingTiers + 1}`; // 新 Tier 的 ID#}
-                    let index = tierContainer.children.length;
-                    let newTierId;
-                    // 循环直到找到一个不存在的 ID
-                    do {
-                        newTierId = `tier${index + 1}`;
-                        index++;
-                    } while (document.getElementById(newTierId));
-                    const newTier = document.createElement("div");
-                    newTier.style.width = (soundSeconds * currentZoom) + "px";
-                    newTier.style.left = -wavesurfer.getScroll() + 'px';
-                    newTier.id = newTierId;
-                    newTier.className = "interval-tier"; // 添加为 interval-tier
-                    {#newTier.dataset.category = "";#}
-                    newTier.dataset.category = Category
-                    addTierNames(newTier); // 新增语句：为每个 tier 添加name
-                    tierContainer.appendChild(newTier);
-                    bindTierClickEvent(newTier, "interval"); // 绑定点击事件
-                    const tierInput = document.getElementById(`${newTier.id}name`);
-                    tierInput.setAttribute('title', Category); // 设置 title
-                    tierInput.setAttribute('value', TierName);
-                    newTier.addEventListener('click', () => {
-                        // 清除之前的选中状态
-                        document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
-                        document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
-                        // 设置当前 tier 为选中
-                        newTier.classList.add('selected');
-                        selectedTier = newTier; // 获取选中的 tier ID
-                        console.log('selectedTier',selectedTier);
-                    });
+            const annotationMenu = document.getElementById("annotation-menu").cloneNode(true);
+            document.body.appendChild(annotationMenu); // Add to page
+            div.addEventListener('contextmenu', (event) => {
+                event.stopPropagation(); // Prevent event bubbling and triggering the contextmenu event of the parent element
+                event.preventDefault(); // Block default right-click menu
+                closeAllMenus();
+                document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
+                document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
+                tier.classList.add('selected');
+                selectedTier = tier; // Get the selected tier ID
+                const start = parseFloat(event.target.dataset.start);
+                const end = parseFloat(event.target.dataset.end);
+                selectedAnotation = event.target.id;
+                isintervalSelecting = true;
+                regions.clearRegions()
+                regions.addRegion({
+                    id: selectedAnotation,
+                    content: event.target.title,
+                    start: start,
+                    end: end, // Initially, start and end are the same.
+                    color: 'rgba(0, 123, 255, 0.5)',
+                });
+                videoPlayer.currentTime = start;
+                document.querySelectorAll(".interval").forEach((interval) => {
+                    interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // blue
+                });
+                div.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // orange
+                const selectedValues = div.dataset.text ? div.dataset.text.split(', ').map(val => val.trim()) : [];
+                annotationMenu.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = selectedValues.includes(checkbox.value);
+                });
+                // Select the part to be displayed according to category
+                annotationMenu.querySelectorAll('ul').forEach(ul => ul.style.display = 'none'); // Hide all categories first
 
-                    document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
-                    document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
-                    newTier.classList.add('selected');
-                    selectedTier = newTier; // 获取选中的 tier ID
-
-                    {#const contextMenu = document.getElementById("context-menu");#}
-                    newTier.addEventListener("contextmenu", (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        closeAllMenus();
-                        const categoryMenu = document.getElementById('category-select-menu');
-                        if (!newTier.dataset.category) {
-                            categoryMenu.style.display = 'block';
-                            categoryMenu.style.left = `${event.clientX}px`;
-                            categoryMenu.style.top = `${event.clientY}px`;
-                            const handleCategorySelect = (e) => {
-                                if (e.target.tagName === 'LI') {
-                                    newTier.dataset.category = e.target.dataset.category;
-                                    categoryMenu.style.display = 'none';
-                                    categoryMenu.removeEventListener('click', handleCategorySelect);
-                                    // 获取对应的输入框
-                                    const tierInput = document.getElementById(`${newTier.id}name`);
-                                    console.log('tierInput',tierInput)
-                                    if (tierInput) {
-                                        tierInput.setAttribute('title', e.target.dataset.category); // 设置 title
-                                    }
-                                }
-                            };
-                            categoryMenu.addEventListener('click', handleCategorySelect);
-                        } else {
-                            {#event.preventDefault();#}
-                            let menuX = event.clientX;
-                            let menuY = event.clientY;
-                            contextMenu.style.display = 'block';
-                            let menuWidth = contextMenu.offsetWidth;
-                            let menuHeight = contextMenu.offsetHeight;
-                            if (menuX + menuWidth > window.innerWidth) {
-                                menuX = window.innerWidth - menuWidth - 10; // 留10px空隙
-                            }
-                            if (menuY + menuHeight > window.innerHeight) {
-                                menuY = window.innerHeight - menuHeight - 10; // 留10px空隙
-                            }
-                            contextMenu.style.top = `${menuY}px`;
-                            contextMenu.style.left = `${menuX}px`;
-                            contextMenu.style.display = "block";
-                            targetTier = newTier; // 保存当前右键的 Tier
-                            menu0.style.display = "none";
-                            menu1.style.display = "none";
-                            menu2.style.display = "none";
-                            menu3.style.display = "block";
-                            menu3.textContent = "Hide This Tier";
-                            menu4.style.display = "block";
-                            menu5.style.display = "block";
-                            updateTierSubmenu();
-                        }
-                        document.addEventListener('click', () => categoryMenu.style.display = 'none', { once: true });
-                        document.addEventListener("scroll", () => categoryMenu.style.display = 'none', { once: true });
-                    });
-                    {#autoSaveAnnotations();#}
-                    {#updatePlayLine2()#}
-                    return newTier;
-                };
-                window.addIntervalTier = addIntervalTier;
-
-                // 添加 Point Tier 的按钮逻辑
-                {#document.getElementById("add-point-tier").addEventListener("click", () => {#}
-                function addPointTier() {
-                    const existingTiers = tierContainer.children.length;
-                    const newTierId = `tier${existingTiers + 1}`; // 新 Tier 的 ID
-                    const newTier = document.createElement("div");
-                    newTier.style.width = (soundSeconds * currentZoom) + "px";
-                    newTier.id = newTierId;
-                    newTier.className = "point-tier"; // 添加为 point-tier
-                    addTierNames(newTier, existingTiers); // 新增语句：为每个 tier 添加name
-                    tierContainer.appendChild(newTier);
-                    bindTierClickEvent(newTier, "point"); // 绑定点击事件
-
-                    {#newTier.addEventListener('click', () => {#}
-                    {#    // 清除之前的选中状态#}
-                    {#    document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));#}
-                    {#    document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));#}
-                    {#    // 设置当前 tier 为选中#}
-                    {#    newTier.classList.add('selected');#}
-                    {#    selectedTier = newTier; // 获取选中的 tier ID#}
-                    {#    console.log('selectedTier',selectedTier);#}
-                    //});
-
-                    {#const contextMenu = document.getElementById("context-menu");#}
-                    newTier.addEventListener("contextmenu", (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        closeAllMenus();
-                        contextMenu.style.top = `${event.clientY}px`;
-                        contextMenu.style.left = `${event.clientX}px`;
-                        contextMenu.style.display = "block";
-                        targetTier = newTier; // 保存当前右键的 Tier
-                        menu0.style.display = "none";
-                        menu1.style.display = "none";
-                        menu2.style.display = "none";
-                        menu3.style.display = "block"; // 显示 Tier 菜单
-                        menu3.textContent = "Hide This Tier";
-                        updateTierSubmenu();
-                    });
-                    {#updatePlayLine2()#}
-                    {#autoSaveAnnotations();#}
-                    return newTier;
-                };
-                window.addPointTier = addPointTier;
-                // 更新子菜单内容
-                function updateTierSubmenu() {
-                    const tiers = document.querySelectorAll(".interval-tier, .point-tier"); // 所有 Tier
-                    tierSubmenu.innerHTML = ""; // 清空子菜单
-                    tiers.forEach((tier) => {
-                        if (tier.style.display === "none") {
-                            const tierId = tier.id;
-                            // 获取 tier 对应的名字
-                            const tierInput = document.getElementById(`${tierId}name`); // 假设输入框的 ID 为 "tier1-name"
-                            const tierName = tierInput?.value || tierId;
-                            const tierOption = document.createElement("div");
-                            tierOption.textContent = `Show ${tierName}`; // 显示名字或 ID
-                            tierOption.className = "tier-option";
-                            tierOption.addEventListener("click", () => {
-                                tierInput.style.display = "block";
-                                tier.style.display = "block"; // 显示 Tier
-                                tierSubmenu.style.display = "none";
-                                contextMenu.style.display = "none";
-                            });
-                            tierSubmenu.appendChild(tierOption);
-                        }
-                    });
-                    if (tierSubmenu.innerHTML === "") {
-                        const emptyMessage = document.createElement("div");
-                        emptyMessage.textContent = "No hidden tiers";
-                        emptyMessage.className = "tier-option disabled";
-                        tierSubmenu.appendChild(emptyMessage);
-                    }
+                const safeCategoryName = `${tier.dataset.category.trim() // Remove leading and trailing spaces
+                    .replace(/^\d+/, "n$&") // If it starts with digits, prefix them with "n"
+                    .replace(/\s+/g, "-") // Replace all spaces with "-"
+                    .replace(/[^a-zA-Z0-9-_]/g, "")}`; // Remove any characters except letters, numbers, "-" and "_"
+                annotationMenu.querySelector(`.${safeCategoryName}-menu`).style.display = "block";
+                // Set menu location
+                let menuX = event.clientX;
+                let menuY = event.clientY;
+                annotationMenu.style.display = 'block'; // First let the menu display and get its height
+                let menuHeight = annotationMenu.offsetHeight;
+                let menuWidth = annotationMenu.offsetWidth;
+                // Calculate whether it exceeds the bottom of the screen
+                if (menuY + menuHeight > window.innerHeight) {
+                    menuY = window.innerHeight - menuHeight - 10; // Float the menu upwards, leaving a 10px gap
                 }
-
-                menu3.addEventListener("click", () => {
-                    if (targetTier) {
-                        const tierId = targetTier.id; // 获取 tier 的 ID
-                        const tierNameInput = document.getElementById(`${tierId}name`); // 获取对应的 tierName 输入框
-                        // 隐藏 Tier 和对应的 Name
-                        targetTier.style.display = "none";
-                        tierNameInput.style.display = "none"; // 隐藏输入框
-                        contextMenu.style.display = "none"; // 隐藏菜单
-                        updateTierSubmenu();
-                    }
-                });
-
-                menu5.addEventListener("click", () => {
-                    if (targetTier) {
-                        const tierNameInput = document.getElementById(`${targetTier.id}name`);
-                        document.getElementById('deleteTierDialogText').innerHTML = `Are you sure you want to delete <strong>"${tierNameInput.value}"</strong>?`
-                        document.getElementById('deleteTierConfirmDialog').style.display = 'flex';
-                        contextMenu.style.display = "none";
-                    }
-                });
-
-                document.getElementById('confirmDeleteTier').addEventListener('click', function() {
-                    const tierId = targetTier.id;  // 获取 tier 的 ID
-                    const tierNameInput = document.getElementById(`${tierId}name`); // 获取对应的输入框
-                    // 移除 Tier 和对应的 Name
-                    targetTier.remove();
-                    if (tierNameInput) tierNameInput.remove();
-                    regions.clearRegions();
-                    contextMenu.style.display = "none";
-                    document.getElementById('deleteTierConfirmDialog').style.display = 'none';
-                });
-
-                document.getElementById('cancelDeleteTier').addEventListener('click', function(){
-                    document.getElementById('deleteTierConfirmDialog').style.display = 'none';
-                });
-
-                function addTierNames(tier, index) {
-                    let nameContainer = document.getElementById("name-container");
-                    // 左侧输入框
-                    const input = document.createElement("input");
-                    input.type = "text";
-                    input.className = "name-input";
-                    {#input.id = `tier${index+1}name`; // 绑定唯一 ID#}
-                    {#input.placeholder = `Tier ${index + 1}`;#}
-                    input.id = `${tier.id}name`; // 绑定唯一 ID
-                    input.placeholder = `${tier.id}`;
-                    input.title = "";
-                    nameContainer.appendChild(input);
-
-                    input.addEventListener("contextmenu", (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        closeAllMenus();
-                        let menuX = event.clientX;
-                        let menuY = event.clientY;
-                        contextMenu.style.display = 'block';
-                        let menuWidth = contextMenu.offsetWidth;
-                        let menuHeight = contextMenu.offsetHeight;
-                        if (menuX + menuWidth > window.innerWidth) {
-                            menuX = window.innerWidth - menuWidth - 10; // 留10px空隙
-                        }
-                        if (menuY + menuHeight > window.innerHeight) {
-                            menuY = window.innerHeight - menuHeight - 10; // 留10px空隙
-                        }
-                        contextMenu.style.top = `${menuY}px`;
-                        contextMenu.style.left = `${menuX}px`;
-                        contextMenu.style.display = "block";
-                        targetTier = tier; // 保存当前右键的 Tier
-                        menu0.style.display = "none";
-                        menu1.style.display = "none";
-                        menu2.style.display = "none";
-                        menu3.style.display = "block";
-                        menu3.textContent = "Hide This Tier";
-                        menu4.style.display = "block";
-                        menu5.style.display = "block";
-                        updateTierSubmenu();
-                    })
+                // Calculate whether it exceeds the right side of the screen
+                if (menuX + menuWidth > window.innerWidth) {
+                    menuX = window.innerWidth - menuWidth - 10; // Move the menu to the left, leaving a 10px gap
                 }
-
-                // 删除 Tier 的按钮逻辑
-                document.getElementById("remove-tier").addEventListener("click", () => {
-                    const existingTiers = tierContainer.children.length;
-                    if (existingTiers > 0) {
-                        nameContainer.removeChild(nameContainer.lastElementChild);
-                        tierContainer.removeChild(tierContainer.lastElementChild);
-                    } else {
-                        alert("No Tier!");
-                    }
-                    {#autoSaveAnnotations();#}
-                });
-
-                // 初始化 Tier 单击事件绑定
-                const tiers = Array.from(tierContainer.children);
-                tiers.forEach((tier) => {
-                    const isIntervalTier = tier.classList.contains("interval-tier");
-                    const tierType = isIntervalTier ? "interval" : "point";
-                    bindTierClickEvent(tier, tierType);
+                annotationMenu.style.left = `${menuX}px`;
+                annotationMenu.style.top = `${menuY}px`;
+            });
+            document.addEventListener('click', (event) => {
+                if (!annotationMenu.contains(event.target) && !event.target.classList.contains('okButton')) {
+                    annotationMenu.style.display = 'none'; // Close menu
+                }
+            });
+            document.addEventListener("scroll", () => {
+                annotationMenu.style.display = 'none';
+            });
+            // Get the menu option order
+            const menuOptions = Array.from(annotationMenu.querySelectorAll('input[type="checkbox"]')).map(
+                (checkbox) => checkbox.value
+            );
+            annotationMenu.querySelectorAll('.okButton').forEach(okButton => {
+                okButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    {#console.log("OK clicked, confirming selection...");#}
+                    annotationMenu.style.display = 'none';
                 });
             });
-            function enableDragAndResize(tier) {
-                {#const enableDragAndResize = (tier) => {#}
-                // 添加拖拽逻辑
-                tier.addEventListener('mousedown', (event) => {
-                    let target = event.target;
-                    // 如果点击的是句柄，获取父元素
-                    if (target.classList.contains('handle-left') || target.classList.contains('handle-right')) {
-                        target = target.parentElement;
-                    }
-                    // 判断父元素是否为 interval 或 point
-                    if (target.classList.contains('interval') || target.classList.contains('point')) {
-                        const isInterval = target.classList.contains('interval');
-                        const startX = event.clientX;
-                        const tierWidth = tier.offsetWidth;
-                        // 获取初始宽度和位置
-                        const startWidthPercentage = isInterval
-                            ? (target.offsetWidth / tierWidth) * 100
-                            : 0;
-                        const startLeftPercentage = isInterval
-                            ? (target.offsetLeft / tierWidth) * 100
-                            : parseFloat(target.style.left || '0');
-                        const onMouseMove = (moveEvent) => {
-                            const dx = moveEvent.clientX - startX;
-                            const dxPercentage = (dx / tierWidth) * 100;
-                            if (isInterval) {
-                                if (target.dataset.resizing === 'left') {
-                                    const newLeftPercentage = Math.max(0, startLeftPercentage + dxPercentage);
-                                    const newWidthPercentage = Math.max(1, startWidthPercentage - dxPercentage);
-                                    target.style.left = `${newLeftPercentage}%`;
-                                    target.style.width = `${newWidthPercentage}%`;
-                                    target.dataset.start = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
-                                    target.dataset.end = (((newLeftPercentage + newWidthPercentage) / 100) * videoDuration).toFixed(2);
-                                } else if (target.dataset.resizing === 'right') {
-                                    const newWidthPercentage = Math.max(1, startWidthPercentage + dxPercentage);
-                                    target.style.width = `${newWidthPercentage}%`;
-                                    target.dataset.end = (((startLeftPercentage + newWidthPercentage) / 100) * videoDuration).toFixed(2);
-                                } else {
-                                    const newLeftPercentage = Math.min(
-                                        100 - startWidthPercentage,
-                                        Math.max(0, startLeftPercentage + dxPercentage)
-                                    );
-                                    target.style.left = `${newLeftPercentage}%`;
-                                    target.dataset.start = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
-                                    target.dataset.end = (((newLeftPercentage + startWidthPercentage) / 100) * videoDuration).toFixed(2);
-                                }
-                            } else {
-                                const newLeftPercentage = Math.max(0, Math.min(100, startLeftPercentage + dxPercentage));
-                                target.style.left = `${newLeftPercentage}%`;
-                                target.dataset.time = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
-                            }
-                        };
-                        const onMouseUp = () => {
-                            document.removeEventListener('mousemove', onMouseMove);
-                            document.removeEventListener('mouseup', onMouseUp);
-                            delete target.dataset.resizing;
-                        };
-                        // 判断点击的是左句柄还是右句柄
-                        if (event.target.classList.contains('handle-left')) {
-                            target.dataset.resizing = 'left';
-                        } else if (event.target.classList.contains('handle-right')) {
-                            target.dataset.resizing = 'right';
+            annotationMenu.querySelectorAll("li").forEach(li => {
+                li.addEventListener("click", (e) => {
+                    const checkbox = li.querySelector('input[type="checkbox"]');
+                    if (!checkbox) return;
+                    if (e.target === checkbox) return;
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+                    e.preventDefault();
+                });
+            });
+            // Listen for the selection state of the checkbox
+            annotationMenu.addEventListener('change', (event) => {
+                if (event.target.type === 'checkbox') {
+                    const value = event.target.value;
+                    const checked = event.target.checked;
+                    {#console.log(` Value: ${value}, Checked: ${checked}`);#}
+                    // Initialize or update div.dataset.text
+                    const currentValues = div.dataset.text ? div.dataset.text.split(', ') : [];
+                    // Update the value based on the check state of the checkbox
+                    if (checked) {
+                        // If selected, add value
+                        if (!currentValues.includes(value)) {
+                            currentValues.push(value);
                         }
-                        document.addEventListener('mousemove', onMouseMove);
-                        document.addEventListener('mouseup', onMouseUp);
+                    } else {
+                        // If unchecked, remove the value
+                        const index = currentValues.indexOf(value);
+                        if (index > -1) {
+                            currentValues.splice(index, 1);
+                        }
                     }
-                    {#autoSaveAnnotations();#}
+                    // Sort by menu order currentValues
+                    currentValues.sort((a, b) => menuOptions.indexOf(a) - menuOptions.indexOf(b));
+                    // Update div.dataset.text and set it to a comma-delimited string
+                    div.dataset.text = currentValues.join(', ');
+                    div.title = currentValues.join(', ');
+                    div.setAttribute('data-text', currentValues.join(', ')); // For front-end display
+                    regions.getRegions()[0].setOptions({ content: currentValues.join(', ') });
+                }
+            });
+            annotationMenu.querySelectorAll('.deleteButton').forEach(okButton => {
+                okButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    {#console.log("Delete clicked, confirming delete...");#}
+                    annotationMenu.style.display = 'none';
+                    tier.removeChild(div);
+                    regions.clearRegions();
+                    const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
+                    const pitchDiv = document.getElementById('chart');
+                    [spectrogramDiv, pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
                 });
-            };
+            });
+        };
 
-            function closeAllMenus() {
-                const menus = document.querySelectorAll(".context-menu"); // 选择所有可能的顶层菜单
-                menus.forEach((menu) => {
-                    menu.style.display = "none";
-                });
+        document.getElementById("add-tier").addEventListener("click", () => {
+            document.getElementById("tierTypeDialog").style.display = "flex";
+        });
+
+        // Listen for Tier Type Selection
+        document.querySelectorAll(".tier-type").forEach(button => {
+            button.addEventListener("click", function () {
+                let tierType = this.dataset.type;
+                if (tierType === "interval") {
+                    document.getElementById("tierTypeDialog").style.display = "none"; // Close Tier selection
+                    document.getElementById("categoryDialog").style.display = "flex"; // Open Annotation Category and select
+                } else {
+                    addPointTier()
+                    closeAllDialogs();
+                }
+            });
+        });
+        // Listen for Annotation Category selection (only for Interval Tier)
+        document.addEventListener("click", function (event) {
+            if (event.target.closest('.delete-icon')) return;
+            const button = event.target.closest('.annotation-category');
+            if (button) {
+                const category = button.querySelector('.category-text')?.textContent;
+                addIntervalTier(category, category);
+                closeAllDialogs();
             }
-            document.addEventListener("DOMContentLoaded", () => {
-                const contextMenu = document.getElementById("context-menu");
-                const waveformlabel = document.querySelector("#waveform-label");
-                const spectrogramlabel = document.querySelector("#spectrogram-label");
-                const spectrogramyaxis = document.querySelector("#spectrogram-yaxis")
-                const drawingslabel = document.querySelector("#drawings-label");
-                const waveform = document.querySelector("#waveform");
-                const canvasesDiv = wavesurfer.getWrapper().querySelector('.canvases'); //waveform
-                const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling
-                hover.attachToContainer(spectrogramDiv);
-                const drawings = document.querySelector("#drawings");
-                hover.attachToContainer(document.querySelector("#chart"));
-                const menu0 = document.querySelector("#menu0");
-                menu0.textContent = "Hide Waveform";
-                const menu1 = document.querySelector("#menu1"); // 用于切换隐藏/显示的菜单项
-                menu1.textContent = "Hide Spectrogram";
-                const menu2 = document.querySelector("#menu2");
-                menu2.textContent = "Hide Pitch & Intensity";
-                const menu3 = document.querySelector("#menu3"); // 用于隐藏 Tier
-                let targetTier = null; // 当前右键的目标 Tier
-                const menu4 = document.querySelector("#menu4"); // 用于显示隐藏的 Tier
-                const menu5 = document.querySelector("#menu5"); // 用于删除 Tier
-                const tierSubmenu = document.getElementById("tier-submenu"); // 子菜单容器
-                // 绑定右键事件
-                waveform.addEventListener("contextmenu", (event) => {
-                    event.preventDefault();
-                    closeAllMenus();
-                    // 显示菜单并设置位置
-                    {#contextMenu.style.top = `${event.clientY}px`;#}
-                    {#contextMenu.style.left = `${event.clientX}px`;#}
-                    {#contextMenu.style.display = "block";#}
-                    {#menu0.style.display = "block";#}
-                    {#menu1.style.display = "none";#}
-                    {#menu2.style.display = "none";#}
-                    {#menu3.style.display = "none"; // 隐藏 Tier 选项#}
-                    {#menu4.style.display = "none";// 显示 Show Tiers 选项#}
-                    {#menu5.style.display = "none";#}
-                    {#updateTierSubmenu(); // 更新子菜单内容#}
-                });
-                waveformlabel.addEventListener("contextmenu", (event) => {
-                    event.stopPropagation()
-                    event.preventDefault();
-                    closeAllMenus();
-                    {#contextMenu.style.top = `${event.clientY}px`;#}
-                    {#contextMenu.style.left = `${event.clientX}px`;#}
-                    {#contextMenu.style.display = "block";#}
-                    {#menu0.style.display = "block";#}
-                    {#menu1.style.display = "none";#}
-                    {#menu2.style.display = "none";#}
-                    {#menu3.style.display = "none"; // 隐藏 Tier 选项#}
-                    {#menu4.style.display = "none";// 显示 Show Tiers 选项#}
-                    {#menu5.style.display = "none";#}
-                    {#updateTierSubmenu(); // 更新子菜单内容#}
-                });
-                spectrogramDiv.addEventListener("contextmenu", (event) => {
-                    event.stopPropagation()
-                    event.preventDefault();
-                    closeAllMenus();
-                    contextMenu.style.top = `${event.clientY}px`;
-                    contextMenu.style.left = `${event.clientX}px`;
+        });
+
+        // Close dialog
+        document.getElementById("closeTierDialog").addEventListener("click", closeAllDialogs);
+        document.getElementById("closeCategoryDialog").addEventListener("click", closeAllDialogs);
+
+        function closeAllDialogs() {
+            document.getElementById("tierTypeDialog").style.display = "none";
+            document.getElementById("categoryDialog").style.display = "none";
+        }
+
+
+        let targetTier = null; // The target Tier of the current right click
+        const contextMenu = document.getElementById("context-menu");
+        const tierSubmenu = document.getElementById("tier-submenu");
+        // Add Interval Tier button logic
+        function addIntervalTier(Category, TierName) {
+            let index = tierContainer.children.length;
+            let newTierId;
+            // Loop until a non-existing ID is found
+            do {
+                newTierId = `tier${index + 1}`;
+                index++;
+            } while (document.getElementById(newTierId));
+            const newTier = document.createElement("div");
+            newTier.style.width = (soundSeconds * currentZoom) + "px";
+            newTier.style.left = -wavesurfer.getScroll() + 'px';
+            newTier.id = newTierId;
+            newTier.className = "interval-tier"; // Added as interval-tier
+            newTier.dataset.category = Category
+            addTierNames(newTier); // Add a name for each tier
+            tierContainer.appendChild(newTier);
+            bindTierClickEvent(newTier, "interval"); // Bind click event
+            const tierInput = document.getElementById(`${newTier.id}name`);
+            tierInput.setAttribute('title', Category); // set title
+            tierInput.setAttribute('value', TierName);
+            newTier.addEventListener('click', () => {
+                // Clear the previous selection
+                document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
+                document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
+                // Set the current tier to selected
+                newTier.classList.add('selected');
+                selectedTier = newTier; // Get the selected tier ID
+                {#console.log('selectedTier',selectedTier);#}
+            });
+
+            document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
+            document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
+            newTier.classList.add('selected');
+            selectedTier = newTier; // Get the selected tier ID
+
+            newTier.addEventListener("contextmenu", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                closeAllMenus();
+                const categoryMenu = document.getElementById('category-select-menu');
+                if (!newTier.dataset.category) {
+                    categoryMenu.style.display = 'block';
+                    categoryMenu.style.left = `${event.clientX}px`;
+                    categoryMenu.style.top = `${event.clientY}px`;
+                    const handleCategorySelect = (e) => {
+                        if (e.target.tagName === 'LI') {
+                            newTier.dataset.category = e.target.dataset.category;
+                            categoryMenu.style.display = 'none';
+                            categoryMenu.removeEventListener('click', handleCategorySelect);
+                            // Get the corresponding input box
+                            const tierInput = document.getElementById(`${newTier.id}name`);
+                            {#console.log('tierInput',tierInput)#}
+                            if (tierInput) {
+                                tierInput.setAttribute('title', e.target.dataset.category); // set title
+                            }
+                        }
+                    };
+                    categoryMenu.addEventListener('click', handleCategorySelect);
+                } else {
+                    let menuX = event.clientX;
+                    let menuY = event.clientY;
+                    contextMenu.style.display = 'block';
+                    let menuWidth = contextMenu.offsetWidth;
+                    let menuHeight = contextMenu.offsetHeight;
+                    if (menuX + menuWidth > window.innerWidth) {
+                        menuX = window.innerWidth - menuWidth - 10; // Leave a 10px gap
+                    }
+                    if (menuY + menuHeight > window.innerHeight) {
+                        menuY = window.innerHeight - menuHeight - 10; // Leave a 10px gap
+                    }
+                    contextMenu.style.top = `${menuY}px`;
+                    contextMenu.style.left = `${menuX}px`;
                     contextMenu.style.display = "block";
-                    menu0.style.display = "none";
-                    menu1.style.display = "block";
-                    menu2.style.display = "none";
-                    menu3.style.display = "none"; // 隐藏 Tier 选项
-                    menu4.style.display = "none";// 显示 Show Tiers 选项
-                    menu5.style.display = "none";
-                    updateTierSubmenu(); // 更新子菜单内容
-                });
-                spectrogramlabel.addEventListener("contextmenu", (event) => {
-                    event.stopPropagation()
-                    event.preventDefault();
-                    closeAllMenus();
-                    contextMenu.style.top = `${event.clientY}px`;
-                    contextMenu.style.left = `${event.clientX}px`;
-                    contextMenu.style.display = "block";
-                    menu0.style.display = "none";
-                    menu1.style.display = "block";
-                    menu2.style.display = "none";
-                    menu3.style.display = "none"; // 隐藏 Tier 选项
-                    menu4.style.display = "none";// 显示 Show Tiers 选项
-                    menu5.style.display = "none";
-                    updateTierSubmenu(); // 更新子菜单内容
-                });
-                drawings.addEventListener("contextmenu", (event) => {
-                    event.preventDefault();
-                    closeAllMenus();
-                    // 显示菜单并设置位置
-                    contextMenu.style.top = `${event.clientY}px`;
-                    contextMenu.style.left = `${event.clientX}px`;
-                    contextMenu.style.display = "block";
+                    targetTier = newTier; // Save the current right-click Tier
                     menu0.style.display = "none";
                     menu1.style.display = "none";
-                    menu2.style.display = "block";
-                    menu3.style.display = "none"; // 隐藏 Tier 选项
-                    menu4.style.display = "none";// 显示 Show Tiers 选项
-                    menu5.style.display = "none";
-                    updateTierSubmenu(); // 更新子菜单内容
-                });
-                // 隐藏菜单
-                document.addEventListener("click", () => {
-                    contextMenu.style.display = "none";
-                    tierSubmenu.style.display = "none"; // 隐藏子菜单
-                    videoMenu.style.display = "none";
-                    {#closeAllMenus()#}
-                });
-                document.addEventListener("scroll", () => {
-                    contextMenu.style.display = "none";
-                    tierSubmenu.style.display = "none"; // 隐藏子菜单
-                    videoMenu.style.display = "none";
-                    {#closeAllMenus()#}
-                });
-                // 菜单选项点击事件
-                menu0.addEventListener("click", () => {
-                    // 切换隐藏/显示
-                    if (canvasesDiv.style.display === "none") {
-                        canvasesDiv.style.display = "block"; // 显示
-                        waveformlabel.style.display = "block"; // 显示
-                        menu0.textContent = "Hide Waveform";
-                    } else {
-                        canvasesDiv.style.display = "none"; // 隐藏
-                        waveformlabel.style.display = "none"; // 隐藏
-                        menu0.textContent = "Show Waveform";
-                    }
-                    // 隐藏菜单
-                    contextMenu.style.display = "none";
-                });
-                {#menu1.addEventListener("click", () => {#}
-                {#    // 切换隐藏/显示#}
-                {#    if (spectrogramDiv.style.display === "none") {#}
-                {#        spectrogramDiv.style.display = "block"; // 显示#}
-                {#        spectrogramlabel.style.display = "block"; // 显示#}
-                {#        menu1.textContent = "Hide Spectrogram";#}
-                {#    } else {#}
-                {#        spectrogramDiv.style.display = "none"; // 隐藏#}
-                {#        spectrogramlabel.style.display = "none"; // 隐藏#}
-                {#        menu1.textContent = "Show Spectrogram";#}
-                {#    }#}
-                {#    // 隐藏菜单#}
-                {#    contextMenu.style.display = "none";#}
-                {#});#}
-                menu1.addEventListener("click", () => {
-                    const plugins = wavesurfer.getActivePlugins();
-                    let hasSpectrogram = false;
-                    console.log('wavesurfer.getPlugin',plugins)
-                    for (const plugin of plugins) {
-                        if (plugin instanceof spectrogram_emu) {
-                            spectrogramlabel.style.display = "none";
-                            spectrogramyaxis.style.display = "none";
-                            menu1.textContent = "Show Spectrogram";
-                            hasSpectrogram = true;
-                            plugin.destroy();
-                            wavesurfer.plugins = wavesurfer.plugins.filter(p => p !== plugin);
-                            console.log(" Spectrogram 已销毁");
-                            return;
-                        }
-                    }
-                    if (!hasSpectrogram) {
-                        spectrogramlabel.style.display = "block";
-                        spectrogramyaxis.style.display = "flex";
-                        menu1.textContent = "Hide Spectrogram";
-                        const spectrogramPlugin = spectrogram_emu.create({
-                            height: 128,
-                        });
-                        hover.attachToContainer(spectrogramDiv);
-                        wavesurfer.registerPlugin(spectrogramPlugin);
-                        spectrogramPlugin.render();  //  手动触发渲染
-                    }
-                });
-                menu2.addEventListener("click", () => {
-                    if (drawings.style.display === "none") {
-                        drawings.style.display = "block"; // 显示
-                        drawingslabel.style.display = "block"; // 显示
-                        menu2.textContent = "Hide Pitch & Intensity";
-                    } else {
-                        drawings.style.display = "none"; // 隐藏
-                        drawingslabel.style.display = "none"; // 隐藏
-                        menu2.textContent = "Show Pitch & Intensity";
-                    }
-                    contextMenu.style.display = "none";
-                });
-                menu4.addEventListener("mouseover", (event) => {
-                    // 1. 初步计算位置
-                    let submenuX = parseFloat(contextMenu.style.left) + contextMenu.offsetWidth;
-                    let submenuY = event.clientY;
-                    // 2. 先显示，获取尺寸
-                    tierSubmenu.style.display = "block";
-                    let menuWidth = tierSubmenu.offsetWidth;
-                    let menuHeight = tierSubmenu.offsetHeight;
-                    // 3. 右侧防溢出
-                    if (submenuX + menuWidth > window.innerWidth) {
-                        submenuX = parseFloat(contextMenu.style.left) - menuWidth;  // 改成左侧弹出
-                    }
-                    // 4. 下边防溢出
-                    if (submenuY + menuHeight > window.innerHeight) {
-                        submenuY = window.innerHeight - menuHeight - 10;  // 缩进 10px
-                    }
-                    // 5. 应用位置
-                    tierSubmenu.style.left = `${submenuX}px`;
-                    tierSubmenu.style.top = `${submenuY}px`;
-                });
-                function updateTierSubmenu() {
-                    const tiers = document.querySelectorAll(".interval-tier, .point-tier"); // 所有 Tier
-                    tierSubmenu.innerHTML = ""; // 清空子菜单
-                    tiers.forEach((tier) => {
-                        if (tier.style.display === "none") {
-                            const tierId = tier.id;
-                            // 获取 tier 对应的名字
-                            const tierInput = document.getElementById(`${tierId}name`); // 假设输入框的 ID 为 "tier1-name"
-                            const tierName = tierInput?.value || tierId;
-                            const tierOption = document.createElement("div");
-                            tierOption.textContent = `Show ${tierName}`; // 显示名字或 ID
-                            tierOption.className = "tier-option";
-                            tierOption.addEventListener("click", () => {
-                                tierInput.style.display = "block";
-                                tier.style.display = "block"; // 显示 Tier
-                                tierSubmenu.style.display = "none";
-                                contextMenu.style.display = "none";
-                            });
-                            tierSubmenu.appendChild(tierOption);
-                        }
+                    menu2.style.display = "none";
+                    menu3.style.display = "block";
+                    menu3.textContent = "Hide This Tier";
+                    menu4.style.display = "block";
+                    menu5.style.display = "block";
+                    updateTierSubmenu();
+                }
+                document.addEventListener('click', () => categoryMenu.style.display = 'none', { once: true });
+                document.addEventListener("scroll", () => categoryMenu.style.display = 'none', { once: true });
+            });
+            return newTier;
+        };
+        window.addIntervalTier = addIntervalTier;
+
+        // Adding Point Tier button logic
+        function addPointTier() {
+            const existingTiers = tierContainer.children.length;
+            const newTierId = `tier${existingTiers + 1}`; // The ID of the new tier
+            const newTier = document.createElement("div");
+            newTier.style.width = (soundSeconds * currentZoom) + "px";
+            newTier.id = newTierId;
+            newTier.className = "point-tier"; // Add as point-tier
+            addTierNames(newTier, existingTiers); // Add a name for each tier
+            tierContainer.appendChild(newTier);
+            bindTierClickEvent(newTier, "point"); // Bind click event
+            newTier.addEventListener("contextmenu", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                closeAllMenus();
+                contextMenu.style.top = `${event.clientY}px`;
+                contextMenu.style.left = `${event.clientX}px`;
+                contextMenu.style.display = "block";
+                targetTier = newTier; // Save the current right-click Tier
+                menu0.style.display = "none";
+                menu1.style.display = "none";
+                menu2.style.display = "none";
+                menu3.style.display = "block"; // Show Tier Menu
+                menu3.textContent = "Hide This Tier";
+                updateTierSubmenu();
+            });
+            return newTier;
+        };
+        window.addPointTier = addPointTier;
+        // Update submenu content
+        function updateTierSubmenu() {
+            const tiers = document.querySelectorAll(".interval-tier, .point-tier"); // Get all tiers
+            tierSubmenu.innerHTML = ""; // Clear submenu
+            tiers.forEach((tier) => {
+                if (tier.style.display === "none") {
+                    const tierId = tier.id;
+                    // Get the name corresponding to the tier
+                    const tierInput = document.getElementById(`${tierId}name`); // Assume the input box's ID is "tier1-name"
+                    const tierName = tierInput?.value || tierId;
+                    const tierOption = document.createElement("div");
+                    tierOption.textContent = `Show ${tierName}`; // Show name or ID
+                    tierOption.className = "tier-option";
+                    tierOption.addEventListener("click", () => {
+                        tierInput.style.display = "block";
+                        tier.style.display = "block"; // Show Tier
+                        tierSubmenu.style.display = "none";
+                        contextMenu.style.display = "none";
                     });
-                    if (tierSubmenu.innerHTML === "") {
-                        const emptyMessage = document.createElement("div");
-                        emptyMessage.textContent = "No hidden tiers";
-                        emptyMessage.className = "tier-option disabled";
-                        tierSubmenu.appendChild(emptyMessage);
-                    }
+                    tierSubmenu.appendChild(tierOption);
                 }
-
-                const videoMenu = document.getElementById('video-menu');
-                videoPlayer.addEventListener('contextmenu', (event) => {
-                    event.preventDefault(); // 阻止默认右键菜单
-                    closeAllMenus();
-                    videoMenu.style.display = 'block';
-                    videoMenu.style.left = `${event.clientX}px`;
-                    videoMenu.style.top = `${event.clientY}px`;
-                });
-                videoMenu.addEventListener('click', (event) => {
-                    const target = event.target;
-                    if (target.tagName === 'LI') {
-                        const [width, height] = target.dataset.size.split('x');
-                        videoPlayer.style.width = `${width}px`;
-                        videoPlayer.style.height = `${height}px`;
-                        videoMenu.style.display = 'none'; // 隐藏菜单
-                    }
-                });
-
-                // 监听右键点击事件（仅限于空白区域）
-                document.addEventListener("contextmenu", function (event) {
-                    if (!event.target.closest("#waveform, #drawings-container, #videoPlayer")) {
-                        event.preventDefault();
-                        closeAllMenus();
-                        // 获取鼠标位置
-                        let menuX = event.clientX;
-                        let menuY = event.clientY;
-                        // 先显示才能获取宽高
-                        contextMenu.style.display = 'block';
-                        // 获取菜单宽高
-                        let menuWidth = contextMenu.offsetWidth;
-                        let menuHeight = contextMenu.offsetHeight;
-                        // 判断是否超出右边
-                        if (menuX + menuWidth > window.innerWidth) {
-                            menuX = window.innerWidth - menuWidth - 10; // 留10px空隙
-                        }
-                        // 判断是否超出下边
-                        if (menuY + menuHeight > window.innerHeight) {
-                            menuY = window.innerHeight - menuHeight - 10; // 留10px空隙
-                        }
-                        // 重新定位
-                        contextMenu.style.left = `${menuX}px`;
-                        contextMenu.style.top = `${menuY}px`;
-                        // 正常显示
-                        contextMenu.style.display = "block";
-                        menu0.style.display = "none";
-                        menu1.style.display = "block";
-                        menu2.style.display = "block";
-                        menu3.style.display = "none"; // 隐藏 Tier 选项
-                        menu4.style.display = "block"; // 显示 Show Tiers 选项
-                        menu5.style.display = "none";
-                        updateTierSubmenu(); // 更新子菜单内容
-                    } else {
-                        {#contextMenu.style.display = "none"; // 如果点击了非空白区域，隐藏菜单#}
-                    }
-                });
             });
+            if (tierSubmenu.innerHTML === "") {
+                const emptyMessage = document.createElement("div");
+                emptyMessage.textContent = "No hidden tiers";
+                emptyMessage.className = "tier-option disabled";
+                tierSubmenu.appendChild(emptyMessage);
+            }
+        }
 
+        menu3.addEventListener("click", () => {
+            if (targetTier) {
+                const tierId = targetTier.id; // Get the tier ID
+                const tierNameInput = document.getElementById(`${tierId}name`); // Get the corresponding tierName input box
+                // Hide Tier and corresponding Name
+                targetTier.style.display = "none";
+                tierNameInput.style.display = "none"; // Hide input box
+                contextMenu.style.display = "none"; // Hide menu
+                updateTierSubmenu();
+            }
+        });
 
+        menu5.addEventListener("click", () => {
+            if (targetTier) {
+                const tierNameInput = document.getElementById(`${targetTier.id}name`);
+                document.getElementById('deleteTierDialogText').innerHTML = `Are you sure you want to delete <strong>"${tierNameInput.value}"</strong>?`
+                document.getElementById('deleteTierConfirmDialog').style.display = 'flex';
+                contextMenu.style.display = "none";
+            }
+        });
 
+        document.getElementById('confirmDeleteTier').addEventListener('click', function() {
+            const tierId = targetTier.id;  // Get the tier ID
+            const tierNameInput = document.getElementById(`${tierId}name`); // Get the corresponding input box
+            // Remove the Tier and the corresponding Name
+            targetTier.remove();
+            if (tierNameInput) tierNameInput.remove();
+            regions.clearRegions();
+            contextMenu.style.display = "none";
+            document.getElementById('deleteTierConfirmDialog').style.display = 'none';
+        });
 
+        document.getElementById('cancelDeleteTier').addEventListener('click', function(){
+            document.getElementById('deleteTierConfirmDialog').style.display = 'none';
+        });
 
-            let currentUsername = "{{ userName }}";
+        function addTierNames(tier, index) {
+            let nameContainer = document.getElementById("name-container");
+            // Left input box
+            const input = document.createElement("input");
+            input.type = "text";
+            input.className = "name-input";
+            input.id = `${tier.id}name`; // Bind unique ID
+            input.placeholder = `${tier.id}`;
+            input.title = "";
+            nameContainer.appendChild(input);
 
-            document.addEventListener("DOMContentLoaded", function () {
-                {#loadAnnotations()#}
-                const videoElement = document.querySelector("video");
-                if (videoElement) {
-                    setInterval(autoSaveAnnotations, 120000);
+            input.addEventListener("contextmenu", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                closeAllMenus();
+                let menuX = event.clientX;
+                let menuY = event.clientY;
+                contextMenu.style.display = 'block';
+                let menuWidth = contextMenu.offsetWidth;
+                let menuHeight = contextMenu.offsetHeight;
+                if (menuX + menuWidth > window.innerWidth) {
+                    menuX = window.innerWidth - menuWidth - 10; // Leave a 10px gap
                 }
-                {#window.addEventListener('beforeunload', autoSaveOnExit);#}
-                let currentLockedFile = fileName;
-                window.addEventListener("beforeunload", function () {
-                    autoSaveOnExit();  // 你原来的保存逻辑
-                    if (currentLockedFile) {
-                        navigator.sendBeacon(
-                            "{{ URL_PREFIX }}/unlock_file",
-                            new Blob([
-                                JSON.stringify({
-                                    username: currentUsername,
-                                    filename: currentLockedFile
-                                })
-                            ], { type: "application/json" })
-                        );
-                    }
-                });
+                if (menuY + menuHeight > window.innerHeight) {
+                    menuY = window.innerHeight - menuHeight - 10; // Leave a 10px gap
+                }
+                contextMenu.style.top = `${menuY}px`;
+                contextMenu.style.left = `${menuX}px`;
+                contextMenu.style.display = "block";
+                targetTier = tier; // Save the current right-click Tier
+                menu0.style.display = "none";
+                menu1.style.display = "none";
+                menu2.style.display = "none";
+                menu3.style.display = "block";
+                menu3.textContent = "Hide This Tier";
+                menu4.style.display = "block";
+                menu5.style.display = "block";
+                updateTierSubmenu();
+            })
+        }
 
+        // Logic for the Tier delete button
+        document.getElementById("remove-tier").addEventListener("click", () => {
+            const existingTiers = tierContainer.children.length;
+            if (existingTiers > 0) {
+                nameContainer.removeChild(nameContainer.lastElementChild);
+                tierContainer.removeChild(tierContainer.lastElementChild);
+            } else {
+                alert("No Tier!");
+            }
+        });
 
-            });
-            wavesurfer.on('ready', function () {
-                loadAnnotations()
-            });
+        // Initialize Tier click event binding
+        const tiers = Array.from(tierContainer.children);
+        tiers.forEach((tier) => {
+            const isIntervalTier = tier.classList.contains("interval-tier");
+            const tierType = isIntervalTier ? "interval" : "point";
+            bindTierClickEvent(tier, tierType);
+        });
+    });
 
-            function loadAnnotations() {
-                fetch(`{{ URL_PREFIX }}/load_annotation?username=${currentUsername}&videoName=${fileName}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            restoreAnnotations(data.annotations);
+    function enableDragAndResize(tier) {
+        // Add drag logic
+        tier.addEventListener('mousedown', (event) => {
+            let target = event.target;
+            // If the clicked element is a handle, get the parent element
+            if (target.classList.contains('handle-left') || target.classList.contains('handle-right')) {
+                target = target.parentElement;
+            }
+            // Determine whether the parent element is interval or point
+            if (target.classList.contains('interval') || target.classList.contains('point')) {
+                const isInterval = target.classList.contains('interval');
+                const startX = event.clientX;
+                const tierWidth = tier.offsetWidth;
+                // Get the initial width and position
+                const startWidthPercentage = isInterval
+                    ? (target.offsetWidth / tierWidth) * 100
+                    : 0;
+                const startLeftPercentage = isInterval
+                    ? (target.offsetLeft / tierWidth) * 100
+                    : parseFloat(target.style.left || '0');
+                const onMouseMove = (moveEvent) => {
+                    const dx = moveEvent.clientX - startX;
+                    const dxPercentage = (dx / tierWidth) * 100;
+                    if (isInterval) {
+                        if (target.dataset.resizing === 'left') {
+                            const newLeftPercentage = Math.max(0, startLeftPercentage + dxPercentage);
+                            const newWidthPercentage = Math.max(1, startWidthPercentage - dxPercentage);
+                            target.style.left = `${newLeftPercentage}%`;
+                            target.style.width = `${newWidthPercentage}%`;
+                            target.dataset.start = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
+                            target.dataset.end = (((newLeftPercentage + newWidthPercentage) / 100) * videoDuration).toFixed(2);
+                        } else if (target.dataset.resizing === 'right') {
+                            const newWidthPercentage = Math.max(1, startWidthPercentage + dxPercentage);
+                            target.style.width = `${newWidthPercentage}%`;
+                            target.dataset.end = (((startLeftPercentage + newWidthPercentage) / 100) * videoDuration).toFixed(2);
                         } else {
-                            console.log("No annotation found for this video.");
+                            const newLeftPercentage = Math.min(
+                                100 - startWidthPercentage,
+                                Math.max(0, startLeftPercentage + dxPercentage)
+                            );
+                            target.style.left = `${newLeftPercentage}%`;
+                            target.dataset.start = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
+                            target.dataset.end = (((newLeftPercentage + startWidthPercentage) / 100) * videoDuration).toFixed(2);
                         }
-                    })
-                    .catch(error => console.error("Error loading annotations:", error));
-            }
-
-            function restoreAnnotations(annotationData) {
-                // 获取当前页面上存在的 category 列表
-                const existingCategories = Array.from(document.querySelectorAll("#categoryList .annotation-category"))
-                    .map(btn => btn.dataset.category);
-
-                annotationData.forEach(tierData => {
-                    if (!existingCategories.includes(tierData.category)) {
-                        console.warn("跳过不存在的 category:", tierData.category);
-                        return;
+                    } else {
+                        const newLeftPercentage = Math.max(0, Math.min(100, startLeftPercentage + dxPercentage));
+                        target.style.left = `${newLeftPercentage}%`;
+                        target.dataset.time = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
                     }
-                    let tier;  // 存储 Tier 对象
-                    if (tierData.type === "IntervalTier") {
-                        tier = addIntervalTier(tierData.category, tierData.name);
-                    } else if (tierData.type === "TextTier") {
-                        tier = addPointTier();
-                    }
-                    if (!tier) {
-                        console.error(" Failed to create tier:", tierData);
-                        return;
-                    }
-                    //遍历 tierData.data 并添加 annotation
-                    tierData.data.forEach((originalData, index) => {
-                        let data = {}; // 创建符合 addAnnotation() 结构的数据对象
-                        {#console.log('originalData',originalData)#}
-                        if (tierData.type === "IntervalTier") {
-                            data = {
-                                type: "interval",
-                                start: originalData.xmin,
-                                end: originalData.xmax,
-                                id: `interval-${tierData.name}-${index}`, // 生成唯一 ID
-                                text: originalData.text,
-                            };
-                        } else if (tierData.type === "TextTier") {
-                            data = {
-                                type: "point",
-                                time: originalData.number,
-                                id: `point-${tier.name}-${index}` // 生成唯一 ID
-                            };
-                        }
-                        addAnnotation(tier, data);
-                    });
-                });
-            }
-
-            function prepareAnnotationPayload() {
-                const rawAnnotations = collectAnnotations();
-                if (!rawAnnotations || !Array.isArray(rawAnnotations) || rawAnnotations.length === 0) return null;
-
-                const filtered = JSON.parse(JSON.stringify(
-                    rawAnnotations
-                        .filter(item =>
-                            item &&
-                            typeof item === 'object' &&
-                            Array.isArray(item.data)
-                        )
-                        .map(item => ({
-                            ...item
-                            // 不再改动 item.data
-                        }))
-                ));
-
-                if (filtered.length === 0) return null;
-
-                return {
-                    username: currentUsername,
-                    videoName: fileName,
-                    annotations: filtered
                 };
-            }
-
-            function autoSaveAnnotations() {
-                const jsonData = prepareAnnotationPayload();
-                if (!jsonData) return;
-
-                fetch(`{{ URL_PREFIX }}/save_annotation`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(jsonData)
-                })
-                    .then(response => {
-                        if (!response.ok) throw new Error("Server error");
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Auto-saved annotation:", data);
-                    })
-                    .catch(error => {
-                        console.error("Error auto-saving annotation:", error);
-                    });
-
-                // UI 提示
-                const autoSaveTime = document.getElementById("autoSaveTime");
-                const autoSaveMessage = document.getElementById("autoSaveMessage");
-                const now = new Date();
-                autoSaveTime.textContent = now.toLocaleTimeString();
-                autoSaveMessage.style.display = "block";
-                autoSaveMessage.style.opacity = "1";
-                setTimeout(() => {
-                    autoSaveMessage.style.opacity = "0";
-                    setTimeout(() => {
-                        autoSaveMessage.style.display = "none";
-                    }, 2000);
-                }, 3000);
-            }
-
-            function autoSaveOnExit() {
-                const jsonData = prepareAnnotationPayload();
-                if (!jsonData) return;
-                const blob = new Blob([JSON.stringify(jsonData)], {
-                    type: 'application/json'
-                });
-                navigator.sendBeacon(`{{ URL_PREFIX }}/save_annotation`, blob);
-            }
-
-
-
-
-
-            document.addEventListener("DOMContentLoaded", function () {
-                const categoryList = document.getElementById("categoryList");
-                const addCategoryButton = document.getElementById("addCategoryButton");
-                const newCategoryDialog = document.getElementById("newCategoryDialog");
-                const saveNewCategoryButton = document.getElementById("saveNewCategory");
-                const cancelNewCategoryButton = document.getElementById("cancelNewCategory");
-                const checkboxContainer = document.getElementById("checkboxContainer");
-
-                // 加载用户已保存的 Category
-                fetch(`{{ URL_PREFIX }}/load_custom_categories?username=${currentUsername}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            console.log('data223',data)
-                            data.categories.forEach(category => {
-                                addCategoryToUI(category.category, category.options);
-                                addCategoryToMenu(category.category, category.options);
-                            });
-                        }
-                    });
-
-                // 点击 Add 按钮，打开新增对话框
-                addCategoryButton.addEventListener("click", function () {
-                    newCategoryDialog.style.display = "flex";
-                });
-
-                // 取消新增 Category
-                cancelNewCategoryButton.addEventListener("click", function () {
-                    newCategoryDialog.style.display = "none";
-                });
-
-                // 监听 "+" 按钮，在当前行下方插入新的 Checkbox 行
-                document.addEventListener("click", function (event) {
-                    if (event.target.classList.contains("add-checkbox")) {
-                        const parentDiv = event.target.parentElement;
-                        const newCheckbox = createCheckboxItem(); // 创建新的 checkbox 行
-                        parentDiv.after(newCheckbox); // 在当前行后面插入新行
-                    }
-                });
-
-                // 监听 "-" 按钮，删除 Checkbox 行
-                document.addEventListener("click", function (event) {
-                    if (event.target.classList.contains("remove-checkbox")) {
-                        const parentDiv = event.target.parentElement;
-                        if (checkboxContainer.children.length > 1) {
-                            parentDiv.remove(); // 仅删除当前行
-                        }
-                    }
-                });
-
-                // 创建新的 checkbox 输入行
-                function createCheckboxItem() {
-                    const newCheckbox = document.createElement("div");
-                    newCheckbox.classList.add("checkbox-item");
-
-                    const input = document.createElement("input");
-                    input.type = "text";
-                    input.classList.add("checkbox-input");
-                    input.placeholder = "Enter checkbox value";
-
-                    const addButton = document.createElement("button");
-                    addButton.textContent = "➕";
-                    addButton.classList.add("add-checkbox");
-
-                    const removeButton = document.createElement("button");
-                    removeButton.textContent = "➖";
-                    removeButton.classList.add("remove-checkbox");
-
-                    newCheckbox.appendChild(input);
-                    newCheckbox.appendChild(addButton);
-                    newCheckbox.appendChild(removeButton);
-                    return newCheckbox;
+                const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    delete target.dataset.resizing;
+                };
+                // Determine whether the left handle or the right handle is clicked
+                if (event.target.classList.contains('handle-left')) {
+                    target.dataset.resizing = 'left';
+                } else if (event.target.classList.contains('handle-right')) {
+                    target.dataset.resizing = 'right';
                 }
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            }
+        });
+    };
 
-                // 保存新 Category
-                saveNewCategoryButton.addEventListener("click", function () {
-                    const categoryName = document.getElementById("newCategoryInput").value.trim();
-                    const checkboxes = Array.from(document.querySelectorAll(".checkbox-input"))
-                        .map(input => input.value.trim())
-                        .filter(value => value !== "");
+    function closeAllMenus() {
+        const menus = document.querySelectorAll(".context-menu"); // Select all possible top-level menus
+        menus.forEach((menu) => {
+            menu.style.display = "none";
+        });
+    }
 
-                    if (categoryName && checkboxes.length > 0) {
-                        saveNewCategory(categoryName, checkboxes);
+    document.addEventListener("DOMContentLoaded", () => {
+        const contextMenu = document.getElementById("context-menu");
+        const waveformlabel = document.querySelector("#waveform-label");
+        const spectrogramlabel = document.querySelector("#spectrogram-label");
+        const spectrogramyaxis = document.querySelector("#spectrogram-yaxis")
+        const drawingslabel = document.querySelector("#drawings-label");
+        const waveform = document.querySelector("#waveform");
+        const canvasesDiv = wavesurfer.getWrapper().querySelector('.canvases'); //waveform
+        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling
+        hover.attachToContainer(spectrogramDiv);
+        const drawings = document.querySelector("#drawings");
+        hover.attachToContainer(document.querySelector("#chart"));
+        const menu0 = document.querySelector("#menu0");
+        menu0.textContent = "Hide Waveform";
+        const menu1 = document.querySelector("#menu1");
+        menu1.textContent = "Hide Spectrogram";
+        const menu2 = document.querySelector("#menu2");
+        menu2.textContent = "Hide Pitch & Intensity";
+        const menu3 = document.querySelector("#menu3"); // Used to hide Tier
+        let targetTier = null; // The target Tier of the current right-click
+        const menu4 = document.querySelector("#menu4"); // Used to show hidden Tiers
+        const menu5 = document.querySelector("#menu5"); // Used to delete Tier
+        const tierSubmenu = document.getElementById("tier-submenu"); // submenu container
+        // Bind right-click event
+        waveform.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            closeAllMenus();
+        });
+        waveformlabel.addEventListener("contextmenu", (event) => {
+            event.stopPropagation()
+            event.preventDefault();
+            closeAllMenus();
+        });
+        spectrogramDiv.addEventListener("contextmenu", (event) => {
+            event.stopPropagation()
+            event.preventDefault();
+            closeAllMenus();
+            contextMenu.style.top = `${event.clientY}px`;
+            contextMenu.style.left = `${event.clientX}px`;
+            contextMenu.style.display = "block";
+            menu0.style.display = "none";
+            menu1.style.display = "block";
+            menu2.style.display = "none";
+            menu3.style.display = "none";
+            menu4.style.display = "none";
+            menu5.style.display = "none";
+            updateTierSubmenu();
+        });
+        spectrogramlabel.addEventListener("contextmenu", (event) => {
+            event.stopPropagation()
+            event.preventDefault();
+            closeAllMenus();
+            contextMenu.style.top = `${event.clientY}px`;
+            contextMenu.style.left = `${event.clientX}px`;
+            contextMenu.style.display = "block";
+            menu0.style.display = "none";
+            menu1.style.display = "block";
+            menu2.style.display = "none";
+            menu3.style.display = "none";
+            menu4.style.display = "none";
+            menu5.style.display = "none";
+            updateTierSubmenu();
+        });
+        drawings.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            closeAllMenus();
+            // Display menu and set position
+            contextMenu.style.top = `${event.clientY}px`;
+            contextMenu.style.left = `${event.clientX}px`;
+            contextMenu.style.display = "block";
+            menu0.style.display = "none";
+            menu1.style.display = "none";
+            menu2.style.display = "block";
+            menu3.style.display = "none";
+            menu4.style.display = "none";
+            menu5.style.display = "none";
+            updateTierSubmenu();
+        });
+        // Hide menu
+        document.addEventListener("click", () => {
+            contextMenu.style.display = "none";
+            tierSubmenu.style.display = "none";
+            videoMenu.style.display = "none";
+        });
+        document.addEventListener("scroll", () => {
+            contextMenu.style.display = "none";
+            tierSubmenu.style.display = "none";
+            videoMenu.style.display = "none";
+        });
+        // Menu option click event
+        menu0.addEventListener("click", () => {
+            if (canvasesDiv.style.display === "none") {
+                canvasesDiv.style.display = "block";
+                waveformlabel.style.display = "block";
+                menu0.textContent = "Hide Waveform";
+            } else {
+                canvasesDiv.style.display = "none";
+                waveformlabel.style.display = "none";
+                menu0.textContent = "Show Waveform";
+            }
+            contextMenu.style.display = "none";
+        });
+        menu1.addEventListener("click", () => {
+            const plugins = wavesurfer.getActivePlugins();
+            let hasSpectrogram = false;
+            {#console.log('wavesurfer.getPlugin',plugins)#}
+            for (const plugin of plugins) {
+                if (plugin instanceof spectrogram_emu) {
+                    spectrogramlabel.style.display = "none";
+                    spectrogramyaxis.style.display = "none";
+                    menu1.textContent = "Show Spectrogram";
+                    hasSpectrogram = true;
+                    plugin.destroy();
+                    wavesurfer.plugins = wavesurfer.plugins.filter(p => p !== plugin);
+                    return;
+                }
+            }
+            if (!hasSpectrogram) {
+                spectrogramlabel.style.display = "block";
+                spectrogramyaxis.style.display = "flex";
+                menu1.textContent = "Hide Spectrogram";
+                const spectrogramPlugin = spectrogram_emu.create({
+                    height: 128,
+                });
+                hover.attachToContainer(spectrogramDiv);
+                wavesurfer.registerPlugin(spectrogramPlugin);
+                spectrogramPlugin.render();  // Manually trigger rendering
+            }
+        });
+        menu2.addEventListener("click", () => {
+            if (drawings.style.display === "none") {
+                drawings.style.display = "block";
+                drawingslabel.style.display = "block";
+                menu2.textContent = "Hide Pitch & Intensity";
+            } else {
+                drawings.style.display = "none";
+                drawingslabel.style.display = "none";
+                menu2.textContent = "Show Pitch & Intensity";
+            }
+            contextMenu.style.display = "none";
+        });
+        menu4.addEventListener("mouseover", (event) => {
+            // Calculate the initial position
+            let submenuX = parseFloat(contextMenu.style.left) + contextMenu.offsetWidth;
+            let submenuY = event.clientY;
+            // Display and get the size
+            tierSubmenu.style.display = "block";
+            let menuWidth = tierSubmenu.offsetWidth;
+            let menuHeight = tierSubmenu.offsetHeight;
+            // Prevent overflow on the right side
+            if (submenuX + menuWidth > window.innerWidth) {
+                submenuX = parseFloat(contextMenu.style.left) - menuWidth;  // Change to left pop-up
+            }
+            // Prevent overflow at the bottom
+            if (submenuY + menuHeight > window.innerHeight) {
+                submenuY = window.innerHeight - menuHeight - 10;  // Indent by 10px
+            }
+            // Apply position
+            tierSubmenu.style.left = `${submenuX}px`;
+            tierSubmenu.style.top = `${submenuY}px`;
+        });
+        function updateTierSubmenu() {
+            const tiers = document.querySelectorAll(".interval-tier, .point-tier"); // Get all tiers
+            tierSubmenu.innerHTML = ""; // Clear submenu
+            tiers.forEach((tier) => {
+                if (tier.style.display === "none") {
+                    const tierId = tier.id;
+                    // Get the name corresponding to the tier
+                    const tierInput = document.getElementById(`${tierId}name`); // Assume the input box's ID is "tier1-name"
+                    const tierName = tierInput?.value || tierId;
+                    const tierOption = document.createElement("div");
+                    tierOption.textContent = `Show ${tierName}`; // Show name or ID
+                    tierOption.className = "tier-option";
+                    tierOption.addEventListener("click", () => {
+                        tierInput.style.display = "block";
+                        tier.style.display = "block"; // Show Tier
+                        tierSubmenu.style.display = "none";
+                        contextMenu.style.display = "none";
+                    });
+                    tierSubmenu.appendChild(tierOption);
+                }
+            });
+            if (tierSubmenu.innerHTML === "") {
+                const emptyMessage = document.createElement("div");
+                emptyMessage.textContent = "No hidden tiers";
+                emptyMessage.className = "tier-option disabled";
+                tierSubmenu.appendChild(emptyMessage);
+            }
+        }
+
+        const videoMenu = document.getElementById('video-menu');
+        videoPlayer.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            closeAllMenus();
+            videoMenu.style.display = 'block';
+            videoMenu.style.left = `${event.clientX}px`;
+            videoMenu.style.top = `${event.clientY}px`;
+        });
+        videoMenu.addEventListener('click', (event) => {
+            const target = event.target;
+            if (target.tagName === 'LI') {
+                const [width, height] = target.dataset.size.split('x');
+                videoPlayer.style.width = `${width}px`;
+                videoPlayer.style.height = `${height}px`;
+                videoMenu.style.display = 'none';
+            }
+        });
+
+        // Listen for right-click events (limited to blank areas)
+        document.addEventListener("contextmenu", function (event) {
+            if (!event.target.closest("#waveform, #drawings-container, #videoPlayer")) {
+                event.preventDefault();
+                closeAllMenus();
+                let menuX = event.clientX;
+                let menuY = event.clientY;
+                contextMenu.style.display = 'block';
+                let menuWidth = contextMenu.offsetWidth;
+                let menuHeight = contextMenu.offsetHeight;
+                if (menuX + menuWidth > window.innerWidth) {
+                    menuX = window.innerWidth - menuWidth - 10;
+                }
+                if (menuY + menuHeight > window.innerHeight) {
+                    menuY = window.innerHeight - menuHeight - 10;
+                }
+                contextMenu.style.left = `${menuX}px`;
+                contextMenu.style.top = `${menuY}px`;
+                contextMenu.style.display = "block";
+                menu0.style.display = "none";
+                menu1.style.display = "block";
+                menu2.style.display = "block";
+                menu3.style.display = "none";
+                menu4.style.display = "block";
+                menu5.style.display = "none";
+                updateTierSubmenu();
+            } else {
+                {#contextMenu.style.display = "none";#}
+            }
+        });
+    });
+
+    let currentUsername = "{{ userName }}";
+    document.addEventListener("DOMContentLoaded", function () {
+        const videoElement = document.querySelector("video");
+        if (videoElement) {
+            setInterval(autoSaveAnnotations, 120000);
+        }
+        let currentLockedFile = fileName;
+        window.addEventListener("beforeunload", function () {
+            autoSaveOnExit();
+            if (currentLockedFile) {
+                navigator.sendBeacon(
+                    "{{ URL_PREFIX }}/unlock_file",
+                    new Blob([
+                        JSON.stringify({
+                            username: currentUsername,
+                            filename: currentLockedFile
+                        })
+                    ], { type: "application/json" })
+                );
+            }
+        });
+    });
+
+    wavesurfer.on('ready', function () {
+        loadAnnotations()
+    });
+
+    function loadAnnotations() {
+        fetch(`{{ URL_PREFIX }}/load_annotation?username=${currentUsername}&videoName=${fileName}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    restoreAnnotations(data.annotations);
+                } else {
+                    console.log("No annotation found for this video.");
+                }
+            })
+            .catch(error => console.error("Error loading annotations:", error));
+    }
+
+    function restoreAnnotations(annotationData) {
+        // Get the category list on the current page
+        const existingCategories = Array.from(document.querySelectorAll("#categoryList .annotation-category"))
+            .map(btn => btn.dataset.category);
+
+        annotationData.forEach(tierData => {
+            if (!existingCategories.includes(tierData.category)) {
+                console.warn("Skip non-existent category:", tierData.category);
+                return;
+            }
+            let tier;  // Store the Tier object
+            if (tierData.type === "IntervalTier") {
+                tier = addIntervalTier(tierData.category, tierData.name);
+            } else if (tierData.type === "TextTier") {
+                tier = addPointTier();
+            }
+            if (!tier) {
+                console.error(" Failed to create tier:", tierData);
+                return;
+            }
+            //Traverse tierData.data and add annotation
+            tierData.data.forEach((originalData, index) => {
+                let data = {}; // Create a data object that conforms to the addAnnotation() structure
+                if (tierData.type === "IntervalTier") {
+                    data = {
+                        type: "interval",
+                        start: originalData.xmin,
+                        end: originalData.xmax,
+                        id: `interval-${tierData.name}-${index}`, // Generate unique ID
+                        text: originalData.text,
+                    };
+                } else if (tierData.type === "TextTier") {
+                    data = {
+                        type: "point",
+                        time: originalData.number,
+                        id: `point-${tier.name}-${index}` // Generate unique ID
+                    };
+                }
+                addAnnotation(tier, data);
+            });
+        });
+    }
+
+    function prepareAnnotationPayload() {
+        const rawAnnotations = collectAnnotations();
+        if (!rawAnnotations || !Array.isArray(rawAnnotations) || rawAnnotations.length === 0) return null;
+
+        const filtered = JSON.parse(JSON.stringify(
+            rawAnnotations
+                .filter(item =>
+                    item &&
+                    typeof item === 'object' &&
+                    Array.isArray(item.data)
+                )
+                .map(item => ({
+                    ...item
+                    // No longer changes item.data
+                }))
+        ));
+
+        if (filtered.length === 0) return null;
+
+        return {
+            username: currentUsername,
+            videoName: fileName,
+            annotations: filtered
+        };
+    }
+
+    function autoSaveAnnotations() {
+        const jsonData = prepareAnnotationPayload();
+        if (!jsonData) return;
+
+        fetch(`{{ URL_PREFIX }}/save_annotation`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(jsonData)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error("Server error");
+                return response.json();
+            })
+            .then(data => {
+                console.log("Auto-saved annotation:", data);
+            })
+            .catch(error => {
+                console.error("Error auto-saving annotation:", error);
+            });
+
+        // UI prompts
+        const autoSaveTime = document.getElementById("autoSaveTime");
+        const autoSaveMessage = document.getElementById("autoSaveMessage");
+        const now = new Date();
+        autoSaveTime.textContent = now.toLocaleTimeString();
+        autoSaveMessage.style.display = "block";
+        autoSaveMessage.style.opacity = "1";
+        setTimeout(() => {
+            autoSaveMessage.style.opacity = "0";
+            setTimeout(() => {
+                autoSaveMessage.style.display = "none";
+            }, 2000);
+        }, 3000);
+    }
+
+    function autoSaveOnExit() {
+        const jsonData = prepareAnnotationPayload();
+        if (!jsonData) return;
+        const blob = new Blob([JSON.stringify(jsonData)], {
+            type: 'application/json'
+        });
+        navigator.sendBeacon(`{{ URL_PREFIX }}/save_annotation`, blob);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const categoryList = document.getElementById("categoryList");
+        const addCategoryButton = document.getElementById("addCategoryButton");
+        const newCategoryDialog = document.getElementById("newCategoryDialog");
+        const saveNewCategoryButton = document.getElementById("saveNewCategory");
+        const cancelNewCategoryButton = document.getElementById("cancelNewCategory");
+        const checkboxContainer = document.getElementById("checkboxContainer");
+
+        // Load the user's saved Category
+        fetch(`{{ URL_PREFIX }}/load_custom_categories?username=${currentUsername}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    data.categories.forEach(category => {
+                        addCategoryToUI(category.category, category.options);
+                        addCategoryToMenu(category.category, category.options);
+                    });
+                }
+            });
+
+        // Click the Add button to open the add dialog
+        addCategoryButton.addEventListener("click", function () {
+            newCategoryDialog.style.display = "flex";
+        });
+
+        // Cancel add new category
+        cancelNewCategoryButton.addEventListener("click", function () {
+            newCategoryDialog.style.display = "none";
+        });
+
+        // Listen for the "+" button and insert a new Checkbox row below the current row
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("add-checkbox")) {
+                const parentDiv = event.target.parentElement;
+                const newCheckbox = createCheckboxItem(); // Create a new checkbox row
+                parentDiv.after(newCheckbox); // Insert a new line after the current line
+            }
+        });
+
+        // Listen for the "-" button and delete the Checkbox row
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("remove-checkbox")) {
+                const parentDiv = event.target.parentElement;
+                if (checkboxContainer.children.length > 1) {
+                    parentDiv.remove(); // Delete the current line
+                }
+            }
+        });
+
+        // Create a new checkbox input row
+        function createCheckboxItem() {
+            const newCheckbox = document.createElement("div");
+            newCheckbox.classList.add("checkbox-item");
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.classList.add("checkbox-input");
+            input.placeholder = "Enter checkbox value";
+
+            const addButton = document.createElement("button");
+            addButton.textContent = "➕";
+            addButton.classList.add("add-checkbox");
+
+            const removeButton = document.createElement("button");
+            removeButton.textContent = "➖";
+            removeButton.classList.add("remove-checkbox");
+
+            newCheckbox.appendChild(input);
+            newCheckbox.appendChild(addButton);
+            newCheckbox.appendChild(removeButton);
+            return newCheckbox;
+        }
+
+        // Save new Category
+        saveNewCategoryButton.addEventListener("click", function () {
+            const categoryName = document.getElementById("newCategoryInput").value.trim();
+            const checkboxes = Array.from(document.querySelectorAll(".checkbox-input"))
+                .map(input => input.value.trim())
+                .filter(value => value !== "");
+
+            if (categoryName && checkboxes.length > 0) {
+                saveNewCategory(categoryName, checkboxes);
+            }
+        });
+
+        function saveNewCategory(category, options) {
+            fetch("{{ URL_PREFIX }}/save_custom_category", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: currentUsername, category: category, options: options })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addCategoryToUI(category, options);
+                        addCategoryToMenu(category, options);
+                        newCategoryDialog.style.display = "none";
                     }
                 });
+        }
 
-                function saveNewCategory(category, options) {
-                    fetch("{{ URL_PREFIX }}/save_custom_category", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ username: currentUsername, category: category, options: options })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                addCategoryToUI(category, options);
-                                addCategoryToMenu(category, options);
-                                newCategoryDialog.style.display = "none";
-                            }
-                        });
-                }
-
-                function addCategoryToUI(category, options) {
-                    const newCategorybutton = document.createElement("button");
-                    newCategorybutton.classList.add("annotation-category");
-                     // 只保留字母、数字、"-" 和 "_"
-                    newCategorybutton.dataset.category = `${category.trim() // 去除首尾空格
-                        .replace(/^\d+/, "n$&") // 数字开头加前缀 "n"
-                        .replace(/\s+/g, "-") // 空格换成 "-"
-                        .replace(/[^a-zA-Z0-9-_]/g, "")}`;
-                    newCategorybutton.dataset.category = category
-                    const textSpan = document.createElement("span");
-                    textSpan.classList.add("category-text");
-                    textSpan.textContent = category;
-                    const deleteIcon = document.createElement("span");
-                    deleteIcon.classList.add("delete-icon");
-                    deleteIcon.title = "Delete";
-                    deleteIcon.innerHTML = `
+        function addCategoryToUI(category, options) {
+            const newCategorybutton = document.createElement("button");
+            newCategorybutton.classList.add("annotation-category");
+            // Keep only letters, numbers, "-" and "_"
+            newCategorybutton.dataset.category = `${category.trim() // Remove leading and trailing spaces
+                .replace(/^\d+/, "n$&") // Add prefix "n" if it starts with a number
+                .replace(/\s+/g, "-") // Replace spaces with "-"
+                .replace(/[^a-zA-Z0-9-_]/g, "")}`; // Remove all characters except letters, numbers, "-" and "_"
+            newCategorybutton.dataset.category = category
+            const textSpan = document.createElement("span");
+            textSpan.classList.add("category-text");
+            textSpan.textContent = category;
+            const deleteIcon = document.createElement("span");
+            deleteIcon.classList.add("delete-icon");
+            deleteIcon.title = "Delete";
+            deleteIcon.innerHTML = `
         <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
             <circle cx="12" cy="12" r="10" fill="red"></circle>
             <rect x="7" y="11" width="10" height="2" rx="1" fill="white"></rect>
         </svg>
     `;
-                    newCategorybutton.appendChild(textSpan);
-                    newCategorybutton.appendChild(deleteIcon);
-                    categoryList.appendChild(newCategorybutton);
-                }
+            newCategorybutton.appendChild(textSpan);
+            newCategorybutton.appendChild(deleteIcon);
+            categoryList.appendChild(newCategorybutton);
+        }
 
-                function addCategoryToMenu(categoryName, options) {
-                    const annotationMenu = document.getElementById("annotation-menu");
-                    // **转换 categoryName 符合 CSS 规则**
-                    const safeCategoryName = `${categoryName.trim() // 去除首尾空格
-                        .replace(/^\d+/, "n$&") // 数字开头加前缀 "n"
-                        .replace(/\s+/g, "-") // 空格换成 "-"
-                        .replace(/[^a-zA-Z0-9-_]/g, "")}`; // 只保留字母、数字、"-" 和 "_"
-                    // **检查是否已存在该类别**
-                    if (annotationMenu.querySelector(`.${safeCategoryName}-menu`)) {
-                        console.warn(`Category '${categoryName}' already exists.`);
-                        return;
-                    }
+        function addCategoryToMenu(categoryName, options) {
+            const annotationMenu = document.getElementById("annotation-menu");
+            // Convert categoryName to comply with CSS rules
+            const safeCategoryName = `${categoryName.trim() // Remove leading and trailing spaces
+                .replace(/^\d+/, "n$&") // Add prefix "n" if it starts with a number
+                .replace(/\s+/g, "-") // Replace spaces with "-"
+                .replace(/[^a-zA-Z0-9-_]/g, "")}`; // Remove all characters except letters, numbers, "-" and "_"
+            // Check if the category already exists
+            if (annotationMenu.querySelector(`.${safeCategoryName}-menu`)) {
+                console.warn(`Category '${categoryName}' already exists.`);
+                return;
+            }
 
-                    // **创建新的 `ul`**
-                    let ul = document.createElement("ul");
-                    ul.classList.add(`${safeCategoryName}-menu`);
-                    ul.style.display = "none"; // 初始隐藏
+            // Create a new `ul`
+            let ul = document.createElement("ul");
+            ul.classList.add(`${safeCategoryName}-menu`);
+            ul.style.display = "none";
 
-                    // **添加类别标题**
-                    let header = document.createElement("li");
-                    header.classList.add('header');
-                    header.textContent = categoryName.toUpperCase();
-                    {#header.style.fontWeight = "bold";#}
-                    ul.appendChild(header);
+            // Add category title
+            let header = document.createElement("li");
+            header.classList.add('header');
+            header.textContent = categoryName.toUpperCase();
+            ul.appendChild(header);
 
-                    // **添加 `checkbox` 选项**
-                    options.forEach(option => {
-                        let li = document.createElement("li");
-                        let label = document.createElement("label");
-                        let input = document.createElement("input");
-                        input.type = "checkbox";
-                        input.value = option;
-                        label.appendChild(input);
-                        label.appendChild(document.createTextNode(" " + option));
-                        li.appendChild(label);
-                        ul.appendChild(li);
-                    });
-                    // **添加到 `menu-container`**
-                    annotationMenu.insertBefore(ul, annotationMenu.querySelector(".category-btn"))
-                }
-
-                let targetCategoryButton = null;
-                document.addEventListener("click", function(event) {
-                    if (event.target.closest('.delete-icon')) {
-                        event.stopPropagation()
-                        targetCategoryButton = event.target.closest('.annotation-category');
-                        const category = targetCategoryButton.querySelector('.category-text')?.textContent;
-                        // 检查是否有 tier
-                        const hasTier = checkIfHasTier(category);
-                        const dialogText = document.getElementById('deleteCategoryDialogText');
-                        if (hasTier) {
-                            dialogText.innerHTML = `This category has a corresponding tier. Are you sure you want to delete <strong style="color:red;">"${category}"</strong> and its tier?`;
-                        } else {
-                            dialogText.innerHTML = `Are you sure you want to delete <strong>"${category}"</strong>?`;
-                        }
-                        document.getElementById('deleteConfirmDialog').style.display = 'flex';
-                    }
-                });
-
-                 // 点击确认删除
-                document.getElementById('confirmDeleteCategory').addEventListener('click', function() {
-                    if (targetCategoryButton) {
-                        const category = targetCategoryButton.querySelector('.category-text')?.textContent;
-                        // 1. 请求后端删除
-                        deleteCategoryOnServer(category);
-                        // 2. 删除前端
-                        if (checkIfHasTier(category)) {
-                            deleteTier(category);
-                        }
-                        targetCategoryButton.remove();
-                        document.getElementById('deleteConfirmDialog').style.display = 'none';
-                    }
-                });
-
-                document.getElementById('cancelDeleteCategory').addEventListener('click', function(){
-                    document.getElementById('deleteConfirmDialog').style.display = 'none';
-                });
-
-                function deleteCategoryOnServer(category) {
-                    fetch(`{{ URL_PREFIX }}/delete_custom_category`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ category: category })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status !== 'success') {
-                                alert('Server Error: ' + data.message);
-                            }
-                        });
-                }
-                function checkIfHasTier(category) {
-                    return document.querySelector(`.interval-tier[data-category="${category}"]`) !== null;
-                }
-
-                function deleteTier(category) {
-                    document.querySelectorAll(`.interval-tier[data-category="${category}"]`).forEach(tier => tier.remove());
-                    document.querySelectorAll(`.name-input[title="${category}"]`).forEach(input => input.remove());
-                }
-
-
-
-
-
+            // Add `checkbox` option
+            options.forEach(option => {
+                let li = document.createElement("li");
+                let label = document.createElement("label");
+                let input = document.createElement("input");
+                input.type = "checkbox";
+                input.value = option;
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(" " + option));
+                li.appendChild(label);
+                ul.appendChild(li);
             });
+            // Add to `menu-container`
+            annotationMenu.insertBefore(ul, annotationMenu.querySelector(".category-btn"))
+        }
 
+        let targetCategoryButton = null;
+        document.addEventListener("click", function(event) {
+            if (event.target.closest('.delete-icon')) {
+                event.stopPropagation()
+                targetCategoryButton = event.target.closest('.annotation-category');
+                const category = targetCategoryButton.querySelector('.category-text')?.textContent;
+                // Check if there is a tier
+                const hasTier = checkIfHasTier(category);
+                const dialogText = document.getElementById('deleteCategoryDialogText');
+                if (hasTier) {
+                    dialogText.innerHTML = `This category has a corresponding tier. Are you sure you want to delete <strong style="color:red;">"${category}"</strong> and its tier?`;
+                } else {
+                    dialogText.innerHTML = `Are you sure you want to delete <strong>"${category}"</strong>?`;
+                }
+                document.getElementById('deleteConfirmDialog').style.display = 'flex';
+            }
+        });
 
-                {#function attachSimpleHoverLine(container) {#}
-                {#    const wrapper = document.createElement('div')#}
-                {#    const label = document.createElement('span')#}
-                {#    wrapper.appendChild(label)#}
-                {##}
-                {#    // 竖线样式#}
-                {#    Object.assign(wrapper.style, {#}
-                {#        position: 'absolute',#}
-                {#        zIndex: '10',#}
-                {#        top: '0',#}
-                {#        left: '0',#}
-                {#        height: '100%',#}
-                {#        pointerEvents: 'none',#}
-                {#        borderLeft: '2px solid #ff0000',#}
-                {#        opacity: '0',#}
-                {#        transition: 'opacity .1s ease-in',#}
-                {#    })#}
-                {##}
-                {#    // 时间标签样式#}
-                {#    Object.assign(label.style, {#}
-                {#        display: 'block',#}
-                {#        backgroundColor: '#555',#}
-                {#        color: '#fff',#}
-                {#        fontSize: '11px',#}
-                {#        transition: 'transform .1s ease-in',#}
-                {#        padding: '2px 3px',#}
-                {#    })#}
-                {##}
-                {#    container.style.position = 'relative'#}
-                {#    container.appendChild(wrapper)#}
-                {##}
-                {##}
-                {#    container.addEventListener('pointermove', (e) => {#}
-                {#        const bbox = container.getBoundingClientRect()#}
-                {#        const width = bbox.width#}
-                {#        const offsetX = e.clientX - bbox.left#}
-                {#        const relX = Math.max(0, Math.min(1, offsetX / width))#}
-                {#        const posX = offsetX#}
-                {##}
-                {#        wrapper.style.transform = `translateX(${posX}px)`#}
-                {#        wrapper.style.opacity = '1'#}
-                {##}
-                {#        const duration = wavesurfer.getDuration()#}
-                {#        label.textContent = (duration * relX).toFixed(5) + 's'#}
-                {##}
-                {#        const labelWidth = label.offsetWidth#}
-                {#        label.style.transform = posX + labelWidth > width#}
-                {#            ? `translateX(-${labelWidth + 2}px)`#}
-                {#            : ''#}
-                {#    })#}
-                {#    container.addEventListener('pointerleave', () => {#}
-                {#        wrapper.style.opacity = '0'#}
-                {#    })#}
-                {#};#}
+        // Click to confirm deletion
+        document.getElementById('confirmDeleteCategory').addEventListener('click', function() {
+            if (targetCategoryButton) {
+                const category = targetCategoryButton.querySelector('.category-text')?.textContent;
+                // Request backend deletion
+                deleteCategoryOnServer(category);
+                // Delete frontend
+                if (checkIfHasTier(category)) {
+                    deleteTier(category);
+                }
+                targetCategoryButton.remove();
+                document.getElementById('deleteConfirmDialog').style.display = 'none';
+            }
+        });
 
+        document.getElementById('cancelDeleteCategory').addEventListener('click', function(){
+            document.getElementById('deleteConfirmDialog').style.display = 'none';
+        });
 
+        function deleteCategoryOnServer(category) {
+            fetch(`{{ URL_PREFIX }}/delete_custom_category`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category: category })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status !== 'success') {
+                        alert('Server Error: ' + data.message);
+                    }
+                });
+        }
+        function checkIfHasTier(category) {
+            return document.querySelector(`.interval-tier[data-category="${category}"]`) !== null;
+        }
 
+        function deleteTier(category) {
+            document.querySelectorAll(`.interval-tier[data-category="${category}"]`).forEach(tier => tier.remove());
+            document.querySelectorAll(`.name-input[title="${category}"]`).forEach(input => input.remove());
+        }
+    });
 </script>
-{#        <script src="{{ '/praat' + url_for('static', filename='js/viewer.js') }}"></script>#}
-<script src="{{ URL_PREFIX + url_for('static', filename='js/viewer.js') }}"></script>
-</div>
+{#<script src="{{ URL_PREFIX + url_for('static', filename='js/viewer.js') }}"></script>#}
 </body>
 </html>

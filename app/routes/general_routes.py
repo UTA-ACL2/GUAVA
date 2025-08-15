@@ -4,20 +4,18 @@ from flask import Blueprint, request, jsonify, render_template
 from app.config import IS_SERVER, URL_PREFIX
 from app.utils.utils import execute_command
 
-# 创建 Blueprint
 general_bp = Blueprint('general', __name__)
 
-# 配置路径
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # `app/` 目录
+# Configure path
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Get the 'app/' directory
 SCRIPTS_FOLDER = os.path.join(BASE_DIR, "static", "scripts")
 if IS_SERVER:
-    PRAAT_LOCATION = "/home/peter/praat_barren"  # 服务器路径
+    PRAAT_LOCATION = "/home/peter/praat_barren"  # Server path
 else:
-    PRAAT_LOCATION = "D:/praat.exe"  # 本地 Windows 路径
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # 获取 app 目录
+    PRAAT_LOCATION = "D:/praat.exe"  # Local Windows Path
 
 
-# 工具函数
+# Utility function.
 def save_file(uploaded_file, save_path):
     uploaded_file.save(save_path)
 
@@ -46,16 +44,16 @@ def general():
         audio_basename = os.path.splitext(audio_filename)[0]
         print(f"audio_basename:{audio_basename}")
 
-        # 最终保存目录
+        # Final save directory
         target_dir = os.path.join(BASE_DIR, "static", "videos", "pool", username, "annotation", audio_basename, "")
         create_directory_if_not_exists(target_dir)
 
-        # 所需文件路径
+        # Required file path
         audio_file_path_mp4 = os.path.join(target_dir, f"{audio_basename}.mp4")
         audio_file_path_wav = os.path.join(target_dir, f"{audio_basename}.wav")
         graph_file_path = os.path.join(target_dir, f"{audio_basename}.graph")
 
-        # 如果三个文件都存在，直接加载
+        # If all three files exist, load them directly
         if file_exists(audio_file_path_mp4, audio_file_path_wav, graph_file_path):
             return render_template(
                 'viewer.html',
@@ -66,10 +64,10 @@ def general():
                 userName=username
             )
 
-        # 否则重新处理
+        # Otherwise reprocess
         save_file(audio_file, audio_file_path_mp4)
 
-        # 转换格式
+        # Convert format
         ffmpeg_command = ["ffmpeg", "-i", audio_file_path_mp4, audio_file_path_wav]
         # ffmpeg_command = ["ffmpeg", "-y", "-i", audio_file_path_mp4, audio_file_path_wav]
         try:
@@ -79,7 +77,7 @@ def general():
             shutil.rmtree(target_dir, ignore_errors=True)
             return jsonify({"error": f"ffmpeg failed: {str(e)}"}), 500
 
-        # 提取 Pitch 和 Intensity
+        # Extract Pitch and Intensity
         extract_command = [
             PRAAT_LOCATION, "--run", "--no-pref-files",
             os.path.join(SCRIPTS_FOLDER, "extractPitchIntensity.praat"),
@@ -106,7 +104,7 @@ def general():
             shutil.rmtree(target_dir, ignore_errors=True)
             return jsonify({"error": f"pitchIntensityScript failed: {str(e)}"}), 500
 
-        # 返回 Viewer 页面
+        # Return to the Viewer page
         return render_template(
             'viewer.html',
             audioFile=f"{URL_PREFIX}/static/videos/pool/{username}/annotation/{audio_basename}/{audio_basename}.wav",

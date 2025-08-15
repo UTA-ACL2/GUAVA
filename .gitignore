@@ -1,16 +1,16 @@
-#  Python 缓存文件
+#  Python cache files
 __pycache__/
 *.py[cod]
 
-#  虚拟环境
+#  virtual environment
 venv/
 
-#  IDE 设置
+#  IDE settings
 .idea/
 
-# 忽略特殊 JSON 文件
+# Ignore special JSON files
 app/users.json
 app/locks.json
 
-# 忽略用户pool
+# Ignore user pool files
 app/static/videos/pool/

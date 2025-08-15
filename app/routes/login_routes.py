@@ -7,10 +7,9 @@ from app.config import URL_PREFIX
 login_bp = Blueprint('login', __name__)
 
 VALID_ACCOUNTS = ["peter", "kenny", "theron", "essam", "tuan", "hridayesh", "birds", "cats", "corvids", "guest", "pranjal"]
-# USER_FILE = 'users.json'
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # `app/` 目录
-USER_FILE = os.path.join(BASE_DIR, 'users.json')  # 用户密码文件路径
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  # Get the 'app/' directory
+USER_FILE = os.path.join(BASE_DIR, 'users.json')  # User password file path
 
 
 def load_users():
@@ -37,13 +36,13 @@ def login():
         users = load_users()
 
         if username not in users:
-            #  第一次登录 → 保存密码
+            #  First login → Save password
             users[username] = generate_password_hash(password)
             save_users(users)
             session['username'] = username
             return render_template('general_form.html', username=session['username'], message=f"First login. Password set successfully. Please remember it!")
 
-            #  以后登录 → 验证密码
+            #  Future logins → Verify password
         if check_password_hash(users[username], password):
             session['username'] = username
             return render_template('general_form.html', username=session['username'])
@@ -53,17 +52,17 @@ def login():
     return render_template('login.html')
 
 
-# 退出登录
+# Log out
 @login_bp.route('/logout')
 def logout():
-    session.pop('username', None)  # 清除 session
-    return redirect(URL_PREFIX + url_for('login.login'))  # 退出后回到登录页
+    session.pop('username', None)  # Clear the session
+    return redirect(URL_PREFIX + url_for('login.login'))  # Redirect to the login page after logout
 
 
 @login_bp.route('/general_form')
 def general_form():
-    # 确保只有已登录的用户能访问
+    # Ensure that only logged-in users can access
     if 'username' not in session:
-        return redirect(URL_PREFIX + url_for('login.login'))  # 未登录用户跳转到 /login
+        return redirect(URL_PREFIX + url_for('login.login'))  # Redirect unauthenticated users to `/login`
 
-    return render_template('general_form.html', username=session['username'])  # 传递用户名到模板
+    return render_template('general_form.html', username=session['username'])

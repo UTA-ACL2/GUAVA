@@ -1,27 +1,9 @@
-@CHARSET "UTF-8";
-
-.serif{
-	font-family: serif;
-}
-
 .arial{
 	font-family: arial;
 }
 
-.large-font{
-	font-size: 22px;
-}
-
-.very-large-font{
-	font-size: 30px;
-}
-
 .medium-font{
 	font-size: 14px;
-}
-
-.small-font{
-	font-size: 8px;
 }
 
 body{
@@ -30,62 +12,33 @@ body{
 	padding-bottom: 50px;
 }
 
+.fileInput{
+	background-color: #87cefa;
+	font-size: 20px;
+}
+
 @media (min-width: 1500px){
 	.container {
-  		width: 1470px;
-  	}
+		width: 1470px;
+	}
 }
 
-.page-header {
-	border-bottom: 1px solid #45ADA8;
-	display:inline-block;
-  	width: 100%;
-  	padding-bottom: 9px;
-    margin: 40px 0 10px;
+@media (min-width: 750px) and (max-width: 970px){
+	.container {
+		width: 100%;
+		min-width: 750px;
+	}
 }
-
-	.page-header .left{
-		position: relative;
-		margin-top: 0px;
-  		float: left;
-	}
-
-	.page-header .right{
-		position: relative;
-		float: right;
-	}
-
-	.page-header .back{
-		font-size: 20px;
-		text-align: right;
-		margin-top: 12px;
-	}
-
-	.page-header .big{
-		font-size: 46px;
-	}
-
-.page-subheader {
-	border-bottom: 1px solid #45ADA8;
-	display:inline-block;
-  	width: 100%;
-  	padding-bottom: 9px;
-  	margin: 0 0 35px;
-}
-	.page-subheader h3{
-		font-size: 22px;
-		margin-top: 0px;
-	}
 
 .btn-textgrid {
-    color: #fff;
-    background-color: #45ADA8;
-    border-style: hidden;
-    border-radius: 0px 0px 0px;
+	color: #fff;
+	background-color: #45ADA8;
+	border-style: hidden;
+	border-radius: 0px 0px 0px;
 }
 .btn-textgrid:hover, .btn-textgrid:focus, .btn-textgrid:active, .btn-textgrid.active, .open>.dropdown-toggle.btn-textgrid {
-    color: #fff;
-    background-color: #547980;
+	color: #fff;
+	background-color: #547980;
 }
 
 .bg-colorWhite{

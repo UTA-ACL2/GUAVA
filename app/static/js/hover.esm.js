@@ -78,23 +78,23 @@ class r extends e {
             const a = this.label.offsetWidth;
             this.label.style.transform = r + a > s ? `translateX(-${a + this.options.lineWidth}px)` : "",
 
-                // 计算 hover 线显示
+                // Calculate hover line display
                 this.extraClones?.forEach(clone => {
                     const cloneContainer = clone.parentElement;
                     if (!cloneContainer) return;
 
-                    // 主 wrapper 尺寸（参考基准）
+                    // Main wrapper size (reference baseline)
                     const mainRect = this.wavesurfer.getWrapper().getBoundingClientRect();
                     const mainWidth = mainRect.width;
 
-                    // 当前 clone 所在容器尺寸和偏移
+                    // Current clone container size and offset
                     const containerRect = cloneContainer.getBoundingClientRect();
                     const containerOffsetLeft = containerRect.left - mainRect.left;
 
-                    // 统一的相对横坐标
+                    // Unified relative X coordinate
                     const posX = Math.min(mainWidth - this.options.lineWidth - 1, t.clientX - mainRect.left);
 
-                    // 位置计算：主 hover 坐标 - 容器偏移
+                    // Position calculation: main hover coordinate - container offset
                     const relativeX = posX - containerOffsetLeft;
                     clone.style.transform = `translateX(${relativeX}px)`;
                     clone.style.opacity = '1';

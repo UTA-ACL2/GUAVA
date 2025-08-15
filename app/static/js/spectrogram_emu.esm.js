@@ -373,9 +373,9 @@ class s extends e {
     render() {
     if (this.terminated) return;
 
-    const now = performance.now();  //新增代码
+    const now = performance.now();  // new code
 
-    // === FPS 控制 ===  新增代码
+    // FPS Control
     const frameInterval = 1000 / 30; // 30 FPS
     if (this.lastRenderTime && now - this.lastRenderTime < frameInterval) {
         window.requestAnimationFrame(() => this.render());
@@ -383,7 +383,7 @@ class s extends e {
     }
     this.lastRenderTime = now;
 
-    // === 检查 decodedData 是否就绪 ===
+    // Check if decodedData is ready
     const decodedData = this.wavesurfer.getDecodedData();
     if (!decodedData) {
         this.update_needed = false;
@@ -391,22 +391,22 @@ class s extends e {
         return;
     }
 
-    // === 计算视口范围 ===
+    // Calculating viewport extents
     const { scrollLeft, scrollWidth, clientWidth } = this.wavesurfer.renderer.scrollContainer;
     const nS = decodedData.length;
     const sS = Math.floor(scrollLeft / scrollWidth * nS);
     const eS = Math.floor((scrollLeft + clientWidth) / scrollWidth * nS);
 
-    // === 如果视口没变，不需要重绘 === 代码更改
+    // If the viewport has not changed, no need to redraw
     if (sS === this.old_sS && eS === this.old_eS && !this.update_needed) {
         window.requestAnimationFrame(() => this.render());
         return;
     }
     this.old_sS = sS;
     this.old_eS = eS;
-    this.update_needed = false;  // 重置 update_needed
+    this.update_needed = false;  // Reset update_needed
 
-    // === 只有在真正需要时 resize canvas ===  新增代码
+    // Resize canvas only when really needed
     const wrapperWidth = this.wrapper.offsetWidth;
     const wrapperHeight = this.wrapper.offsetHeight;
     if (this.canvas.width !== wrapperWidth || this.canvas.height !== wrapperHeight) {
@@ -415,7 +415,7 @@ class s extends e {
         this.imageData = this.spectrCc.createImageData(this.canvas.width, this.canvas.height);
     }
 
-    // === 获取音频数据 ===
+    // Get Audio Data
     const buffer = decodedData.getChannelData(this.options.channel);
     const sampleRate = decodedData.sampleRate;
     const windowSizeInSecs = this.options.windowSizeInSecs;
@@ -435,10 +435,10 @@ class s extends e {
     paddedSamples.set(data, left_padding.length);
     paddedSamples.set(right_padding, left_padding.length + data.length);
 
-    // === 计算 upperFreq ===
+    // Calculate upperFreq
     const upperFreq = this.options.upperFreq || sampleRate / 2;
 
-    // === 调用 worker 绘制 ===
+    // Call worker to draw
     this.spectroWorker.tell({
         windowSizeInSecs: windowSizeInSecs,
         fftN: fftN,
@@ -461,7 +461,7 @@ class s extends e {
         invert: this.options.invert,
     }, [paddedSamples.buffer]);
 
-    // === 持续动画循环 ===  新增代码
+    // Continuous animation loop
     window.requestAnimationFrame(() => this.render());
 }
 
