@@ -25,13 +25,16 @@
             <div style="display: flex; flex-direction: column; margin-left: 20px; gap: 10px;">
                 <a href="{{ URL_PREFIX + url_for('login.logout') }}" class="btn btn-primary">Logout</a>
                 <a href="{{ URL_PREFIX + url_for('login.general_form') }}" class="btn btn-primary">Back</a>
+
             </div>
             <!-- Right-side video display area -->
             <div style="flex: 2;">
+                {% if videoFile %}
                 <video id="videoPlayer" width="480" height="270" controls>
                     <source id="videoSource" src="{{ videoFile }}" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
+                {% endif %}
             </div>
         </div>
         <div id="waveform-container" style="position: relative;">
@@ -108,7 +111,21 @@
             </div>
         </div>
 
-        <p class="row">
+        <div class="row text-center" style="margin-bottom: 15px;">
+        <button id="playPauseBtn" class="btn btn-primary btn-lg" title="Play/Pause">
+            <i class="glyphicon glyphicon-play"></i>
+        </button>
+        <button id="stopBtn" class="btn btn-primary btn-lg" title="Stop (return to start)">
+            <i class="glyphicon glyphicon-stop"></i>
+        </button>
+    </div>
+
+    <div class="row text-center" style="margin-bottom: 20px;">
+        <button id="prevFileBtn" class="btn btn-info btn-lg">&lt; Previous File</button>
+        <button id="nextFileBtn" class="btn btn-info btn-lg">Next File &gt;</button>
+    </div>
+
+    <p class="row">
         <div class="col-xs-1">
             <i class="glyphicon glyphicon-zoom-out icon-large" style="cursor: pointer"></i>
         </div>
@@ -164,12 +181,11 @@
                 <li><label><input type="checkbox" value="aggressive"> Aggressive</label></li>
                 <li><label><input type="checkbox" value="attention-seeking"> Seeking Attention</label></li>
             </ul>
-            <div class ="category-btn" style="display: flex;
-  justify-content: space-between;
-  gap: 8px; padding: 0 8px;">
-                <button class="okButton">OK</button>
-                <button class="deleteButton">Delete</button>
-            </div>
+            <div class ="category-btn" style="display: flex; justify-content: space-between; gap: 8px; padding: 0 8px;">
+            <button class="okButton">OK</button>
+            <button class="addSubCategoryBtn"> + Category</button>
+            <button class="deleteButton">Delete</button>
+        </div>
         </div>
         <div id="category-select-menu" class="context-menu">
             <ul>
@@ -179,15 +195,16 @@
         </div>
         <div id="tier-submenu" class="context-submenu" style="display: none;"></div>
 
-        <div class="col-xs-6">
+        <div class="col-xs-6" style="display: flex; gap: 10px;">
             <button id="add-tier" class="btn btn-textgrid btn-lg">+ Add Tier</button>
+            <button id="copyPreviousTiersBtn" class="btn btn-info btn-lg" style="display: none;" title="Recreate tiers from the last annotated file">Copy Tiers from Previous</button>
         </div>
         <!-- Dialog box for selecting Tier type -->
         <div id="tierTypeDialog" class="overlay">
             <div class="dialog">
                 <h3>Tier Type</h3>
                 <button class="tier-type" data-type="interval">Interval Tier</button>
-                <button class="tier-type" data-type="point" disabled>Point Tier</button>
+                <button class="tier-type" data-type="point">Point Tier</button>
                 <button id="closeTierDialog">Cancel</button>
             </div>
         </div>
@@ -251,22 +268,22 @@
 </div>
 <script src="//d3js.org/d3.v3.js"></script>
 <script type="module">
+ // --- Imports must be at the top level of the module ---
+import WaveSurfer from "{{ URL_PREFIX + url_for('static', filename='js/wavesurfer.esm.js') }}"
+import Spectrogram from "{{ URL_PREFIX + url_for('static', filename='js/spectrogram.esm.js') }}"
+import spectrogram_emu from "{{ URL_PREFIX }}/static/js/spectrogram_emu.esm.js";
+import TimelinePlugin from "{{ URL_PREFIX + url_for('static', filename='js/timeline.esm.js') }}"
+import RegionsPlugin from "{{ URL_PREFIX + url_for('static', filename='js/regions.esm.js') }}"
+import ZoomPlugin from "{{ URL_PREFIX + url_for('static', filename='js/zoom.esm.js') }}"
+import Hover from "{{ URL_PREFIX + url_for('static', filename='js/hover.esm.js') }}"
 
-    {#import WaveSurfer from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/wavesurfer.esm.js'#}
-    {#import Spectrogram from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/spectrogram.esm.js'#}
-    {#import TimelinePlugin from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/timeline.esm.js'#}
-    {#import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/regions.esm.js'#}
-    {#import ZoomPlugin from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/zoom.esm.js'#}
-    {#import Hover from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/hover.esm.js'#}
+document.addEventListener('DOMContentLoaded', () => {
+    // --- START: Main Application Logic ---
 
-    import WaveSurfer from "{{ URL_PREFIX + url_for('static', filename='js/wavesurfer.esm.js') }}"
-    import Spectrogram from "{{ URL_PREFIX + url_for('static', filename='js/spectrogram.esm.js') }}"
-    import spectrogram_emu from "{{ URL_PREFIX }}/static/js/spectrogram_emu.esm.js";
-    import TimelinePlugin from "{{ URL_PREFIX + url_for('static', filename='js/timeline.esm.js') }}"
-    import RegionsPlugin from "{{ URL_PREFIX + url_for('static', filename='js/regions.esm.js') }}"
-    import ZoomPlugin from "{{ URL_PREFIX + url_for('static', filename='js/zoom.esm.js') }}"
-    import Hover from "{{ URL_PREFIX + url_for('static', filename='js/hover.esm.js') }}"
-
+    // --- Part 1: Initial variable and plugin setup ---
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const playPauseIcon = playPauseBtn.querySelector('i');
     var soundSeconds = 0;
     var timeline;
     var videoDuration;
@@ -275,35 +292,27 @@
     let addAnnotation;
     let currentZoom;
     let pxPerSec;
-
     var margin, width, height;
-    var parseTime
+    var parseTime;
     var x, y0, y1;
     var xAxis, yAxisLeft, yAxisRight;
     var valueline, valueline2;
     var svg;
 
-    const regions = RegionsPlugin.create()
+    const regions = RegionsPlugin.create();
 
-    // Create a timeline plugin instance with custom options
     const topTimeline = TimelinePlugin.create({
         height: 20,
         insertPosition: 'beforebegin',
-        {#timeInterval: 0.1,#}
-        {#primaryLabelInterval: 5,#}
-        {#primaryLabelSpacing: 1,#}
-        {#secondaryLabelInterval: 1,#}
-        {#secondaryLabelSpacing: 1,#}
         formatTimeCallback: (seconds) => {
-            return seconds.toFixed(3) + "s";  // example：0.12345s
+            return seconds.toFixed(3) + "s";
         },
         style: {
             fontSize: '14px',
             color: '#2D5B88',
         },
-    })
+    });
 
-    // Create a second timeline
     const bottomTimeline = TimelinePlugin.create({
         height: 10,
         timeInterval: 0.1,
@@ -312,13 +321,13 @@
             fontSize: '10px',
             color: '#6A3274',
         },
-    })
+    });
 
     const zoomPlugin = ZoomPlugin.create({
-        scale: 0.5,      // the amount of zoom per wheel step, e.g. 0.5 means a 50% magnification per scroll
+        scale: 0.5,
         maxZoom: 80000,
         exponentialZooming: true
-    })
+    });
 
     const hover = Hover.create({
         lineColor: '#ff0000',
@@ -327,68 +336,141 @@
         labelColor: '#fff',
         labelSize: '11px',
         formatTimeCallback: (seconds) => {
-            return seconds.toFixed(5) + "s";  // example：0.12345s
+            return seconds.toFixed(5) + "s";
         },
-    })
+    });
 
     const spectrogramPlugin = spectrogram_emu.create({
         height: 128,
     });
 
-    var wavesurfer = WaveSurfer.create({
+    // --- Part 2: WaveSurfer initialization ---
+    const videoFileUrl = "{{ videoFile }}";
+    const videoPlayer = document.getElementById('videoPlayer');
+    const wavesurferConfig = {
         normalize: true,
         autoScroll: false,
         fillParent: false,
         container: '#waveform',
         waveColor: 'rgb(200, 0, 200)',
         progressColor: 'rgb(100, 0, 100)',
-        media: document.querySelector('video'),
         sampleRate: 11025,
         minPxPerSec: 100,
         plugins: [
             topTimeline,
-            {#bottomTimeline,#}
             regions,
             zoomPlugin,
             hover,
             spectrogramPlugin
         ],
-    });
-
+    };
+    if (videoFileUrl && videoPlayer) {
+        wavesurferConfig.media = videoPlayer;
+    }
+    var wavesurfer = WaveSurfer.create(wavesurferConfig);
+    wavesurfer.load("{{ audioFile }}");
     let isintervalSelecting = false
     const container = document.querySelector(`${wavesurfer.options.container} > div`);
     container.style.backgroundColor = "white";
 
-    var videoPlayer = document.getElementById('videoPlayer');
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const observer = new IntersectionObserver(async (entries) => {
-            // Detect transition from >=0.5 ➜ <0.5 (entered hidden zone)
-            if (entries[0].intersectionRatio < 0.5) {
-                await videoPlayer.requestPictureInPicture();
+
+    const fileList = JSON.parse('{{ fileList | safe }}');
+        const currentIndex = parseInt('{{ currentIndex }}', 10);
+        const prevFileBtn = document.getElementById('prevFileBtn');
+        const nextFileBtn = document.getElementById('nextFileBtn');
+
+        async function navigateToFile(newIndex) {
+            if (newIndex < 0 || newIndex >= fileList.length) return;
+
+            const fileName = fileList[newIndex];
+            const username = '{{ userName }}';
+            document.body.style.cursor = 'wait'; // Show loading cursor
+
+            try {
+                const fileResponse = await fetch(`{{ URL_PREFIX }}/static/videos/pool/${username}/${fileName}`);
+                if (!fileResponse.ok) throw new Error(`Could not load file ${fileName}`);
+
+                const fileBlob = await fileResponse.blob();
+                const selectedFile = new File([fileBlob], fileName, { type: fileBlob.type });
+
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `{{ URL_PREFIX }}/general/general`;
+                form.enctype = 'multipart/form-data';
+                form.style.display = 'none';
+
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(selectedFile);
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.name = 'audioFile';
+                fileInput.files = dataTransfer.files;
+                form.appendChild(fileInput);
+
+                // Append other necessary form data
+                form.insertAdjacentHTML('beforeend', `
+                    <input type="hidden" name="username" value="${username}">
+                    <input type="hidden" name="fileList" value='${JSON.stringify(fileList)}'>
+                    <input type="hidden" name="currentIndex" value="${newIndex}">
+                `);
+
+                document.body.appendChild(form);
+                form.submit();
+            } catch (error) {
+                alert(error.message);
+                document.body.style.cursor = 'default';
             }
-            // Detect transition from <0.5 ➜ >=0.5 (back to viewport)
-            if (entries[0].intersectionRatio >= 0.5 ) {
-                await document.exitPictureInPicture();
-            }
-        }, {
-            threshold: [0, 0.5, 1.0]
-        });
-        observer.observe(videoPlayer);
+        }
+
+    if (fileList.length > 0 && currentIndex !== -1) {
+        prevFileBtn.disabled = currentIndex === 0;
+        nextFileBtn.disabled = currentIndex >= fileList.length - 1;
+
+        prevFileBtn.addEventListener('click', () => navigateToFile(currentIndex - 1));
+        nextFileBtn.addEventListener('click', () => navigateToFile(currentIndex + 1));
+    } else {
+        // Hide buttons if the file was not loaded from the pool (e.g., direct upload)
+        prevFileBtn.style.display = 'none';
+        nextFileBtn.style.display = 'none';
+    }
+
+
+    // --- Part 3: Event Listeners and Core Functions ---
+
+    // Playback Button Listeners
+    playPauseBtn.addEventListener('click', () => {
+        wavesurfer.playPause();
+    });
+    stopBtn.addEventListener('click', () => {
+        wavesurfer.stop();
+    });
+    wavesurfer.on('play', () => {
+        playPauseIcon.classList.remove('glyphicon-play');
+        playPauseIcon.classList.add('glyphicon-pause');
+    });
+    wavesurfer.on('pause', () => {
+        playPauseIcon.classList.remove('glyphicon-pause');
+        playPauseIcon.classList.add('glyphicon-play');
+    });
+    wavesurfer.on('finish', () => {
+        playPauseIcon.classList.remove('glyphicon-pause');
+        playPauseIcon.classList.add('glyphicon-play');
     });
 
+    // Regions Plugin Listeners
     regions.on('region-clicked', (region, event) => {
-        event.stopPropagation(); // Prevent event bubbling
-        const start = region.start;
+        event.stopPropagation();
         const end = region.end;
-        videoPlayer.currentTime = start;
-        region.play()
+        region.play();
         const checkEndTime = () => {
-            if (videoPlayer.currentTime >= end) {
-                videoPlayer.pause();
+            if (wavesurfer.isPlaying() && wavesurfer.getCurrentTime() >= end) {
+                wavesurfer.pause();
                 return;
             }
-            requestAnimationFrame(checkEndTime); // Continuous high-frequency checking
+            if (wavesurfer.isPlaying()) {
+                 requestAnimationFrame(checkEndTime);
+            }
         };
         requestAnimationFrame(checkEndTime);
     });
@@ -402,287 +484,312 @@
 
     regions.enableDragSelection({
         color: 'rgba(255, 0, 0, 0.1)',
-    })
+    });
 
     regions.on('region-created', (region) => {
         regions.getRegions().forEach(existingRegion => {
             if (existingRegion.id !== region.id) {
-                existingRegion.remove(); // Remove other regions
+                existingRegion.remove();
             }
         });
-        if(selectedTier && selectedTier.dataset.category && !isintervalSelecting){
-            const data = {type: 'interval', start: region.start, end: region.end, id: region.id};
-            {#console.log('data',data)#}
+
+        // Helper functions for structured annotation data
+        const getAnnotationData = (div) => {
+            try {
+                return JSON.parse(div.dataset.annotations || '{}');
+            } catch (e) {
+                return {};
+            }
+        };
+        const setAnnotationData = (div, data) => {
+            div.dataset.annotations = JSON.stringify(data);
+        };
+        const updateAnnotationDisplayText = (div) => {
+            const data = getAnnotationData(div);
+            const allLabels = Object.values(data).flat().join(', ');
+            div.textContent = allLabels;
+            div.title = allLabels;
+            region.setOptions({ content: allLabels });
+        };
+
+        if (selectedTier && selectedTier.dataset.category && !isintervalSelecting) {
+            const annotations = {};
+            annotations[selectedTier.dataset.category] = [];
+            const data = { type: 'interval', start: region.start, end: region.end, id: region.id, annotations: annotations };
             addAnnotation(selectedTier, data);
         } else if (!selectedTier) {
-            alert('Select Tier！');
+            alert('Select a Tier first!');
+            region.remove();
+            return;
         } else if (!selectedTier.dataset.category) {
-            alert('Specify Tier Category！');
+            alert('The selected Tier must have a primary Category!');
+            region.remove();
+            return;
         }
         isintervalSelecting = false;
         closeAllMenus();
-        selectedAnotation = region.id
-        region.element.title = `Start: ${region.start.toFixed(5)}s,\nEnd: ${region.end.toFixed(5)}s,\nDuration: ${(region.end - region.start).toFixed(5)}s`;
-        const div = document.getElementById(selectedAnotation)
-        const oldMenu  = document.getElementById("annotation-menu")
-        const newMenu = oldMenu.cloneNode(true);
-        // Replace annotationMenu (remove old event listeners)
-        oldMenu .replaceWith(newMenu);
-        const annotationMenu = newMenu;
+        selectedAnotation = region.id;
+
+        const div = document.getElementById(selectedAnotation);
+        if (!div) return;
+
+        const oldMenu = document.getElementById("annotation-menu");
+        const annotationMenu = oldMenu.cloneNode(true);
+        oldMenu.parentNode.replaceChild(annotationMenu, oldMenu);
+
+        // --- Logic for "+ Add Category" button ---
+        annotationMenu.querySelector('.addSubCategoryBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const categoryDialog = document.getElementById('categoryDialog');
+            categoryDialog.style.display = 'flex';
+            
+            const categorySelectionHandler = (event) => {
+                const button = event.target.closest('.annotation-category');
+                if (button) {
+                    const category = button.querySelector('.category-text')?.textContent;
+                    const annotationData = getAnnotationData(div);
+
+                    if (!annotationData[category]) {
+                        annotationData[category] = []; // Add new category if it doesn't exist
+                        setAnnotationData(div, annotationData);
+
+                        // Find the template for this category's checkboxes and add it to the menu
+                        const safeCategoryName = `${category.trim().replace(/^\d+/, "n$&").replace(/\s+/g, "-").replace(/[^a-zA-Z0-9-_]/g, "")}`;
+                        const categoryTemplate = document.getElementById('annotation-menu').querySelector(`.${safeCategoryName}-menu`);
+                        if (categoryTemplate) {
+                            const newCategoryUI = categoryTemplate.cloneNode(true);
+                            newCategoryUI.style.display = 'block';
+                            annotationMenu.querySelector('.category-btn').before(newCategoryUI);
+                        }
+                    }
+                    categoryDialog.style.display = 'none';
+                    document.removeEventListener('click', categorySelectionHandler);
+                }
+            };
+            document.addEventListener('click', categorySelectionHandler, { once: true });
+        });
+
+
+        // Right-click to open the menu
         region.element.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             event.stopPropagation();
             closeAllMenus();
-            const selectedValues = div.dataset.text ? div.dataset.text.split(', ').map(val => val.trim()) : [];
-            annotationMenu.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = selectedValues.includes(checkbox.value);
+
+            const annotationData = getAnnotationData(div);
+            
+            // Clear previous dynamic ULs
+            annotationMenu.querySelectorAll('ul:not([class*="-menu"])').forEach(ul => ul.remove());
+            
+            // Show all relevant category checklists
+            annotationMenu.querySelectorAll('ul[class*="-menu"]').forEach(ul => ul.style.display = 'none');
+            
+            Object.keys(annotationData).forEach(category => {
+                const safeCategoryName = `${category.trim().replace(/^\d+/, "n$&").replace(/\s+/g, "-").replace(/[^a-zA-Z0-9-_]/g, "")}`;
+                const categoryUI = annotationMenu.querySelector(`.${safeCategoryName}-menu`);
+                if (categoryUI) {
+                    categoryUI.style.display = 'block';
+                    // Check the correct boxes
+                    const selectedValues = annotationData[category] || [];
+                    categoryUI.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = selectedValues.includes(checkbox.value);
+                    });
+                }
             });
-            // Select the part to be displayed according to category
-            annotationMenu.querySelectorAll('ul').forEach(ul => ul.style.display = 'none'); // Hide all category first
-            const safeCategoryName = `${selectedTier.dataset.category.trim() // Remove leading and trailing spaces
-                .replace(/^\d+/, "n$&") // If it starts with digits, prefix them with "n"
-                .replace(/\s+/g, "-") // Replace all spaces with "-"
-                .replace(/[^a-zA-Z0-9-_]/g, "")}`; // Remove any characters except letters, numbers, "-" and "_"
-            annotationMenu.querySelector(`.${safeCategoryName}-menu`).style.display = "block";
-            // Set menu location
-            let menuX = event.clientX;
-            let menuY = event.clientY;
-            annotationMenu.style.display = 'block'; // First let the menu display and get its height
-            let menuHeight = annotationMenu.offsetHeight;
-            let menuWidth = annotationMenu.offsetWidth;
-            // Calculate whether it exceeds the bottom of the screen
-            if (menuY + menuHeight > window.innerHeight) {
-                menuY = window.innerHeight - menuHeight - 10; // Float the menu upwards, leaving a 10px gap
-            }
-            // Calculate whether it exceeds the right side of the screen
-            if (menuX + menuWidth > window.innerWidth) {
-                menuX = window.innerWidth - menuWidth - 10; // Move the menu to the left, leaving a 10px gap
-            }
+            
+            // Position and show menu...
+            let menuX = event.clientX, menuY = event.clientY;
+            annotationMenu.style.display = 'block';
+            let menuHeight = annotationMenu.offsetHeight, menuWidth = annotationMenu.offsetWidth;
+            if (menuY + menuHeight > window.innerHeight) menuY = window.innerHeight - menuHeight - 10;
+            if (menuX + menuWidth > window.innerWidth) menuX = window.innerWidth - menuWidth - 10;
             annotationMenu.style.left = `${menuX}px`;
             annotationMenu.style.top = `${menuY}px`;
         });
-        document.addEventListener('click', (event) => {
-            if (!annotationMenu.contains(event.target) && !event.target.classList.contains('okButton')) {
-                annotationMenu.style.display = 'none'; // Close menu
+        
+        // --- Updated Checkbox Change Handler ---
+        annotationMenu.addEventListener('change', (event) => {
+            if (event.target.type === 'checkbox') {
+                const checkbox = event.target;
+                const value = checkbox.value;
+                const categoryUL = checkbox.closest('ul');
+                const safeCategoryName = Array.from(categoryUL.classList).find(c => c.endsWith('-menu'));
+                
+                // Find original category name from a template on the page
+                const originalMenu = document.getElementById('annotation-menu');
+                const templateUL = originalMenu.querySelector(`.${safeCategoryName}`);
+                const categoryName = templateUL.querySelector('.header').textContent.trim();
+
+                const annotationData = getAnnotationData(div);
+                if (!annotationData[categoryName]) {
+                    annotationData[categoryName] = [];
+                }
+
+                const values = annotationData[categoryName];
+                const index = values.indexOf(value);
+
+                if (checkbox.checked && index === -1) {
+                    values.push(value);
+                } else if (!checkbox.checked && index > -1) {
+                    values.splice(index, 1);
+                }
+                
+                setAnnotationData(div, annotationData);
+                updateAnnotationDisplayText(div);
             }
         });
-        document.addEventListener("scroll", () => {
-            annotationMenu.style.display = 'none';
-        });
-        // Get the order of menu options
-        const menuOptions = Array.from(annotationMenu.querySelectorAll('input[type="checkbox"]')).map(
-            (checkbox) => checkbox.value
-        );
-        annotationMenu.querySelectorAll('.okButton').forEach(okButton => {
-            okButton.addEventListener('click', (event) => {
-                event.stopPropagation();
-                {#console.log("OK clicked, confirming selection...");#}
-                annotationMenu.style.display = 'none';
-            });
-        });
+
+        // Other menu event listeners (OK, Delete, etc.) remain largely the same...
+        annotationMenu.querySelectorAll('.okButton').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); annotationMenu.style.display = 'none'; }));
         annotationMenu.querySelectorAll("li").forEach(li => {
             li.addEventListener("click", (e) => {
                 const checkbox = li.querySelector('input[type="checkbox"]');
-                if (!checkbox) return;
-                if (e.target === checkbox) return;
+                if (!checkbox || e.target === checkbox) return;
                 checkbox.checked = !checkbox.checked;
                 checkbox.dispatchEvent(new Event("change", { bubbles: true }));
                 e.preventDefault();
             });
         });
-        annotationMenu.addEventListener('change', (event) => {
-            if (event.target.type === 'checkbox') {
-                const value = event.target.value;
-                const checked = event.target.checked;
-                {#console.log(` Value: ${value}, Checked: ${checked}`);#}
-                // Initialize or update div.dataset.text
-                const currentValues = div.dataset.text ? div.dataset.text.split(', ') : [];
-                // Update the value based on the check state of the checkbox
-                if (checked) {
-                    // If selected, add value
-                    if (!currentValues.includes(value)) {
-                        currentValues.push(value);
-                    }
-                } else {
-                    // If unchecked, remove the value
-                    const index = currentValues.indexOf(value);
-                    if (index > -1) {
-                        currentValues.splice(index, 1);
-                    }
-                }
-                // Sort by menu order currentValues
-                currentValues.sort((a, b) => menuOptions.indexOf(a) - menuOptions.indexOf(b));
-                // Update div.dataset.text and set it to a comma-delimited string
-                div.dataset.text = currentValues.join(', ');
-                div.title = currentValues.join(', ');
-                div.setAttribute('data-text', currentValues.join(', ')); // For front-end display
-                regions.getRegions()[0].setOptions({ content: currentValues.join(', ') });
-            }
-        });
-        annotationMenu.querySelectorAll('.deleteButton').forEach(okButton => {
-            okButton.addEventListener('click', (event) => {
-                event.stopPropagation(); // Prevent bubbling and click OK from triggering the body's click event
-                {#console.log("Delete clicked, confirming delete...");#}
-                annotationMenu.style.display = 'none'; // Click OK to hide the menu
-                selectedTier.removeChild(div);
+        annotationMenu.querySelectorAll('.deleteButton').forEach(btn => {
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                annotationMenu.style.display = 'none';
+                tier.removeChild(div);
                 regions.clearRegions();
-                const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
-                const pitchDiv = document.getElementById('chart');
-                [spectrogramDiv, pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
+                updateAllRegionOverlays(true);
             });
         });
-
-        //  Add synchronized Region to spectrogram and pitch layers
-        const createOverlay = (container, region) => {
-            Array.from(container.querySelectorAll('.region-overlay')).forEach(e => e.remove());
-            const duration = wavesurfer.getDuration();
-            const startX = (region.start / duration) * wavesurfer.getWrapper().scrollWidth - wavesurfer.getScroll();
-            const width = ((region.end - region.start) / duration) * wavesurfer.getWrapper().scrollWidth;
-            const overlay = document.createElement('div');
-            overlay.className = 'region-overlay';
-            overlay.style.position = 'absolute';
-            overlay.style.left = `${startX}px`;
-            overlay.style.width = `${width}px`;
-            overlay.style.top = '0';
-            overlay.style.bottom = '0';
-            overlay.style.backgroundColor = region.color;
-            overlay.style.pointerEvents = 'none';
-            overlay.style.zIndex = '1';
-            // Set an ID to facilitate subsequent deletion or synchronous update
-            overlay.dataset.regionId = region.id;
-            container.appendChild(overlay);
-        };
-        // Get two containers
-        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
-        const pitchDiv = document.getElementById('chart');
-        // Create two overlays
-        if (spectrogramDiv) createOverlay(spectrogramDiv, region);
-        if (pitchDiv) createOverlay(pitchDiv, region);
-
-    })
+    });
 
     regions.on('region-update', (region) => {
-        videoPlayer.currentTime = region.start
+        wavesurfer.setTime(region.start);
         region.element.title = `Start: ${region.start.toFixed(5)}s,\nEnd: ${region.end.toFixed(5)}s,\nDuration: ${(region.end - region.start).toFixed(5)}s`;
-        // Find the corresponding annotation block
         const annotation = selectedTier.querySelector(`.interval[id="${region.id}"]`);
         if (annotation) {
-            // Calculate new styles
             const startPercentage = (region.start / wavesurfer.getDuration()) * 100;
             const widthPercentage = ((region.end - region.start) / wavesurfer.getDuration()) * 100;
-            // Update the annotation style
             annotation.style.left = `${startPercentage}%`;
             annotation.style.width = `${widthPercentage}%`;
-            // Update the annotation data
             annotation.dataset.start = region.start.toFixed(5);
             annotation.dataset.end = region.end.toFixed(5);
         }
-        updateAllRegionOverlays()
+        updateAllRegionOverlays();
     });
 
-    const downloadTextGridButton = document.querySelector('#downloadTextGrid')
-    downloadTextGridButton.onclick = ()=>{
-        downloadTextGrid()
-    }
+    // Download button
+    document.querySelector('#downloadTextGrid').onclick = () => {
+        downloadTextGrid();
+    };
 
-    wavesurfer.on('ready', function () {
-        videoDuration = wavesurfer.getDuration();
-    });
 
-    function updatePlayLine1() {
-        var timeRatio = videoPlayer.currentTime / wavesurfer.getDuration();
-        var xPosition = timeRatio * width;
-        d3.select("#play-line")
-            .attr("x1", xPosition)
-            .attr("x2", xPosition);
-    }
-
-    function updatePlayLine2() {
-        const tiers = document.querySelectorAll("#tier-control > div"); // Get all tier containers
-        tiers.forEach(tier => {
-            const tierWidth = tier.offsetWidth;
-            const linePosition = (videoPlayer.currentTime / videoDuration) * tierWidth;
-            // Make sure the vertical line is within the tier container
-            if (linePosition >= 0 && linePosition <= tierWidth) {
-                let playLine = tier.querySelector(".play-line2"); // Find the vertical line in the current container
-                if (playLine) {
-                    playLine.style.left = `${linePosition}px`; // Update location
-                } else {
-                    // If there is no vertical line, create a new one
-                    playLine = document.createElement("div");
-                    playLine.classList.add("play-line2");
-                    playLine.style.position = "absolute";
-                    playLine.style.top = "0";
-                    playLine.style.bottom = "0";
-                    playLine.style.width = "1px";
-                    playLine.style.backgroundColor = "black";
-                    playLine.style.left = `${linePosition}px`;
-                    tier.style.position = "relative"; // Make sure the parent container is relatively positioned
-                    tier.appendChild(playLine);
-                }
-            }
-        });
-    }
-
-    function updateAllRegionOverlays() {
-        const regionsList = regions.getRegions();
-        const duration = wavesurfer.getDuration();
-        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
+    function updateAllRegionOverlays(clear = false) {
+        const spectrogramDiv = document.querySelector('div[part="spectrogram-emu"]');
         const pitchDiv = document.getElementById('chart');
         const containers = [spectrogramDiv, pitchDiv];
+
+        if (clear) {
+            containers.forEach(container => {
+                if (container) {
+                    container.querySelectorAll('.region-overlay').forEach(e => e.remove());
+                }
+            });
+            return;
+        }
+
+        const regionsList = regions.getRegions();
+        if (regionsList.length === 0) return;
+
+        const duration = wavesurfer.getDuration();
         const scrollLeft = wavesurfer.getScroll();
         const scrollWidth = wavesurfer.getWrapper().scrollWidth;
+
         regionsList.forEach(region => {
             containers.forEach(container => {
                 if (!container) return;
-                const overlay = container.querySelector(`.region-overlay[data-region-id="${region.id}"]`);
-                if (overlay) {
-                    const startX = (region.start / duration) * scrollWidth - scrollLeft;
-                    const width = ((region.end - region.start) / duration) * scrollWidth;
-                    overlay.style.left = `${startX}px`;
-                    overlay.style.width = `${width}px`;
+                let overlay = container.querySelector(`.region-overlay[data-region-id="${region.id}"]`);
+                if (!overlay) { // Create it if it doesn't exist
+                    overlay = document.createElement('div');
+                    overlay.className = 'region-overlay';
+                    overlay.dataset.regionId = region.id;
+                    overlay.style.cssText = `position: absolute; top: 0; bottom: 0; background-color: ${region.color}; pointer-events: none; z-index: 1;`;
+                    container.appendChild(overlay);
                 }
+                const startX = (region.start / duration) * scrollWidth - scrollLeft;
+                const width = ((region.end - region.start) / duration) * scrollWidth;
+                overlay.style.left = `${startX}px`;
+                overlay.style.width = `${width}px`;
             });
         });
     }
 
+    // WaveSurfer general event listeners
     wavesurfer.on('ready', function () {
-        soundSeconds = wavesurfer.getDuration();
+        videoDuration = wavesurfer.getDuration();
+        soundSeconds = videoDuration;
+        if (videoPlayer) {
+            const observer = new IntersectionObserver(async (entries) => {
+                if (entries[0].intersectionRatio < 0.5 && document.pictureInPictureElement !== videoPlayer) {
+                    await videoPlayer.requestPictureInPicture();
+                } else if (entries[0].intersectionRatio >= 0.5 && document.pictureInPictureElement === videoPlayer) {
+                    await document.exitPictureInPicture();
+                }
+            }, { threshold: [0, 0.5, 1.0] });
+            observer.observe(videoPlayer);
+        }
         var totalPixels = $("#waveform").innerWidth() - 140;
         pxPerSec = totalPixels / soundSeconds;
         wavesurfer.zoom(pxPerSec);
-        currentZoom = pxPerSec
+        currentZoom = pxPerSec;
         setGraphParams(totalPixels);
         initializeGraph();
         $('#slider').attr("min", pxPerSec);
         $('#slider').val(pxPerSec);
+        loadAnnotations();
     });
 
-    // Listen for mouse wheel events to achieve zooming
+    // D3 Graph and Playline functions
+    function updatePlayLine1() {
+        if (!wavesurfer || !width) return;
+        var timeRatio = wavesurfer.getCurrentTime() / wavesurfer.getDuration();
+        var xPosition = timeRatio * width;
+        d3.select("#play-line").attr("x1", xPosition).attr("x2", xPosition);
+    }
+    function updatePlayLine2() {
+        if (!wavesurfer) return;
+        const tiers = document.querySelectorAll("#tier-control > div");
+        tiers.forEach(tier => {
+            const tierWidth = tier.offsetWidth;
+            const linePosition = (wavesurfer.getCurrentTime() / videoDuration) * tierWidth;
+            if (linePosition >= 0 && linePosition <= tierWidth) {
+                let playLine = tier.querySelector(".play-line2");
+                if (!playLine) {
+                    playLine = document.createElement("div");
+                    playLine.className = "play-line2";
+                    playLine.style.cssText = "position: absolute; top: 0; bottom: 0; width: 1px; background-color: black; pointer-events: none; z-index: 10;";
+                    tier.style.position = "relative";
+                    tier.appendChild(playLine);
+                }
+                playLine.style.left = `${linePosition}px`;
+            }
+        });
+    }
+
+    // Zoom and Scroll listeners
     document.getElementById('drawings').addEventListener('wheel', function(event) {
         event.preventDefault();
-        let newZoom = event.deltaY < 0 ? currentZoom + 500 : currentZoom - 500; // Scroll wheel up to zoom in, scroll wheel down to zoom out
-        newZoom = Math.max(pxPerSec, Math.min(80000, newZoom)); // Limit zoom range
+        let newZoom = event.deltaY < 0 ? currentZoom + 500 : currentZoom - 500;
+        newZoom = Math.max(pxPerSec, Math.min(80000, newZoom));
         wavesurfer.zoom(newZoom);
-        $('#slider').val(newZoom);
-        zoom(soundSeconds * newZoom);
-        currentZoom = newZoom;
-        updatePlayLine1();
-        updatePlayLine2();
     });
 
-    wavesurfer.on('zoom', function (pxPerSec) {
-        $(".interval-tier, .point-tier").css("width", (soundSeconds * pxPerSec) + "px");
-        $('#slider').val(pxPerSec)
-        zoom(soundSeconds * pxPerSec)
-        currentZoom = pxPerSec
+    wavesurfer.on('zoom', function (newPxPerSec) {
+        $(".interval-tier, .point-tier").css("width", (soundSeconds * newPxPerSec) + "px");
+        $('#slider').val(newPxPerSec);
+        zoom(soundSeconds * newPxPerSec);
+        currentZoom = newPxPerSec;
         updatePlayLine1();
         updatePlayLine2();
-        if (pxPerSec > 1000) {
-            wavesurfer.setOptions({ autoScroll: false });
-        } else {
-            wavesurfer.setOptions({ autoScroll: true });
-        }
+        wavesurfer.setOptions({ autoScroll: newPxPerSec <= 1000 });
         updateAllRegionOverlays();
     });
 
@@ -694,181 +801,62 @@
 
     var slider = document.querySelector('#slider');
     slider.oninput = function () {
-        var zoomLevel = Number(slider.value);
-        currentZoom = zoomLevel
-        wavesurfer.zoom(zoomLevel);
-        zoom(soundSeconds * zoomLevel);
-        updatePlayLine1();
-        updatePlayLine2();
+        wavesurfer.zoom(Number(this.value));
     };
 
-    const zoomInBtn = document.querySelector(".glyphicon-zoom-in");
-    const zoomOutBtn = document.querySelector(".glyphicon-zoom-out");
+    document.querySelector(".glyphicon-zoom-in").addEventListener("click", () => wavesurfer.zoom(Number(slider.value) + 800));
+    document.querySelector(".glyphicon-zoom-out").addEventListener("click", () => wavesurfer.zoom(Number(slider.value) - 800));
 
-    zoomInBtn.addEventListener("click", () => {
-        const newValue = Number(slider.value) + 800;
-        currentZoom = newValue
-        wavesurfer.zoom(newValue);
-        zoom(soundSeconds * newValue);
-        updatePlayLine1();
-        updatePlayLine2();
-    });
+    if (videoPlayer) {
+        const syncScrollToVideo = () => {
+            if (slider.value > 1000) {
+                const totalWidth = wavesurfer.getWrapper().scrollWidth;
+                const visibleDuration = wavesurfer.getDuration() * (wavesurfer.getWidth() / totalWidth);
+                const centerTime = videoPlayer.currentTime - visibleDuration / 2;
+                wavesurfer.setScrollTime(centerTime);
+            }
+        };
+        videoPlayer.addEventListener('seeked', syncScrollToVideo);
+        videoPlayer.addEventListener('pause', syncScrollToVideo);
+    }
 
-    zoomOutBtn.addEventListener("click", () => {
-        const newValue = Number(slider.value) - 800;
-        if (newValue>pxPerSec) {
-            currentZoom = newValue
-            wavesurfer.zoom(newValue);
-            zoom(soundSeconds * newValue);
-            updatePlayLine1();
-            updatePlayLine2();
-        }
-    });
-
-    videoPlayer.addEventListener('seeked', () => {
-        if (slider.value > 1000) {
-            const wrapper = wavesurfer.getWrapper();
-            const totalWidth = wrapper.scrollWidth;
-            const visibleDuration = wavesurfer.getDuration() * (wavesurfer.getWidth()  / totalWidth); // Calculate visible time width
-            const centerTime = videoPlayer.currentTime - visibleDuration / 2;
-            wavesurfer.setScrollTime(centerTime);
-        }
-    });
-    videoPlayer.addEventListener('pause', () => {
-        if (slider.value > 1000) {
-            const wrapper = wavesurfer.getWrapper();
-            const totalWidth = wrapper.scrollWidth;
-            const visibleDuration = wavesurfer.getDuration() * (wavesurfer.getWidth() / totalWidth);
-            const centerTime = videoPlayer.currentTime - visibleDuration / 2;
-            wavesurfer.setScrollTime(centerTime);
-        }
-    });
-
+    // D3 Graphing Functions
     function setGraphParams(newWidth) {
-        margin = {top: 20, right: 40, bottom: 30, left: 100},
-            width = newWidth /*- margin.left - margin.right*/,
-            height = 158 /*- margin.top*/ - margin.bottom;
-
+        margin = {top: 20, right: 40, bottom: 30, left: 100};
+        width = newWidth;
+        height = 158 - margin.bottom;
         parseTime = d3.time.format("%S.%L").parse;
-
         x = d3.time.scale().range([0, width]);
         y0 = d3.scale.linear().range([height, 0]);
         y1 = d3.scale.linear().range([height, 0]);
-
-        xAxis = d3.svg.axis().scale(x)
-            .orient("bottom").ticks(d3.time.seconds, 1)
-            .tickFormat(d3.time.format("%M:%S"));
-
-        yAxisLeft = d3.svg.axis().scale(y0)
-            .orient("left").ticks(2);
-
-        yAxisRight = d3.svg.axis().scale(y1)
-            .orient("right").ticks(2);
-
-        valueline = d3.svg.line()
-            .interpolate("basis")
-            .defined(function (d) {
-                return d.pitch != null && d.pitch != undefined && !isNaN(d.pitch);
-            })
-            .x(function (d) {
-                return x(d.time);
-            })
-            .y(function (d) {
-                return y0(d.pitch);
-            });
-
-        valueline2 = d3.svg.line()
-            .interpolate("basis")
-            .defined(function (d) {
-                return d.intensity != null && d.intensity != undefined && !isNaN(d.intensity);
-            })
-            .x(function (d) {
-                return x(d.time);
-            })
-            .y(function (d) {
-                return y1(d.intensity);
-            });
-
-        svg = d3.select("#chart").append("svg")
-            .attr("width", width /*+ margin.left + margin.right*/)
-            .attr("height", height /*+ margin.top*/ + margin.bottom)
-            .attr("id", "lines")
-            .attr("class", "bg-colorWhite")
-            .append("g");
+        xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(d3.time.seconds, 1).tickFormat(d3.time.format("%M:%S"));
+        yAxisLeft = d3.svg.axis().scale(y0).orient("left").ticks(2);
+        yAxisRight = d3.svg.axis().scale(y1).orient("right").ticks(2);
+        valueline = d3.svg.line().interpolate("basis").defined(d => d.pitch != null && !isNaN(d.pitch)).x(d => x(d.time)).y(d => y0(d.pitch));
+        valueline2 = d3.svg.line().interpolate("basis").defined(d => d.intensity != null && !isNaN(d.intensity)).x(d => x(d.time)).y(d => y1(d.intensity));
+        svg = d3.select("#chart").append("svg").attr("width", width).attr("height", height + margin.bottom).attr("id", "lines").attr("class", "bg-colorWhite").append("g");
     }
-
     function initializeGraph() {
         d3.tsv("{{ graphData }}", function (error, data)  {
             if (error) throw error;
-
-            data.forEach(function (d) {
+            data.forEach(d => {
                 d.time = parseFloat(d.time) * 1000;
                 d.pitch = +d.pitch;
                 d.intensity = +d.intensity;
             });
-
-            x.domain(d3.extent(data, function (d) {
-                return d.time;
-            }));
-            y0.domain([Math.min(d3.min(data, function (d) {
-                return Math.min(d.pitch);
-            }), 75), Math.max(d3.max(data, function (d) {
-                return Math.max(d.pitch);
-            }), 500)]);
-            y1.domain([Math.min(d3.min(data, function (d) {
-                return Math.min(d.intensity);
-            }), 50), Math.max(d3.max(data, function (d) {
-                return Math.max(d.intensity);
-            }), 100)]);
-
-            svg.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(0," + height + ")")
-                .call(xAxis);
-
-            d3.select("#axis").append("g")
-                .attr("class", "y axis a-left fill-color2")
-                .call(yAxisLeft)
-                .append("text")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 6)
-                .attr("dy", ".71em")
-                .style("text-anchor", "end")
-                .text("Hz");
-
-            d3.select("#axis").append("g")
-                .attr("class", "y axis a-right fill-color3")
-                .attr("transform", "translate(" + width + " ,0)")
-                .call(yAxisRight)
-                .append("text")
-                .attr("transform", "rotate(90)")
-                .attr("y", 6)
-                .attr("dy", ".71em")
-                .text("dB");
-
-            svg.append("path")
-                .datum(data)
-                .attr("class", "line2 color3")
-                .attr("d", valueline2);
-
-            svg.append("path")
-                .datum(data)
-                .attr("class", "line1 color2")
-                .attr("d", valueline);
+            x.domain(d3.extent(data, d => d.time));
+            y0.domain([Math.min(d3.min(data, d => d.pitch), 75), Math.max(d3.max(data, d => d.pitch), 500)]);
+            y1.domain([Math.min(d3.min(data, d => d.intensity), 50), Math.max(d3.max(data, d => d.intensity), 100)]);
+            svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+            d3.select("#axis").append("g").attr("class", "y axis a-left fill-color2").call(yAxisLeft).append("text").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", ".71em").style("text-anchor", "end").text("Hz");
+            d3.select("#axis").append("g").attr("class", "y axis a-right fill-color3").attr("transform", "translate(" + width + " ,0)").call(yAxisRight).append("text").attr("transform", "rotate(90)").attr("y", 6).attr("dy", ".71em").text("dB");
+            svg.append("path").datum(data).attr("class", "line2 color3").attr("d", valueline2);
+            svg.append("path").datum(data).attr("class", "line1 color2").attr("d", valueline);
+            svg.append("line").attr("id", "play-line").attr("x1", 0).attr("x2", 0).attr("y1", 0).attr("y2", height).attr("stroke", "black").attr("stroke-width", 0.8);
         });
-
-        svg.append("line")
-            .attr("id", "play-line")
-            .attr("x1", 0)
-            .attr("x2", 0)
-            .attr("y1", 0)
-            .attr("y2", height)
-            .attr("stroke", "black")
-            .attr("stroke-width", 0.8);
     }
 
-    // Waveform synchronization, update the position of the vertical line
-    wavesurfer.on('timeupdate', function (currentTime) {
+    wavesurfer.on('timeupdate', () => {
         updatePlayLine1();
         updatePlayLine2();
     });
@@ -877,94 +865,58 @@
         $("svg").attr("width", value + "px");
         width = value;
         x = d3.time.scale().range([0, width]);
-
         $(".y.axis.a-right").attr("transform", "translate(" + Math.min($("#lines").outerWidth(), $("#chart").outerWidth()) + " ,0)");
+        valueline = d3.svg.line().interpolate("basis").defined(d => d.pitch != null && !isNaN(d.pitch)).x(d => x(d.time)).y(d => y0(d.pitch));
+        valueline2 = d3.svg.line().interpolate("basis").defined(d => d.intensity != null && !isNaN(d.intensity)).x(d => x(d.time)).y(d => y1(d.intensity));
 
         d3.tsv("{{ graphData }}", function (error, data)  {
             var svg = d3.select("#drawings").transition();
-
-            data.forEach(function (d) {
+            data.forEach(d => {
                 d.time = parseFloat(d.time) * 1000;
                 d.pitch = +d.pitch;
                 d.intensity = +d.intensity;
             });
-
-            x.domain(d3.extent(data, function (d) {
-                return d.time;
-            }));
-
-            xAxis = d3.svg.axis().scale(x)
-                .orient("bottom").ticks(getSmartTickCount(x))
-                .tickFormat(generateTickFormat());
-
-            svg.select(".line1")
-                .duration(0)
-                .attr("d", valueline(data));
-
-            svg.select(".line2")
-                .duration(0)
-                .attr("d", valueline2(data));
-
-            svg.select(".x.axis") // change the x axis
-                .duration(0)
-                .call(xAxis);
+            x.domain(d3.extent(data, d => d.time));
+            xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(getSmartTickCount(x)).tickFormat(generateTickFormat());
+            svg.select(".line1").duration(0).attr("d", valueline(data));
+            svg.select(".line2").duration(0).attr("d", valueline2(data));
+            svg.select(".x.axis").duration(0).call(xAxis);
         });
     }
-
     function generateTickFormat() {
-        return function (d) {
-            {#console.log('Number(slider.value)',Number(slider.value))#}
-            if (Number(slider.value) < 100) {
-                return (d / 1000).toFixed(0) + "s";
-            } else {
-                return (d / 1000).toFixed(1) + "s";
-            }
-        };
+        return d => (d / 1000).toFixed(Number(slider.value) < 100 ? 0 : 1) + "s";
     }
-
     function getSmartTickCount(xScale) {
-        const domain = xScale.domain();
-        const duration = domain[1] - domain[0];  // millisecond
-        const maxTickDensity = 100; // One tick every 100ms = 0.1s
-        const maxTicks = Math.floor(duration / maxTickDensity);  // Maximum number of ticks
-        const defaultTickCount = Math.floor(width / 50);  // original logic
-        return Math.min(defaultTickCount, maxTicks);  // No more than maxTicks
+        const duration = xScale.domain()[1] - xScale.domain()[0];
+        const maxTicks = Math.floor(duration / 100);
+        return Math.min(Math.floor(width / 50), maxTicks);
     }
-
-    // Highlight logic
     wavesurfer.on('audioprocess', () => {
         const currentTime = wavesurfer.getCurrentTime();
-        // Highlight Interval
         document.querySelectorAll('.interval').forEach(interval => {
             const start = parseFloat(interval.dataset.start);
             const end = parseFloat(interval.dataset.end);
-            if (currentTime >= start && currentTime <= end) {
-                interval.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // Highlight orange
-            } else {
-                interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)";
-            }
+            interval.style.backgroundColor = (currentTime >= start && currentTime <= end) ? "rgba(255, 165, 0, 0.6)" : "rgba(173, 216, 230, 0.6)";
         });
-        // Highlight Point
         document.querySelectorAll('.point').forEach(point => {
             const time = parseFloat(point.dataset.time);
-            if (Math.abs(currentTime - time) < 0.1) {
-                point.style.backgroundColor = "rgba(255, 0, 0, 0.6)"; // Highlight red
-            } else {
-                point.style.backgroundColor = "rgba(144, 238, 144, 0.6)";
-            }
+            point.style.backgroundColor = (Math.abs(currentTime - time) < 0.1) ? "rgba(255, 0, 0, 0.6)" : "rgba(144, 238, 144, 0.6)";
         });
     });
 
-    // Collect annotation
+    // Tier, Annotation, and TextGrid logic
+    const nameContainer = document.getElementById("name-container");
+    const tierContainer = document.getElementById("tier-control");
+
     const collectAnnotations = () => {
-        const tiers = Array.from(document.querySelectorAll("#tier-control > div")); // Get all tiers
+        const tiers = Array.from(document.querySelectorAll("#tier-control > div"));
         const annotations = [];
 
         tiers.forEach(tier => {
             const tierType = tier.classList.contains("interval-tier") ? "interval" : "point";
             const tierId = tier.id;
             const tierInput = document.getElementById(`${tierId}name`);
-            const tierName = tierInput?.value || tierId; // Use the input box value or the default ID as the name
+            const tierName = tierInput?.value || tierId;
             const category = tier.dataset.category || "default";
 
             if (tierType === "interval") {
@@ -974,29 +926,19 @@
                     text: interval.dataset.text || ""
                 })).filter(item => !isNaN(item.xmin) && !isNaN(item.xmax) && item.xmin < item.xmax);
                 intervalAnnotations.sort((a, b) => a.xmin - b.xmin);
-                annotations.push({
-                    type: "IntervalTier",
-                    category: category,
-                    name: tierName,
-                    data: intervalAnnotations
-                });
+                annotations.push({ type: "IntervalTier", category: category, name: tierName, data: intervalAnnotations });
             } else if (tierType === "point") {
                 const pointAnnotations = Array.from(tier.getElementsByClassName("point")).map(point => ({
                     number: parseFloat(point.dataset.time),
                     mark: point.dataset.text || ""
                 }));
                 pointAnnotations.sort((a, b) => a.number - b.number);
-                annotations.push({
-                    type: "TextTier",
-                    name: tierName,
-                    data: pointAnnotations
-                });
+                annotations.push({ type: "TextTier", name: tierName, data: pointAnnotations });
             }
         });
         return annotations;
     };
 
-    // Generate TextGrid file content
     const generateTextGridContent = (annotations, videoDuration) => {
         let content = `File type = "ooTextFile"\nObject class = "TextGrid"\n\n`;
         content += `xmin = 0\nxmax = ${videoDuration}\ntiers? <exists>\nsize = ${annotations.length}\nitem []:\n`;
@@ -1021,8 +963,8 @@
         });
         return content;
     };
+
     const fileName = "{{ fileName }}";
-    // File download logic
     const downloadTextGrid = () => {
         const annotations = collectAnnotations();
         const textGridContent = generateTextGridContent(annotations, videoDuration);
@@ -1037,309 +979,251 @@
         URL.revokeObjectURL(url);
     };
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const nameContainer = document.getElementById("name-container")
-        const tierContainer = document.getElementById("tier-control");
-        // Bind the function of Tier click event
-        const bindTierClickEvent = (tier, tierType) => {
-            let clickTimeout;
-            tier.addEventListener("click", (event) => {
-                if (event.target.classList.contains("handle-left") || event.target.classList.contains("handle-right")) {
-                    // Get the parent element interval
-                    const intervalElement = event.target.parentElement;
-                    if (intervalElement && intervalElement.classList.contains("interval")) {
-                        // Get the interval's dataset.start
-                        const start = parseFloat(intervalElement.dataset.start);
-                        const end = parseFloat(intervalElement.dataset.end);
-                        videoPlayer.currentTime = start; // Jump to the start time of the interval
-                        // Reset the background color of all intervals to the default blue
-                        document.querySelectorAll(".interval").forEach((interval) => {
-                            interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // blue
-                        });
-                        // Set the currently clicked interval to orange
-                        intervalElement.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // orange
-
-                        selectedAnotation = intervalElement.id;
-                        isintervalSelecting = true;
-                        regions.clearRegions()
-                        regions.addRegion({
-                            id: selectedAnotation,
-                            content: intervalElement.title,
-                            start: start,
-                            end: end, // Initially, start and end are the same.
-                            color: 'rgba(0, 123, 255, 0.5)'
-                        });
-                    }
-                    return; // Return directly to avoid executing the new annotation logic
+    const bindTierClickEvent = (tier, tierType) => {
+        tier.addEventListener("click", (event) => {
+            if (event.target.classList.contains("handle-left") || event.target.classList.contains("handle-right")) {
+                const intervalElement = event.target.parentElement;
+                if (intervalElement && intervalElement.classList.contains("interval")) {
+                    const start = parseFloat(intervalElement.dataset.start);
+                    const end = parseFloat(intervalElement.dataset.end);
+                    wavesurfer.setTime(start);
+                    document.querySelectorAll(".interval").forEach(i => i.style.backgroundColor = "rgba(173, 216, 230, 0.6)");
+                    intervalElement.style.backgroundColor = "rgba(255, 165, 0, 0.6)";
+                    selectedAnotation = intervalElement.id;
+                    isintervalSelecting = true;
+                    regions.clearRegions();
+                    regions.addRegion({ id: selectedAnotation, content: intervalElement.title, start: start, end: end, color: 'rgba(0, 123, 255, 0.5)' });
                 }
-                // If you click on a "point" or "interval", jump directly to the corresponding time
-                if (event.target.classList.contains("point") || event.target.classList.contains("interval")) {
-                    // Reset the background color of all intervals to the default blue
-                    document.querySelectorAll(".interval").forEach((interval) => {
-                        interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // blue
-                    });
-                    // Set the currently clicked interval to orange
-                    event.target.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // orange
-                    if (event.target.classList.contains("point")) {
-                        const time = parseFloat(event.target.dataset.time);
-                        videoPlayer.currentTime = time; // Jump to the corresponding time point
-                        {#console.log(`Point clicked, jumping to time: ${time}`);#}
-                    } else if (event.target.classList.contains("interval")) {
-                        // Handle click event logic for "interval"
-                        const start = parseFloat(event.target.dataset.start);
-                        const end = parseFloat(event.target.dataset.end);
-
-                        selectedAnotation = event.target.id;
-                        isintervalSelecting = true;
-                        regions.clearRegions()
-                        regions.addRegion({
-                            id: selectedAnotation,
-                            content: event.target.title,
-                            start: start,
-                            end: end, // Initially, start and end are the same.
-                            color: 'rgba(0, 123, 255, 0.5)'
-                        });
-                        // Jump to the start time and start playing
-                        videoPlayer.currentTime = start;
-                    }
-                    return; // Return directly to avoid executing the new annotation logic
+                return;
+            }
+            if (event.target.classList.contains("point") || event.target.classList.contains("interval")) {
+                document.querySelectorAll(".interval").forEach(i => i.style.backgroundColor = "rgba(173, 216, 230, 0.6)");
+                event.target.style.backgroundColor = "rgba(255, 165, 0, 0.6)";
+                if (event.target.classList.contains("point")) {
+                    wavesurfer.setTime(parseFloat(event.target.dataset.time));
+                } else if (event.target.classList.contains("interval")) {
+                    const start = parseFloat(event.target.dataset.start);
+                    const end = parseFloat(event.target.dataset.end);
+                    selectedAnotation = event.target.id;
+                    isintervalSelecting = true;
+                    regions.clearRegions();
+                    regions.addRegion({ id: selectedAnotation, content: event.target.title, start: start, end: end, color: 'rgba(0, 123, 255, 0.5)' });
+                    wavesurfer.setTime(start);
                 }
-                clearTimeout(clickTimeout); // Clear the effects of double-click
+                return;
+            }
+        });
+    };
+
+
+    function addPointTier() {
+            let index = 0;
+            let newTierId;
+            while(true) {
+                index++;
+                newTierId = `tier${index}`;
+                if (!document.getElementById(newTierId)) break;
+            }
+
+            const newTier = document.createElement("div");
+            newTier.style.width = (soundSeconds * currentZoom) + "px";
+            newTier.style.left = -wavesurfer.getScroll() + 'px';
+            newTier.id = newTierId;
+            newTier.className = "point-tier";
+            
+            addTierNames(newTier);
+            tierContainer.appendChild(newTier);
+            
+            // When a point tier is clicked, add a point annotation
+            newTier.addEventListener('click', (event) => {
+                // Ignore clicks on existing points
+                if (event.target.classList.contains('point')) return;
+
+                const tierRect = newTier.getBoundingClientRect();
+                const clickX = event.clientX - tierRect.left;
+                const timeRatio = clickX / tierRect.width;
+                const time = timeRatio * videoDuration;
+
+                const pointId = `point-${newTier.id}-${Date.now()}`;
+                addAnnotation(newTier, { type: 'point', time: time, id: pointId });
             });
+
+            return newTier;
         };
 
-        // add annotation function
-        addAnnotation = (tier, data) => {
-            const div = document.createElement("div");
-            if (data.type === "interval") {
-                div.className = "interval";
-                div.id = data.id; // Link the region ID
-                div.title = data.text ? data.text : "";
-                div.dataset.start = data.start.toFixed(5);
-                div.dataset.end = data.end.toFixed(5);
-                div.dataset.text = data.text ? data.text : "";
-                const startPercentage = Math.max(0, Math.min((data.start / videoDuration) * 100, 100));
-                const widthPercentage = Math.max(0, Math.min(((data.end - data.start) / videoDuration) * 100, 100));
-                div.style.left = startPercentage + "%";
-                div.style.width = widthPercentage + "%";
 
-                const handleLeft = document.createElement('div');
-                handleLeft.className = 'handle handle-left';
-                const handleRight = document.createElement('div');
-                handleRight.className = 'handle handle-right';
-            } else if (data.type === "point") {
-                div.className = "point";
-                div.dataset.time = data.time.toFixed(5);
-                const timePercentage = Math.max(0, Math.min((data.time / videoDuration) * 100, 100));
-                div.style.left = timePercentage + "%";
-            }
-            tier.appendChild(div);
+
+    addAnnotation = (tier, data) => {
+        const div = document.createElement("div");
+        if (data.type === "interval") {
+            div.className = "interval";
+            div.id = data.id;
+            div.title = data.text || "";
+            div.dataset.start = data.start.toFixed(5);
+            div.dataset.end = data.end.toFixed(5);
+            div.dataset.text = data.text || "";
+            // Keep a structured version of annotations for sub-categories
+            div.dataset.annotations = JSON.stringify(data.annotations || {});
+            const startPercentage = Math.max(0, Math.min((data.start / videoDuration) * 100, 100));
+            const widthPercentage = Math.max(0, Math.min(((data.end - data.start) / videoDuration) * 100, 100));
+            div.style.left = startPercentage + "%";
+            div.style.width = widthPercentage + "%";
+        
+        // --- START: ADD THIS 'ELSE IF' BLOCK ---
+        } else if (data.type === "point") {
+            div.className = "point";
+            div.id = data.id;
+            div.dataset.time = data.time.toFixed(5);
+            div.dataset.text = data.text || "";
+            const timePercentage = Math.max(0, Math.min((data.time / videoDuration) * 100, 100));
+            div.style.left = `calc(${timePercentage}% - 2px)`; // Center the point marker
+        // --- END: ADD THIS 'ELSE IF' BLOCK ---
+        }
+        
+        tier.appendChild(div);
 
             const annotationMenu = document.getElementById("annotation-menu").cloneNode(true);
-            document.body.appendChild(annotationMenu); // Add to page
+            document.body.appendChild(annotationMenu);
             div.addEventListener('contextmenu', (event) => {
-                event.stopPropagation(); // Prevent event bubbling and triggering the contextmenu event of the parent element
-                event.preventDefault(); // Block default right-click menu
+                event.stopPropagation();
+                event.preventDefault();
                 closeAllMenus();
-                document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
-                document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
+                document.querySelectorAll('.interval-tier, .point-tier').forEach(t => t.classList.remove('selected'));
                 tier.classList.add('selected');
-                selectedTier = tier; // Get the selected tier ID
+                selectedTier = tier;
                 const start = parseFloat(event.target.dataset.start);
                 const end = parseFloat(event.target.dataset.end);
                 selectedAnotation = event.target.id;
                 isintervalSelecting = true;
-                regions.clearRegions()
-                regions.addRegion({
-                    id: selectedAnotation,
-                    content: event.target.title,
-                    start: start,
-                    end: end, // Initially, start and end are the same.
-                    color: 'rgba(0, 123, 255, 0.5)',
-                });
-                videoPlayer.currentTime = start;
-                document.querySelectorAll(".interval").forEach((interval) => {
-                    interval.style.backgroundColor = "rgba(173, 216, 230, 0.6)"; // blue
-                });
-                div.style.backgroundColor = "rgba(255, 165, 0, 0.6)"; // orange
+                regions.clearRegions();
+                regions.addRegion({ id: selectedAnotation, content: event.target.title, start: start, end: end, color: 'rgba(0, 123, 255, 0.5)' });
+                wavesurfer.setTime(start);
+                document.querySelectorAll(".interval").forEach(i => i.style.backgroundColor = "rgba(173, 216, 230, 0.6)");
+                div.style.backgroundColor = "rgba(255, 165, 0, 0.6)";
                 const selectedValues = div.dataset.text ? div.dataset.text.split(', ').map(val => val.trim()) : [];
-                annotationMenu.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = selectedValues.includes(checkbox.value);
-                });
-                // Select the part to be displayed according to category
-                annotationMenu.querySelectorAll('ul').forEach(ul => ul.style.display = 'none'); // Hide all categories first
-
-                const safeCategoryName = `${tier.dataset.category.trim() // Remove leading and trailing spaces
-                    .replace(/^\d+/, "n$&") // If it starts with digits, prefix them with "n"
-                    .replace(/\s+/g, "-") // Replace all spaces with "-"
-                    .replace(/[^a-zA-Z0-9-_]/g, "")}`; // Remove any characters except letters, numbers, "-" and "_"
-                annotationMenu.querySelector(`.${safeCategoryName}-menu`).style.display = "block";
-                // Set menu location
-                let menuX = event.clientX;
-                let menuY = event.clientY;
-                annotationMenu.style.display = 'block'; // First let the menu display and get its height
-                let menuHeight = annotationMenu.offsetHeight;
-                let menuWidth = annotationMenu.offsetWidth;
-                // Calculate whether it exceeds the bottom of the screen
-                if (menuY + menuHeight > window.innerHeight) {
-                    menuY = window.innerHeight - menuHeight - 10; // Float the menu upwards, leaving a 10px gap
-                }
-                // Calculate whether it exceeds the right side of the screen
-                if (menuX + menuWidth > window.innerWidth) {
-                    menuX = window.innerWidth - menuWidth - 10; // Move the menu to the left, leaving a 10px gap
-                }
+                annotationMenu.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = selectedValues.includes(checkbox.value));
+                annotationMenu.querySelectorAll('ul').forEach(ul => ul.style.display = 'none');
+                const safeCategoryName = `${tier.dataset.category.trim().replace(/^\d+/, "n$&").replace(/\s+/g, "-").replace(/[^a-zA-Z0-9-_]/g, "")}`;
+                const categorySpecificMenu = annotationMenu.querySelector(`.${safeCategoryName}-menu`);
+                if(categorySpecificMenu) categorySpecificMenu.style.display = "block";
+                
+                let menuX = event.clientX, menuY = event.clientY;
+                annotationMenu.style.display = 'block';
+                let menuHeight = annotationMenu.offsetHeight, menuWidth = annotationMenu.offsetWidth;
+                if (menuY + menuHeight > window.innerHeight) menuY = window.innerHeight - menuHeight - 10;
+                if (menuX + menuWidth > window.innerWidth) menuX = window.innerWidth - menuWidth - 10;
                 annotationMenu.style.left = `${menuX}px`;
                 annotationMenu.style.top = `${menuY}px`;
             });
             document.addEventListener('click', (event) => {
                 if (!annotationMenu.contains(event.target) && !event.target.classList.contains('okButton')) {
-                    annotationMenu.style.display = 'none'; // Close menu
+                    annotationMenu.style.display = 'none';
                 }
             });
-            document.addEventListener("scroll", () => {
-                annotationMenu.style.display = 'none';
-            });
-            // Get the menu option order
-            const menuOptions = Array.from(annotationMenu.querySelectorAll('input[type="checkbox"]')).map(
-                (checkbox) => checkbox.value
-            );
-            annotationMenu.querySelectorAll('.okButton').forEach(okButton => {
-                okButton.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    {#console.log("OK clicked, confirming selection...");#}
-                    annotationMenu.style.display = 'none';
-                });
-            });
+            document.addEventListener("scroll", () => annotationMenu.style.display = 'none');
+            const menuOptions = Array.from(annotationMenu.querySelectorAll('input[type="checkbox"]')).map(cb => cb.value);
+            annotationMenu.querySelectorAll('.okButton').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); annotationMenu.style.display = 'none'; }));
             annotationMenu.querySelectorAll("li").forEach(li => {
                 li.addEventListener("click", (e) => {
                     const checkbox = li.querySelector('input[type="checkbox"]');
-                    if (!checkbox) return;
-                    if (e.target === checkbox) return;
+                    if (!checkbox || e.target === checkbox) return;
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event("change", { bubbles: true }));
                     e.preventDefault();
                 });
             });
-            // Listen for the selection state of the checkbox
             annotationMenu.addEventListener('change', (event) => {
                 if (event.target.type === 'checkbox') {
                     const value = event.target.value;
                     const checked = event.target.checked;
-                    {#console.log(` Value: ${value}, Checked: ${checked}`);#}
-                    // Initialize or update div.dataset.text
-                    const currentValues = div.dataset.text ? div.dataset.text.split(', ') : [];
-                    // Update the value based on the check state of the checkbox
-                    if (checked) {
-                        // If selected, add value
-                        if (!currentValues.includes(value)) {
-                            currentValues.push(value);
-                        }
-                    } else {
-                        // If unchecked, remove the value
-                        const index = currentValues.indexOf(value);
-                        if (index > -1) {
-                            currentValues.splice(index, 1);
-                        }
-                    }
-                    // Sort by menu order currentValues
+                    let currentValues = div.dataset.text ? div.dataset.text.split(', ').filter(v => v) : [];
+                    const index = currentValues.indexOf(value);
+                    if (checked && index === -1) currentValues.push(value);
+                    else if (!checked && index > -1) currentValues.splice(index, 1);
                     currentValues.sort((a, b) => menuOptions.indexOf(a) - menuOptions.indexOf(b));
-                    // Update div.dataset.text and set it to a comma-delimited string
-                    div.dataset.text = currentValues.join(', ');
-                    div.title = currentValues.join(', ');
-                    div.setAttribute('data-text', currentValues.join(', ')); // For front-end display
-                    regions.getRegions()[0].setOptions({ content: currentValues.join(', ') });
+                    const newText = currentValues.join(', ');
+                    div.dataset.text = newText;
+                    div.title = newText;
+                    regions.getRegions()[0].setOptions({ content: newText });
                 }
             });
-            annotationMenu.querySelectorAll('.deleteButton').forEach(okButton => {
-                okButton.addEventListener('click', (event) => {
+            annotationMenu.querySelectorAll('.deleteButton').forEach(btn => {
+                btn.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    {#console.log("Delete clicked, confirming delete...");#}
                     annotationMenu.style.display = 'none';
                     tier.removeChild(div);
                     regions.clearRegions();
-                    const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
-                    const pitchDiv = document.getElementById('chart');
-                    [spectrogramDiv, pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
+                    updateAllRegionOverlays(true);
                 });
             });
-        };
+    };
 
-        document.getElementById("add-tier").addEventListener("click", () => {
-            document.getElementById("tierTypeDialog").style.display = "flex";
-        });
+    document.getElementById("add-tier").addEventListener("click", () => {
+        document.getElementById("tierTypeDialog").style.display = "flex";
+    });
 
-        // Listen for Tier Type Selection
-        document.querySelectorAll(".tier-type").forEach(button => {
-            button.addEventListener("click", function () {
-                let tierType = this.dataset.type;
-                if (tierType === "interval") {
-                    document.getElementById("tierTypeDialog").style.display = "none"; // Close Tier selection
-                    document.getElementById("categoryDialog").style.display = "flex"; // Open Annotation Category and select
-                } else {
-                    addPointTier()
-                    closeAllDialogs();
-                }
-            });
-        });
-        // Listen for Annotation Category selection (only for Interval Tier)
-        document.addEventListener("click", function (event) {
-            if (event.target.closest('.delete-icon')) return;
-            const button = event.target.closest('.annotation-category');
-            if (button) {
-                const category = button.querySelector('.category-text')?.textContent;
-                addIntervalTier(category, category);
+    document.querySelectorAll(".tier-type").forEach(button => {
+        button.addEventListener("click", function () {
+            let tierType = this.dataset.type;
+            if (tierType === "interval") {
+                document.getElementById("tierTypeDialog").style.display = "none";
+                document.getElementById("categoryDialog").style.display = "flex";
+            } else {
+                addPointTier();
                 closeAllDialogs();
             }
         });
+    });
 
-        // Close dialog
-        document.getElementById("closeTierDialog").addEventListener("click", closeAllDialogs);
-        document.getElementById("closeCategoryDialog").addEventListener("click", closeAllDialogs);
-
-        function closeAllDialogs() {
-            document.getElementById("tierTypeDialog").style.display = "none";
-            document.getElementById("categoryDialog").style.display = "none";
+    document.addEventListener("click", function (event) {
+        if (event.target.closest('.delete-icon')) return;
+        const button = event.target.closest('.annotation-category');
+        if (button) {
+            const category = button.querySelector('.category-text')?.textContent;
+            addIntervalTier(category, category);
+            closeAllDialogs();
         }
+    });
 
+    document.getElementById("closeTierDialog").addEventListener("click", closeAllDialogs);
+    document.getElementById("closeCategoryDialog").addEventListener("click", closeAllDialogs);
 
-        let targetTier = null; // The target Tier of the current right click
-        const contextMenu = document.getElementById("context-menu");
-        const tierSubmenu = document.getElementById("tier-submenu");
-        // Add Interval Tier button logic
-        function addIntervalTier(Category, TierName) {
-            let index = tierContainer.children.length;
+    function closeAllDialogs() {
+        document.getElementById("tierTypeDialog").style.display = "none";
+        document.getElementById("categoryDialog").style.display = "none";
+    }
+
+    let targetTier = null;
+    const contextMenu = document.getElementById("context-menu");
+    const tierSubmenu = document.getElementById("tier-submenu");
+    function addIntervalTier(Category, TierName) {
+            let index = 0;
             let newTierId;
-            // Loop until a non-existing ID is found
-            do {
-                newTierId = `tier${index + 1}`;
+            while(true) {
                 index++;
-            } while (document.getElementById(newTierId));
+                newTierId = `tier${index}`;
+                if (!document.getElementById(newTierId)) break;
+            }
             const newTier = document.createElement("div");
             newTier.style.width = (soundSeconds * currentZoom) + "px";
             newTier.style.left = -wavesurfer.getScroll() + 'px';
             newTier.id = newTierId;
-            newTier.className = "interval-tier"; // Added as interval-tier
-            newTier.dataset.category = Category
-            addTierNames(newTier); // Add a name for each tier
+            newTier.className = "interval-tier";
+            newTier.dataset.category = Category;
+            addTierNames(newTier);
             tierContainer.appendChild(newTier);
-            bindTierClickEvent(newTier, "interval"); // Bind click event
+            bindTierClickEvent(newTier, "interval");
             const tierInput = document.getElementById(`${newTier.id}name`);
-            tierInput.setAttribute('title', Category); // set title
+            tierInput.setAttribute('title', Category);
             tierInput.setAttribute('value', TierName);
             newTier.addEventListener('click', () => {
-                // Clear the previous selection
-                document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
-                document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
-                // Set the current tier to selected
+                document.querySelectorAll('.interval-tier, .point-tier').forEach(t => t.classList.remove('selected'));
                 newTier.classList.add('selected');
-                selectedTier = newTier; // Get the selected tier ID
-                {#console.log('selectedTier',selectedTier);#}
+                selectedTier = newTier;
             });
-
-            document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
-            document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
+            document.querySelectorAll('.interval-tier, .point-tier').forEach(t => t.classList.remove('selected'));
             newTier.classList.add('selected');
-            selectedTier = newTier; // Get the selected tier ID
+            selectedTier = newTier;
 
             newTier.addEventListener("contextmenu", (event) => {
                 event.preventDefault();
@@ -1355,31 +1239,19 @@
                             newTier.dataset.category = e.target.dataset.category;
                             categoryMenu.style.display = 'none';
                             categoryMenu.removeEventListener('click', handleCategorySelect);
-                            // Get the corresponding input box
-                            const tierInput = document.getElementById(`${newTier.id}name`);
-                            {#console.log('tierInput',tierInput)#}
-                            if (tierInput) {
-                                tierInput.setAttribute('title', e.target.dataset.category); // set title
-                            }
+                            document.getElementById(`${newTier.id}name`)?.setAttribute('title', e.target.dataset.category);
                         }
                     };
-                    categoryMenu.addEventListener('click', handleCategorySelect);
+                    categoryMenu.addEventListener('click', handleCategorySelect, {once: true});
                 } else {
-                    let menuX = event.clientX;
-                    let menuY = event.clientY;
+                    let menuX = event.clientX, menuY = event.clientY;
                     contextMenu.style.display = 'block';
-                    let menuWidth = contextMenu.offsetWidth;
-                    let menuHeight = contextMenu.offsetHeight;
-                    if (menuX + menuWidth > window.innerWidth) {
-                        menuX = window.innerWidth - menuWidth - 10; // Leave a 10px gap
-                    }
-                    if (menuY + menuHeight > window.innerHeight) {
-                        menuY = window.innerHeight - menuHeight - 10; // Leave a 10px gap
-                    }
+                    let menuWidth = contextMenu.offsetWidth, menuHeight = contextMenu.offsetHeight;
+                    if (menuX + menuWidth > window.innerWidth) menuX = window.innerWidth - menuWidth - 10;
+                    if (menuY + menuHeight > window.innerHeight) menuY = window.innerHeight - menuHeight - 10;
                     contextMenu.style.top = `${menuY}px`;
                     contextMenu.style.left = `${menuX}px`;
-                    contextMenu.style.display = "block";
-                    targetTier = newTier; // Save the current right-click Tier
+                    targetTier = newTier;
                     menu0.style.display = "none";
                     menu1.style.display = "none";
                     menu2.style.display = "none";
@@ -1393,504 +1265,231 @@
                 document.addEventListener("scroll", () => categoryMenu.style.display = 'none', { once: true });
             });
             return newTier;
-        };
-        window.addIntervalTier = addIntervalTier;
-
-        // Adding Point Tier button logic
-        function addPointTier() {
-            const existingTiers = tierContainer.children.length;
-            const newTierId = `tier${existingTiers + 1}`; // The ID of the new tier
-            const newTier = document.createElement("div");
-            newTier.style.width = (soundSeconds * currentZoom) + "px";
-            newTier.id = newTierId;
-            newTier.className = "point-tier"; // Add as point-tier
-            addTierNames(newTier, existingTiers); // Add a name for each tier
-            tierContainer.appendChild(newTier);
-            bindTierClickEvent(newTier, "point"); // Bind click event
-            newTier.addEventListener("contextmenu", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                closeAllMenus();
-                contextMenu.style.top = `${event.clientY}px`;
-                contextMenu.style.left = `${event.clientX}px`;
-                contextMenu.style.display = "block";
-                targetTier = newTier; // Save the current right-click Tier
-                menu0.style.display = "none";
-                menu1.style.display = "none";
-                menu2.style.display = "none";
-                menu3.style.display = "block"; // Show Tier Menu
-                menu3.textContent = "Hide This Tier";
-                updateTierSubmenu();
-            });
-            return newTier;
-        };
-        window.addPointTier = addPointTier;
-        // Update submenu content
-        function updateTierSubmenu() {
-            const tiers = document.querySelectorAll(".interval-tier, .point-tier"); // Get all tiers
-            tierSubmenu.innerHTML = ""; // Clear submenu
-            tiers.forEach((tier) => {
-                if (tier.style.display === "none") {
-                    const tierId = tier.id;
-                    // Get the name corresponding to the tier
-                    const tierInput = document.getElementById(`${tierId}name`); // Assume the input box's ID is "tier1-name"
-                    const tierName = tierInput?.value || tierId;
-                    const tierOption = document.createElement("div");
-                    tierOption.textContent = `Show ${tierName}`; // Show name or ID
-                    tierOption.className = "tier-option";
-                    tierOption.addEventListener("click", () => {
-                        tierInput.style.display = "block";
-                        tier.style.display = "block"; // Show Tier
-                        tierSubmenu.style.display = "none";
-                        contextMenu.style.display = "none";
-                    });
-                    tierSubmenu.appendChild(tierOption);
-                }
-            });
-            if (tierSubmenu.innerHTML === "") {
-                const emptyMessage = document.createElement("div");
-                emptyMessage.textContent = "No hidden tiers";
-                emptyMessage.className = "tier-option disabled";
-                tierSubmenu.appendChild(emptyMessage);
-            }
-        }
-
-        menu3.addEventListener("click", () => {
-            if (targetTier) {
-                const tierId = targetTier.id; // Get the tier ID
-                const tierNameInput = document.getElementById(`${tierId}name`); // Get the corresponding tierName input box
-                // Hide Tier and corresponding Name
-                targetTier.style.display = "none";
-                tierNameInput.style.display = "none"; // Hide input box
-                contextMenu.style.display = "none"; // Hide menu
-                updateTierSubmenu();
-            }
-        });
-
-        menu5.addEventListener("click", () => {
-            if (targetTier) {
-                const tierNameInput = document.getElementById(`${targetTier.id}name`);
-                document.getElementById('deleteTierDialogText').innerHTML = `Are you sure you want to delete <strong>"${tierNameInput.value}"</strong>?`
-                document.getElementById('deleteTierConfirmDialog').style.display = 'flex';
-                contextMenu.style.display = "none";
-            }
-        });
-
-        document.getElementById('confirmDeleteTier').addEventListener('click', function() {
-            const tierId = targetTier.id;  // Get the tier ID
-            const tierNameInput = document.getElementById(`${tierId}name`); // Get the corresponding input box
-            // Remove the Tier and the corresponding Name
-            targetTier.remove();
-            if (tierNameInput) tierNameInput.remove();
-            regions.clearRegions();
-            contextMenu.style.display = "none";
-            document.getElementById('deleteTierConfirmDialog').style.display = 'none';
-        });
-
-        document.getElementById('cancelDeleteTier').addEventListener('click', function(){
-            document.getElementById('deleteTierConfirmDialog').style.display = 'none';
-        });
-
-        function addTierNames(tier, index) {
-            let nameContainer = document.getElementById("name-container");
-            // Left input box
-            const input = document.createElement("input");
-            input.type = "text";
-            input.className = "name-input";
-            input.id = `${tier.id}name`; // Bind unique ID
-            input.placeholder = `${tier.id}`;
-            input.title = "";
-            nameContainer.appendChild(input);
-
-            input.addEventListener("contextmenu", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                closeAllMenus();
-                let menuX = event.clientX;
-                let menuY = event.clientY;
-                contextMenu.style.display = 'block';
-                let menuWidth = contextMenu.offsetWidth;
-                let menuHeight = contextMenu.offsetHeight;
-                if (menuX + menuWidth > window.innerWidth) {
-                    menuX = window.innerWidth - menuWidth - 10; // Leave a 10px gap
-                }
-                if (menuY + menuHeight > window.innerHeight) {
-                    menuY = window.innerHeight - menuHeight - 10; // Leave a 10px gap
-                }
-                contextMenu.style.top = `${menuY}px`;
-                contextMenu.style.left = `${menuX}px`;
-                contextMenu.style.display = "block";
-                targetTier = tier; // Save the current right-click Tier
-                menu0.style.display = "none";
-                menu1.style.display = "none";
-                menu2.style.display = "none";
-                menu3.style.display = "block";
-                menu3.textContent = "Hide This Tier";
-                menu4.style.display = "block";
-                menu5.style.display = "block";
-                updateTierSubmenu();
-            })
-        }
-
-        // Logic for the Tier delete button
-        document.getElementById("remove-tier").addEventListener("click", () => {
-            const existingTiers = tierContainer.children.length;
-            if (existingTiers > 0) {
-                nameContainer.removeChild(nameContainer.lastElementChild);
-                tierContainer.removeChild(tierContainer.lastElementChild);
-            } else {
-                alert("No Tier!");
-            }
-        });
-
-        // Initialize Tier click event binding
-        const tiers = Array.from(tierContainer.children);
-        tiers.forEach((tier) => {
-            const isIntervalTier = tier.classList.contains("interval-tier");
-            const tierType = isIntervalTier ? "interval" : "point";
-            bindTierClickEvent(tier, tierType);
-        });
-    });
-
-    function enableDragAndResize(tier) {
-        // Add drag logic
-        tier.addEventListener('mousedown', (event) => {
-            let target = event.target;
-            // If the clicked element is a handle, get the parent element
-            if (target.classList.contains('handle-left') || target.classList.contains('handle-right')) {
-                target = target.parentElement;
-            }
-            // Determine whether the parent element is interval or point
-            if (target.classList.contains('interval') || target.classList.contains('point')) {
-                const isInterval = target.classList.contains('interval');
-                const startX = event.clientX;
-                const tierWidth = tier.offsetWidth;
-                // Get the initial width and position
-                const startWidthPercentage = isInterval
-                    ? (target.offsetWidth / tierWidth) * 100
-                    : 0;
-                const startLeftPercentage = isInterval
-                    ? (target.offsetLeft / tierWidth) * 100
-                    : parseFloat(target.style.left || '0');
-                const onMouseMove = (moveEvent) => {
-                    const dx = moveEvent.clientX - startX;
-                    const dxPercentage = (dx / tierWidth) * 100;
-                    if (isInterval) {
-                        if (target.dataset.resizing === 'left') {
-                            const newLeftPercentage = Math.max(0, startLeftPercentage + dxPercentage);
-                            const newWidthPercentage = Math.max(1, startWidthPercentage - dxPercentage);
-                            target.style.left = `${newLeftPercentage}%`;
-                            target.style.width = `${newWidthPercentage}%`;
-                            target.dataset.start = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
-                            target.dataset.end = (((newLeftPercentage + newWidthPercentage) / 100) * videoDuration).toFixed(2);
-                        } else if (target.dataset.resizing === 'right') {
-                            const newWidthPercentage = Math.max(1, startWidthPercentage + dxPercentage);
-                            target.style.width = `${newWidthPercentage}%`;
-                            target.dataset.end = (((startLeftPercentage + newWidthPercentage) / 100) * videoDuration).toFixed(2);
-                        } else {
-                            const newLeftPercentage = Math.min(
-                                100 - startWidthPercentage,
-                                Math.max(0, startLeftPercentage + dxPercentage)
-                            );
-                            target.style.left = `${newLeftPercentage}%`;
-                            target.dataset.start = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
-                            target.dataset.end = (((newLeftPercentage + startWidthPercentage) / 100) * videoDuration).toFixed(2);
-                        }
-                    } else {
-                        const newLeftPercentage = Math.max(0, Math.min(100, startLeftPercentage + dxPercentage));
-                        target.style.left = `${newLeftPercentage}%`;
-                        target.dataset.time = ((newLeftPercentage / 100) * videoDuration).toFixed(2);
-                    }
-                };
-                const onMouseUp = () => {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                    delete target.dataset.resizing;
-                };
-                // Determine whether the left handle or the right handle is clicked
-                if (event.target.classList.contains('handle-left')) {
-                    target.dataset.resizing = 'left';
-                } else if (event.target.classList.contains('handle-right')) {
-                    target.dataset.resizing = 'right';
-                }
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-            }
-        });
     };
+    window.addIntervalTier = addIntervalTier;
+    
+    function addTierNames(tier) {
+        const nameContainer = document.getElementById("name-container");
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "name-input";
+        input.id = `${tier.id}name`;
+        input.placeholder = `${tier.id}`;
+        input.title = "";
+        nameContainer.appendChild(input);
 
-    function closeAllMenus() {
-        const menus = document.querySelectorAll(".context-menu"); // Select all possible top-level menus
-        menus.forEach((menu) => {
-            menu.style.display = "none";
+        input.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            closeAllMenus();
+            let menuX = event.clientX, menuY = event.clientY;
+            contextMenu.style.display = 'block';
+            let menuWidth = contextMenu.offsetWidth, menuHeight = contextMenu.offsetHeight;
+            if (menuX + menuWidth > window.innerWidth) menuX = window.innerWidth - menuWidth - 10;
+            if (menuY + menuHeight > window.innerHeight) menuY = window.innerHeight - menuHeight - 10;
+            contextMenu.style.top = `${menuY}px`;
+            contextMenu.style.left = `${menuX}px`;
+            targetTier = tier;
+            menu0.style.display = "none";
+            menu1.style.display = "none";
+            menu2.style.display = "none";
+            menu3.style.display = "block";
+            menu3.textContent = "Hide This Tier";
+            menu4.style.display = "block";
+            menu5.style.display = "block";
+            updateTierSubmenu();
         });
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const contextMenu = document.getElementById("context-menu");
-        const waveformlabel = document.querySelector("#waveform-label");
-        const spectrogramlabel = document.querySelector("#spectrogram-label");
-        const spectrogramyaxis = document.querySelector("#spectrogram-yaxis")
-        const drawingslabel = document.querySelector("#drawings-label");
-        const waveform = document.querySelector("#waveform");
-        const canvasesDiv = wavesurfer.getWrapper().querySelector('.canvases'); //waveform
-        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling
+    const waveformlabel = document.querySelector("#waveform-label");
+    const spectrogramlabel = document.querySelector("#spectrogram-label");
+    const spectrogramyaxis = document.querySelector("#spectrogram-yaxis")
+    const drawingslabel = document.querySelector("#drawings-label");
+    const waveformEl = document.querySelector("#waveform");
+    const canvasesDiv = wavesurfer.getWrapper().querySelector('.canvases');
+    const spectrogramDiv = document.querySelector('div[part="spectrogram-emu"]');
+    if (spectrogramDiv) {
         hover.attachToContainer(spectrogramDiv);
-        const drawings = document.querySelector("#drawings");
-        hover.attachToContainer(document.querySelector("#chart"));
-        const menu0 = document.querySelector("#menu0");
-        menu0.textContent = "Hide Waveform";
-        const menu1 = document.querySelector("#menu1");
-        menu1.textContent = "Hide Spectrogram";
-        const menu2 = document.querySelector("#menu2");
-        menu2.textContent = "Hide Pitch & Intensity";
-        const menu3 = document.querySelector("#menu3"); // Used to hide Tier
-        let targetTier = null; // The target Tier of the current right-click
-        const menu4 = document.querySelector("#menu4"); // Used to show hidden Tiers
-        const menu5 = document.querySelector("#menu5"); // Used to delete Tier
-        const tierSubmenu = document.getElementById("tier-submenu"); // submenu container
-        // Bind right-click event
-        waveform.addEventListener("contextmenu", (event) => {
-            event.preventDefault();
+    }
+    const drawings = document.querySelector("#drawings");
+    const chart = document.querySelector("#chart");
+    if (chart) {
+        hover.attachToContainer(chart);
+    }
+    const menu0 = document.querySelector("#menu0");
+    menu0.textContent = "Hide Waveform";
+    const menu1 = document.querySelector("#menu1");
+    menu1.textContent = "Hide Spectrogram";
+    const menu2 = document.querySelector("#menu2");
+    menu2.textContent = "Hide Pitch & Intensity";
+    const menu3 = document.querySelector("#menu3");
+    const menu4 = document.querySelector("#menu4");
+    const menu5 = document.querySelector("#menu5");
+    
+
+    // 1. Logic for "Hide This Tier"
+    menu3.addEventListener("click", () => {
+        if (targetTier) {
+            const tierId = targetTier.id;
+            const tierNameInput = document.getElementById(`${tierId}name`);
+
+            // Hide both the tier and its name input
+            if (tierNameInput) {
+                tierNameInput.style.display = "none";
+            }
+            targetTier.style.display = "none";
+            
             closeAllMenus();
-        });
-        waveformlabel.addEventListener("contextmenu", (event) => {
-            event.stopPropagation()
-            event.preventDefault();
-            closeAllMenus();
-        });
-        spectrogramDiv.addEventListener("contextmenu", (event) => {
-            event.stopPropagation()
-            event.preventDefault();
-            closeAllMenus();
-            contextMenu.style.top = `${event.clientY}px`;
-            contextMenu.style.left = `${event.clientX}px`;
-            contextMenu.style.display = "block";
-            menu0.style.display = "none";
-            menu1.style.display = "block";
-            menu2.style.display = "none";
-            menu3.style.display = "none";
-            menu4.style.display = "none";
-            menu5.style.display = "none";
-            updateTierSubmenu();
-        });
-        spectrogramlabel.addEventListener("contextmenu", (event) => {
-            event.stopPropagation()
-            event.preventDefault();
-            closeAllMenus();
-            contextMenu.style.top = `${event.clientY}px`;
-            contextMenu.style.left = `${event.clientX}px`;
-            contextMenu.style.display = "block";
-            menu0.style.display = "none";
-            menu1.style.display = "block";
-            menu2.style.display = "none";
-            menu3.style.display = "none";
-            menu4.style.display = "none";
-            menu5.style.display = "none";
-            updateTierSubmenu();
-        });
-        drawings.addEventListener("contextmenu", (event) => {
-            event.preventDefault();
-            closeAllMenus();
-            // Display menu and set position
-            contextMenu.style.top = `${event.clientY}px`;
-            contextMenu.style.left = `${event.clientX}px`;
-            contextMenu.style.display = "block";
-            menu0.style.display = "none";
-            menu1.style.display = "none";
-            menu2.style.display = "block";
-            menu3.style.display = "none";
-            menu4.style.display = "none";
-            menu5.style.display = "none";
-            updateTierSubmenu();
-        });
-        // Hide menu
-        document.addEventListener("click", () => {
-            contextMenu.style.display = "none";
-            tierSubmenu.style.display = "none";
-            videoMenu.style.display = "none";
-        });
-        document.addEventListener("scroll", () => {
-            contextMenu.style.display = "none";
-            tierSubmenu.style.display = "none";
-            videoMenu.style.display = "none";
-        });
-        // Menu option click event
-        menu0.addEventListener("click", () => {
-            if (canvasesDiv.style.display === "none") {
-                canvasesDiv.style.display = "block";
-                waveformlabel.style.display = "block";
-                menu0.textContent = "Hide Waveform";
-            } else {
-                canvasesDiv.style.display = "none";
-                waveformlabel.style.display = "none";
-                menu0.textContent = "Show Waveform";
-            }
-            contextMenu.style.display = "none";
-        });
-        menu1.addEventListener("click", () => {
-            const plugins = wavesurfer.getActivePlugins();
-            let hasSpectrogram = false;
-            {#console.log('wavesurfer.getPlugin',plugins)#}
-            for (const plugin of plugins) {
-                if (plugin instanceof spectrogram_emu) {
-                    spectrogramlabel.style.display = "none";
-                    spectrogramyaxis.style.display = "none";
-                    menu1.textContent = "Show Spectrogram";
-                    hasSpectrogram = true;
-                    plugin.destroy();
-                    wavesurfer.plugins = wavesurfer.plugins.filter(p => p !== plugin);
-                    return;
-                }
-            }
-            if (!hasSpectrogram) {
-                spectrogramlabel.style.display = "block";
-                spectrogramyaxis.style.display = "flex";
-                menu1.textContent = "Hide Spectrogram";
-                const spectrogramPlugin = spectrogram_emu.create({
-                    height: 128,
-                });
-                hover.attachToContainer(spectrogramDiv);
-                wavesurfer.registerPlugin(spectrogramPlugin);
-                spectrogramPlugin.render();  // Manually trigger rendering
-            }
-        });
-        menu2.addEventListener("click", () => {
-            if (drawings.style.display === "none") {
-                drawings.style.display = "block";
-                drawingslabel.style.display = "block";
-                menu2.textContent = "Hide Pitch & Intensity";
-            } else {
-                drawings.style.display = "none";
-                drawingslabel.style.display = "none";
-                menu2.textContent = "Show Pitch & Intensity";
-            }
-            contextMenu.style.display = "none";
-        });
-        menu4.addEventListener("mouseover", (event) => {
-            // Calculate the initial position
-            let submenuX = parseFloat(contextMenu.style.left) + contextMenu.offsetWidth;
-            let submenuY = event.clientY;
-            // Display and get the size
-            tierSubmenu.style.display = "block";
-            let menuWidth = tierSubmenu.offsetWidth;
-            let menuHeight = tierSubmenu.offsetHeight;
-            // Prevent overflow on the right side
-            if (submenuX + menuWidth > window.innerWidth) {
-                submenuX = parseFloat(contextMenu.style.left) - menuWidth;  // Change to left pop-up
-            }
-            // Prevent overflow at the bottom
-            if (submenuY + menuHeight > window.innerHeight) {
-                submenuY = window.innerHeight - menuHeight - 10;  // Indent by 10px
-            }
-            // Apply position
-            tierSubmenu.style.left = `${submenuX}px`;
-            tierSubmenu.style.top = `${submenuY}px`;
-        });
-        function updateTierSubmenu() {
-            const tiers = document.querySelectorAll(".interval-tier, .point-tier"); // Get all tiers
-            tierSubmenu.innerHTML = ""; // Clear submenu
-            tiers.forEach((tier) => {
-                if (tier.style.display === "none") {
-                    const tierId = tier.id;
-                    // Get the name corresponding to the tier
-                    const tierInput = document.getElementById(`${tierId}name`); // Assume the input box's ID is "tier1-name"
-                    const tierName = tierInput?.value || tierId;
-                    const tierOption = document.createElement("div");
-                    tierOption.textContent = `Show ${tierName}`; // Show name or ID
-                    tierOption.className = "tier-option";
-                    tierOption.addEventListener("click", () => {
-                        tierInput.style.display = "block";
-                        tier.style.display = "block"; // Show Tier
-                        tierSubmenu.style.display = "none";
-                        contextMenu.style.display = "none";
-                    });
-                    tierSubmenu.appendChild(tierOption);
-                }
-            });
-            if (tierSubmenu.innerHTML === "") {
-                const emptyMessage = document.createElement("div");
-                emptyMessage.textContent = "No hidden tiers";
-                emptyMessage.className = "tier-option disabled";
-                tierSubmenu.appendChild(emptyMessage);
-            }
+        }
+    });
+
+    // 2. Logic for showing the "Show Tiers" submenu on hover
+    menu4.addEventListener("mouseover", (event) => {
+        // First, make sure the list of hidden tiers is current
+        updateTierSubmenu();
+
+        // If the submenu only contains the "No hidden tiers" message, don't show it
+        if (tierSubmenu.children.length === 0 || tierSubmenu.children[0].classList.contains('disabled')) {
+            tierSubmenu.style.display = 'none';
+            return;
         }
 
-        const videoMenu = document.getElementById('video-menu');
-        videoPlayer.addEventListener('contextmenu', (event) => {
-            event.preventDefault();
-            closeAllMenus();
-            videoMenu.style.display = 'block';
-            videoMenu.style.left = `${event.clientX}px`;
-            videoMenu.style.top = `${event.clientY}px`;
-        });
-        videoMenu.addEventListener('click', (event) => {
-            const target = event.target;
-            if (target.tagName === 'LI') {
-                const [width, height] = target.dataset.size.split('x');
-                videoPlayer.style.width = `${width}px`;
-                videoPlayer.style.height = `${height}px`;
-                videoMenu.style.display = 'none';
-            }
-        });
+        const mainRect = contextMenu.getBoundingClientRect();
+        
+        // Position the submenu to the right of the main menu
+        tierSubmenu.style.left = `${mainRect.right}px`;
+        tierSubmenu.style.top = `${mainRect.top}px`;
+        tierSubmenu.style.display = "block";
 
-        // Listen for right-click events (limited to blank areas)
-        document.addEventListener("contextmenu", function (event) {
-            if (!event.target.closest("#waveform, #drawings-container, #videoPlayer")) {
-                event.preventDefault();
-                closeAllMenus();
-                let menuX = event.clientX;
-                let menuY = event.clientY;
-                contextMenu.style.display = 'block';
-                let menuWidth = contextMenu.offsetWidth;
-                let menuHeight = contextMenu.offsetHeight;
-                if (menuX + menuWidth > window.innerWidth) {
-                    menuX = window.innerWidth - menuWidth - 10;
-                }
-                if (menuY + menuHeight > window.innerHeight) {
-                    menuY = window.innerHeight - menuHeight - 10;
-                }
-                contextMenu.style.left = `${menuX}px`;
-                contextMenu.style.top = `${menuY}px`;
-                contextMenu.style.display = "block";
-                menu0.style.display = "none";
-                menu1.style.display = "block";
-                menu2.style.display = "block";
-                menu3.style.display = "none";
-                menu4.style.display = "block";
-                menu5.style.display = "none";
-                updateTierSubmenu();
-            } else {
-                {#contextMenu.style.display = "none";#}
+        // Check if the submenu goes off-screen and adjust if necessary
+        const subRect = tierSubmenu.getBoundingClientRect();
+        if (subRect.right > window.innerWidth) {
+            tierSubmenu.style.left = `${mainRect.left - subRect.width}px`; // Move to the left
+        }
+        if (subRect.bottom > window.innerHeight) {
+            tierSubmenu.style.top = `${window.innerHeight - subRect.height - 5}px`; // Move up
+        }
+    });
+
+    const videoMenu = document.getElementById('video-menu');
+
+    function closeAllMenus() {
+        document.querySelectorAll(".context-menu, .context-submenu").forEach(menu => menu.style.display = "none");
+    }
+
+    function updateTierSubmenu() {
+        tierSubmenu.innerHTML = "";
+        let hasHiddenTiers = false;
+        document.querySelectorAll(".interval-tier, .point-tier").forEach((tier) => {
+            if (tier.style.display === "none") {
+                hasHiddenTiers = true;
+                const tierId = tier.id;
+                const tierInput = document.getElementById(`${tierId}name`);
+                const tierName = tierInput?.value || tierId;
+                const tierOption = document.createElement("div");
+                tierOption.textContent = `Show ${tierName}`;
+                tierOption.className = "tier-option";
+                tierOption.addEventListener("click", () => {
+                    tierInput.style.display = "block";
+                    tier.style.display = "block";
+                    closeAllMenus();
+                });
+                tierSubmenu.appendChild(tierOption);
             }
         });
+        if (!hasHiddenTiers) {
+            const emptyMessage = document.createElement("div");
+            emptyMessage.textContent = "No hidden tiers";
+            emptyMessage.className = "tier-option disabled";
+            tierSubmenu.appendChild(emptyMessage);
+        }
+    }
+
+    menu5.addEventListener("click", () => {
+        if (targetTier) {
+            const tierNameInput = document.getElementById(`${targetTier.id}name`);
+            const tierName = tierNameInput ? tierNameInput.value : targetTier.id;
+            document.getElementById('deleteTierDialogText').innerHTML = `Are you sure you want to delete the tier <strong>"${tierName}"</strong>?`;
+            document.getElementById('deleteTierConfirmDialog').style.display = 'flex';
+            contextMenu.style.display = "none";
+        }
     });
+
+    document.getElementById('confirmDeleteTier').addEventListener('click', function() {
+        if (targetTier) {
+            const tierId = targetTier.id;
+            const tierNameInput = document.getElementById(`${tierId}name`);
+
+            // Remove the tier and its corresponding name input
+            targetTier.remove();
+            if (tierNameInput) tierNameInput.remove();
+
+            regions.clearRegions();
+            updateAllRegionOverlays(true); // Clear overlays
+            contextMenu.style.display = "none";
+            document.getElementById('deleteTierConfirmDialog').style.display = 'none';
+        }
+    });
+
+    document.getElementById('cancelDeleteTier').addEventListener('click', function() {
+        document.getElementById('deleteTierConfirmDialog').style.display = 'none';
+    });
+
+
+    const copyTiersBtn = document.getElementById('copyPreviousTiersBtn');
+    const savedTiersJSON = localStorage.getItem('lastAnnotationStructure');
+
+    if (savedTiersJSON) {
+        copyTiersBtn.style.display = 'block'; // Show the button if there's saved data
+
+        copyTiersBtn.addEventListener('click', () => {
+            const savedTiers = JSON.parse(savedTiersJSON);
+            
+            // Check if tiers with these names already exist
+            const existingTierNames = Array.from(document.querySelectorAll('.name-input')).map(input => input.value);
+            const tiersToAdd = savedTiers.filter(savedTier => !existingTierNames.includes(savedTier.name));
+
+            if (tiersToAdd.length === 0) {
+                alert("All tiers from the previous file already exist.");
+                return;
+            }
+
+            tiersToAdd.forEach(tierData => {
+                if (tierData.type === 'IntervalTier') {
+                    // This function already exists in your code
+                    addIntervalTier(tierData.category, tierData.name);
+                }
+                // Note: You can add logic for "PointTier" here if needed
+            });
+
+            copyTiersBtn.disabled = true; // Prevent clicking again
+            copyTiersBtn.textContent = 'Tiers Copied!';
+        });
+    }
 
     let currentUsername = "{{ userName }}";
-    document.addEventListener("DOMContentLoaded", function () {
-        const videoElement = document.querySelector("video");
-        if (videoElement) {
-            setInterval(autoSaveAnnotations, 120000);
-        }
-        let currentLockedFile = fileName;
-        window.addEventListener("beforeunload", function () {
-            autoSaveOnExit();
-            if (currentLockedFile) {
-                navigator.sendBeacon(
-                    "{{ URL_PREFIX }}/unlock_file",
-                    new Blob([
-                        JSON.stringify({
-                            username: currentUsername,
-                            filename: currentLockedFile
-                        })
-                    ], { type: "application/json" })
-                );
-            }
-        });
-    });
+    
+    // Auto-save logic
+    setInterval(autoSaveAnnotations, 120000);
+    
+    let currentLockedFile = fileName;
+    window.addEventListener("beforeunload", function () {
+        autoSaveOnExit();
 
-    wavesurfer.on('ready', function () {
-        loadAnnotations()
+        const tiers = collectAnnotations();
+        if (tiers && tiers.length > 0) {
+            const tierStructure = tiers.map(t => ({ name: t.name, category: t.category, type: t.type }));
+            localStorage.setItem('lastAnnotationStructure', JSON.stringify(tierStructure));
+        } else {
+            // If there are no tiers, clear the saved structure
+            localStorage.removeItem('lastAnnotationStructure');
+        }
+        if (currentLockedFile) {
+            navigator.sendBeacon(
+                "{{ URL_PREFIX }}/unlock_file",
+                new Blob([JSON.stringify({ username: currentUsername, filename: currentLockedFile })], { type: "application/json" })
+            );
+        }
     });
 
     function loadAnnotations() {
@@ -1899,50 +1498,28 @@
             .then(data => {
                 if (data.success) {
                     restoreAnnotations(data.annotations);
-                } else {
-                    console.log("No annotation found for this video.");
                 }
             })
             .catch(error => console.error("Error loading annotations:", error));
     }
 
     function restoreAnnotations(annotationData) {
-        // Get the category list on the current page
-        const existingCategories = Array.from(document.querySelectorAll("#categoryList .annotation-category"))
-            .map(btn => btn.dataset.category);
-
+        const existingCategories = Array.from(document.querySelectorAll("#categoryList .annotation-category")).map(btn => btn.dataset.category);
         annotationData.forEach(tierData => {
-            if (!existingCategories.includes(tierData.category)) {
-                console.warn("Skip non-existent category:", tierData.category);
-                return;
-            }
-            let tier;  // Store the Tier object
+            if (!existingCategories.includes(tierData.category)) return;
+            let tier;
             if (tierData.type === "IntervalTier") {
                 tier = addIntervalTier(tierData.category, tierData.name);
             } else if (tierData.type === "TextTier") {
                 tier = addPointTier();
             }
-            if (!tier) {
-                console.error(" Failed to create tier:", tierData);
-                return;
-            }
-            //Traverse tierData.data and add annotation
+            if (!tier) return;
             tierData.data.forEach((originalData, index) => {
-                let data = {}; // Create a data object that conforms to the addAnnotation() structure
+                let data = {};
                 if (tierData.type === "IntervalTier") {
-                    data = {
-                        type: "interval",
-                        start: originalData.xmin,
-                        end: originalData.xmax,
-                        id: `interval-${tierData.name}-${index}`, // Generate unique ID
-                        text: originalData.text,
-                    };
+                    data = { type: "interval", start: originalData.xmin, end: originalData.xmax, id: `interval-${tierData.name}-${index}`, text: originalData.text };
                 } else if (tierData.type === "TextTier") {
-                    data = {
-                        type: "point",
-                        time: originalData.number,
-                        id: `point-${tier.name}-${index}` // Generate unique ID
-                    };
+                    data = { type: "point", time: originalData.number, id: `point-${tier.name}-${index}` };
                 }
                 addAnnotation(tier, data);
             });
@@ -1952,302 +1529,160 @@
     function prepareAnnotationPayload() {
         const rawAnnotations = collectAnnotations();
         if (!rawAnnotations || !Array.isArray(rawAnnotations) || rawAnnotations.length === 0) return null;
-
-        const filtered = JSON.parse(JSON.stringify(
-            rawAnnotations
-                .filter(item =>
-                    item &&
-                    typeof item === 'object' &&
-                    Array.isArray(item.data)
-                )
-                .map(item => ({
-                    ...item
-                    // No longer changes item.data
-                }))
-        ));
-
+        const filtered = JSON.parse(JSON.stringify(rawAnnotations.filter(item => item && typeof item === 'object' && Array.isArray(item.data))));
         if (filtered.length === 0) return null;
-
-        return {
-            username: currentUsername,
-            videoName: fileName,
-            annotations: filtered
-        };
+        return { username: currentUsername, videoName: fileName, annotations: filtered };
     }
 
     function autoSaveAnnotations() {
         const jsonData = prepareAnnotationPayload();
         if (!jsonData) return;
-
-        fetch(`{{ URL_PREFIX }}/save_annotation`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(jsonData)
-        })
-            .then(response => {
-                if (!response.ok) throw new Error("Server error");
-                return response.json();
-            })
-            .then(data => {
-                console.log("Auto-saved annotation:", data);
-            })
-            .catch(error => {
-                console.error("Error auto-saving annotation:", error);
-            });
-
-        // UI prompts
+        fetch(`{{ URL_PREFIX }}/save_annotation`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(jsonData) })
+            .then(response => { if (!response.ok) throw new Error("Server error"); return response.json(); })
+            .then(data => { console.log("Auto-saved annotation:", data); })
+            .catch(error => { console.error("Error auto-saving annotation:", error); });
         const autoSaveTime = document.getElementById("autoSaveTime");
         const autoSaveMessage = document.getElementById("autoSaveMessage");
-        const now = new Date();
-        autoSaveTime.textContent = now.toLocaleTimeString();
+        autoSaveTime.textContent = new Date().toLocaleTimeString();
         autoSaveMessage.style.display = "block";
         autoSaveMessage.style.opacity = "1";
         setTimeout(() => {
             autoSaveMessage.style.opacity = "0";
-            setTimeout(() => {
-                autoSaveMessage.style.display = "none";
-            }, 2000);
+            setTimeout(() => { autoSaveMessage.style.display = "none"; }, 2000);
         }, 3000);
     }
 
     function autoSaveOnExit() {
         const jsonData = prepareAnnotationPayload();
         if (!jsonData) return;
-        const blob = new Blob([JSON.stringify(jsonData)], {
-            type: 'application/json'
-        });
+        const blob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
         navigator.sendBeacon(`{{ URL_PREFIX }}/save_annotation`, blob);
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const categoryList = document.getElementById("categoryList");
-        const addCategoryButton = document.getElementById("addCategoryButton");
-        const newCategoryDialog = document.getElementById("newCategoryDialog");
-        const saveNewCategoryButton = document.getElementById("saveNewCategory");
-        const cancelNewCategoryButton = document.getElementById("cancelNewCategory");
-        const checkboxContainer = document.getElementById("checkboxContainer");
+    const categoryList = document.getElementById("categoryList");
+    const addCategoryButton = document.getElementById("addCategoryButton");
+    const newCategoryDialog = document.getElementById("newCategoryDialog");
+    const saveNewCategoryButton = document.getElementById("saveNewCategory");
+    const cancelNewCategoryButton = document.getElementById("cancelNewCategory");
+    const checkboxContainer = document.getElementById("checkboxContainer");
 
-        // Load the user's saved Category
-        fetch(`{{ URL_PREFIX }}/load_custom_categories?username=${currentUsername}`)
+    fetch(`{{ URL_PREFIX }}/load_custom_categories?username=${currentUsername}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                data.categories.forEach(category => {
+                    addCategoryToUI(category.category, category.options);
+                    addCategoryToMenu(category.category, category.options);
+                });
+            }
+        });
+
+    addCategoryButton.addEventListener("click", () => newCategoryDialog.style.display = "flex");
+    cancelNewCategoryButton.addEventListener("click", () => newCategoryDialog.style.display = "none");
+    
+    document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("add-checkbox")) {
+            const newCheckbox = createCheckboxItem();
+            event.target.parentElement.after(newCheckbox);
+        }
+        if (event.target.classList.contains("remove-checkbox")) {
+            if (checkboxContainer.children.length > 1) {
+                event.target.parentElement.remove();
+            }
+        }
+    });
+
+    function createCheckboxItem() {
+        const newCheckbox = document.createElement("div");
+        newCheckbox.className = "checkbox-item";
+        newCheckbox.innerHTML = `<input type="text" class="checkbox-input" placeholder="Enter checkbox value"><button class="add-checkbox">➕</button><button class="remove-checkbox">➖</button>`;
+        return newCheckbox;
+    }
+
+    saveNewCategoryButton.addEventListener("click", () => {
+        const categoryName = document.getElementById("newCategoryInput").value.trim();
+        const checkboxes = Array.from(document.querySelectorAll(".checkbox-input")).map(input => input.value.trim()).filter(value => value !== "");
+        if (categoryName && checkboxes.length > 0) {
+            saveNewCategory(categoryName, checkboxes);
+        }
+    });
+
+    function saveNewCategory(category, options) {
+        fetch("{{ URL_PREFIX }}/save_custom_category", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: currentUsername, category: category, options: options }) })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    data.categories.forEach(category => {
-                        addCategoryToUI(category.category, category.options);
-                        addCategoryToMenu(category.category, category.options);
-                    });
+                    addCategoryToUI(category, options);
+                    addCategoryToMenu(category, options);
+                    newCategoryDialog.style.display = "none";
                 }
             });
+    }
 
-        // Click the Add button to open the add dialog
-        addCategoryButton.addEventListener("click", function () {
-            newCategoryDialog.style.display = "flex";
+    function addCategoryToUI(category, options) {
+        const newCategorybutton = document.createElement("button");
+        newCategorybutton.className = "annotation-category";
+        newCategorybutton.dataset.category = category;
+        newCategorybutton.innerHTML = `<span class="category-text">${category}</span><span class="delete-icon" title="Delete"><svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="red"></circle><rect x="7" y="11" width="10" height="2" rx="1" fill="white"></rect></svg></span>`;
+        categoryList.appendChild(newCategorybutton);
+    }
+
+    function addCategoryToMenu(categoryName, options) {
+        const annotationMenu = document.getElementById("annotation-menu");
+        const safeCategoryName = `${categoryName.trim().replace(/^\d+/, "n$&").replace(/\s+/g, "-").replace(/[^a-zA-Z0-9-_]/g, "")}`;
+        if (annotationMenu.querySelector(`.${safeCategoryName}-menu`)) return;
+        let ul = document.createElement("ul");
+        ul.className = `${safeCategoryName}-menu`;
+        ul.style.display = "none";
+        ul.innerHTML += `<li class="header">${categoryName.toUpperCase()}</li>`;
+        options.forEach(option => {
+            ul.innerHTML += `<li><label><input type="checkbox" value="${option}"> ${option}</label></li>`;
         });
+        annotationMenu.insertBefore(ul, annotationMenu.querySelector(".category-btn"));
+    }
 
-        // Cancel add new category
-        cancelNewCategoryButton.addEventListener("click", function () {
-            newCategoryDialog.style.display = "none";
-        });
-
-        // Listen for the "+" button and insert a new Checkbox row below the current row
-        document.addEventListener("click", function (event) {
-            if (event.target.classList.contains("add-checkbox")) {
-                const parentDiv = event.target.parentElement;
-                const newCheckbox = createCheckboxItem(); // Create a new checkbox row
-                parentDiv.after(newCheckbox); // Insert a new line after the current line
-            }
-        });
-
-        // Listen for the "-" button and delete the Checkbox row
-        document.addEventListener("click", function (event) {
-            if (event.target.classList.contains("remove-checkbox")) {
-                const parentDiv = event.target.parentElement;
-                if (checkboxContainer.children.length > 1) {
-                    parentDiv.remove(); // Delete the current line
-                }
-            }
-        });
-
-        // Create a new checkbox input row
-        function createCheckboxItem() {
-            const newCheckbox = document.createElement("div");
-            newCheckbox.classList.add("checkbox-item");
-
-            const input = document.createElement("input");
-            input.type = "text";
-            input.classList.add("checkbox-input");
-            input.placeholder = "Enter checkbox value";
-
-            const addButton = document.createElement("button");
-            addButton.textContent = "➕";
-            addButton.classList.add("add-checkbox");
-
-            const removeButton = document.createElement("button");
-            removeButton.textContent = "➖";
-            removeButton.classList.add("remove-checkbox");
-
-            newCheckbox.appendChild(input);
-            newCheckbox.appendChild(addButton);
-            newCheckbox.appendChild(removeButton);
-            return newCheckbox;
-        }
-
-        // Save new Category
-        saveNewCategoryButton.addEventListener("click", function () {
-            const categoryName = document.getElementById("newCategoryInput").value.trim();
-            const checkboxes = Array.from(document.querySelectorAll(".checkbox-input"))
-                .map(input => input.value.trim())
-                .filter(value => value !== "");
-
-            if (categoryName && checkboxes.length > 0) {
-                saveNewCategory(categoryName, checkboxes);
-            }
-        });
-
-        function saveNewCategory(category, options) {
-            fetch("{{ URL_PREFIX }}/save_custom_category", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: currentUsername, category: category, options: options })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        addCategoryToUI(category, options);
-                        addCategoryToMenu(category, options);
-                        newCategoryDialog.style.display = "none";
-                    }
-                });
-        }
-
-        function addCategoryToUI(category, options) {
-            const newCategorybutton = document.createElement("button");
-            newCategorybutton.classList.add("annotation-category");
-            // Keep only letters, numbers, "-" and "_"
-            newCategorybutton.dataset.category = `${category.trim() // Remove leading and trailing spaces
-                .replace(/^\d+/, "n$&") // Add prefix "n" if it starts with a number
-                .replace(/\s+/g, "-") // Replace spaces with "-"
-                .replace(/[^a-zA-Z0-9-_]/g, "")}`; // Remove all characters except letters, numbers, "-" and "_"
-            newCategorybutton.dataset.category = category
-            const textSpan = document.createElement("span");
-            textSpan.classList.add("category-text");
-            textSpan.textContent = category;
-            const deleteIcon = document.createElement("span");
-            deleteIcon.classList.add("delete-icon");
-            deleteIcon.title = "Delete";
-            deleteIcon.innerHTML = `
-        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" fill="red"></circle>
-            <rect x="7" y="11" width="10" height="2" rx="1" fill="white"></rect>
-        </svg>
-    `;
-            newCategorybutton.appendChild(textSpan);
-            newCategorybutton.appendChild(deleteIcon);
-            categoryList.appendChild(newCategorybutton);
-        }
-
-        function addCategoryToMenu(categoryName, options) {
-            const annotationMenu = document.getElementById("annotation-menu");
-            // Convert categoryName to comply with CSS rules
-            const safeCategoryName = `${categoryName.trim() // Remove leading and trailing spaces
-                .replace(/^\d+/, "n$&") // Add prefix "n" if it starts with a number
-                .replace(/\s+/g, "-") // Replace spaces with "-"
-                .replace(/[^a-zA-Z0-9-_]/g, "")}`; // Remove all characters except letters, numbers, "-" and "_"
-            // Check if the category already exists
-            if (annotationMenu.querySelector(`.${safeCategoryName}-menu`)) {
-                console.warn(`Category '${categoryName}' already exists.`);
-                return;
-            }
-
-            // Create a new `ul`
-            let ul = document.createElement("ul");
-            ul.classList.add(`${safeCategoryName}-menu`);
-            ul.style.display = "none";
-
-            // Add category title
-            let header = document.createElement("li");
-            header.classList.add('header');
-            header.textContent = categoryName.toUpperCase();
-            ul.appendChild(header);
-
-            // Add `checkbox` option
-            options.forEach(option => {
-                let li = document.createElement("li");
-                let label = document.createElement("label");
-                let input = document.createElement("input");
-                input.type = "checkbox";
-                input.value = option;
-                label.appendChild(input);
-                label.appendChild(document.createTextNode(" " + option));
-                li.appendChild(label);
-                ul.appendChild(li);
-            });
-            // Add to `menu-container`
-            annotationMenu.insertBefore(ul, annotationMenu.querySelector(".category-btn"))
-        }
-
-        let targetCategoryButton = null;
-        document.addEventListener("click", function(event) {
-            if (event.target.closest('.delete-icon')) {
-                event.stopPropagation()
-                targetCategoryButton = event.target.closest('.annotation-category');
-                const category = targetCategoryButton.querySelector('.category-text')?.textContent;
-                // Check if there is a tier
-                const hasTier = checkIfHasTier(category);
-                const dialogText = document.getElementById('deleteCategoryDialogText');
-                if (hasTier) {
-                    dialogText.innerHTML = `This category has a corresponding tier. Are you sure you want to delete <strong style="color:red;">"${category}"</strong> and its tier?`;
-                } else {
-                    dialogText.innerHTML = `Are you sure you want to delete <strong>"${category}"</strong>?`;
-                }
-                document.getElementById('deleteConfirmDialog').style.display = 'flex';
-            }
-        });
-
-        // Click to confirm deletion
-        document.getElementById('confirmDeleteCategory').addEventListener('click', function() {
-            if (targetCategoryButton) {
-                const category = targetCategoryButton.querySelector('.category-text')?.textContent;
-                // Request backend deletion
-                deleteCategoryOnServer(category);
-                // Delete frontend
-                if (checkIfHasTier(category)) {
-                    deleteTier(category);
-                }
-                targetCategoryButton.remove();
-                document.getElementById('deleteConfirmDialog').style.display = 'none';
-            }
-        });
-
-        document.getElementById('cancelDeleteCategory').addEventListener('click', function(){
-            document.getElementById('deleteConfirmDialog').style.display = 'none';
-        });
-
-        function deleteCategoryOnServer(category) {
-            fetch(`{{ URL_PREFIX }}/delete_custom_category`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ category: category })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status !== 'success') {
-                        alert('Server Error: ' + data.message);
-                    }
-                });
-        }
-        function checkIfHasTier(category) {
-            return document.querySelector(`.interval-tier[data-category="${category}"]`) !== null;
-        }
-
-        function deleteTier(category) {
-            document.querySelectorAll(`.interval-tier[data-category="${category}"]`).forEach(tier => tier.remove());
-            document.querySelectorAll(`.name-input[title="${category}"]`).forEach(input => input.remove());
+    let targetCategoryButton = null;
+    document.addEventListener("click", function(event) {
+        if (event.target.closest('.delete-icon')) {
+            event.stopPropagation();
+            targetCategoryButton = event.target.closest('.annotation-category');
+            const category = targetCategoryButton.querySelector('.category-text')?.textContent;
+            const hasTier = checkIfHasTier(category);
+            const dialogText = document.getElementById('deleteCategoryDialogText');
+            dialogText.innerHTML = hasTier ? `This category has a corresponding tier. Are you sure you want to delete <strong style="color:red;">"${category}"</strong> and its tier?` : `Are you sure you want to delete <strong>"${category}"</strong>?`;
+            document.getElementById('deleteConfirmDialog').style.display = 'flex';
         }
     });
+
+    document.getElementById('confirmDeleteCategory').addEventListener('click', function() {
+        if (targetCategoryButton) {
+            const category = targetCategoryButton.querySelector('.category-text')?.textContent;
+            deleteCategoryOnServer(category);
+            if (checkIfHasTier(category)) {
+                deleteTier(category);
+            }
+            targetCategoryButton.remove();
+            document.getElementById('deleteConfirmDialog').style.display = 'none';
+        }
+    });
+
+    document.getElementById('cancelDeleteCategory').addEventListener('click', () => document.getElementById('deleteConfirmDialog').style.display = 'none');
+    
+    function deleteCategoryOnServer(category) {
+        fetch(`{{ URL_PREFIX }}/delete_custom_category`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category: category }) })
+            .then(res => res.json())
+            .then(data => { if (data.status !== 'success') alert('Server Error: ' + data.message); });
+    }
+    function checkIfHasTier(category) {
+        return !!document.querySelector(`.interval-tier[data-category="${category}"]`);
+    }
+    function deleteTier(category) {
+        document.querySelectorAll(`.interval-tier[data-category="${category}"]`).forEach(tier => tier.remove());
+        document.querySelectorAll(`.name-input[title="${category}"]`).forEach(input => input.remove());
+    }
+});
 </script>
 {#<script src="{{ URL_PREFIX + url_for('static', filename='js/viewer.js') }}"></script>#}
 </body>
 </html>
+

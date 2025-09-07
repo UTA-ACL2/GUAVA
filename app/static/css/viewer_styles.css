@@ -1,0 +1,81 @@
+#waveform-container {
+    position: relative;
+}
+
+#waveform-label {
+    position: absolute;
+    top: 70px;
+    left: 25px;
+    transform: translate(-50%, -50%);
+    padding: 5px 5px;
+    background-color: white;
+    color: black;
+    border: 1px solid red;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#waveform-yaxis {
+    position: absolute;
+    left: 85px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 130px;
+    font-size: 15px;
+    color: black;
+}
+
+#spectrogram-label {
+    position: absolute;
+    top: 200px;
+    left: 18px;
+    transform: translate(-50%, -50%);
+    padding: 5px 5px;
+    background-color: white;
+    color: black;
+    border: 1px solid red;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#spectrogram-yaxis {
+    position: absolute;
+    top: 145px;
+    left: 67px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 110px;
+    font-size: 13px;
+    color: black;
+}
+
+#drawings-container {
+    position: relative;
+}
+
+#drawings-label {
+    position: absolute;
+    top: 50%;
+    left: 25px;
+    transform: translate(-50%, -50%);
+    padding: 8px 0px;
+    background-color: white;
+    color: black;
+    border: 1px solid red;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    width: 77px;
+    white-space: normal;
+}
+
+.category-btn {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 8px;
+}

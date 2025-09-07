@@ -14,3 +14,4 @@ app/locks.json
 
 # Ignore user pool files
 app/static/videos/pool/
+app/locks.json
