@@ -12,19 +12,33 @@
 <body>
 <div class="container">
     <div id="poolContainer" class="file-manager" style="display: none;">
-        <h3>File Pool for <span id="userDisplay"></span></h3>
+        <h3>
+            File Pool for <span id="userDisplay"></span>
+            <span id="helpLink" title="Show instructions">Help</span>
+        </h3>
+        <div id="instructions">
+            <ul style="margin:0; padding-left:20px;">
+                <li>Upload audio/video files in <b>.wav</b>, <b>.mp3</b>, or <b>.mp4</b> format.</li>
+                <li>Click <b>Add</b> to create new tiers or define custom categories, and please select a specific tier before annotating.</li>
+                <li>Drag on the waveform to create and adjust annotation regions.</li>
+                <li>All changes are auto-saved and can be exported as a Praat-compatible <b>.TextGrid</b>.</li>
+            </ul>
+            <p> Full features:
+                <a href="https://youtu.be/-rjM8eFayUA?si=m4QV_mgjR4PtuXXV" target="_blank" rel="noopener">GUAVA Tutorial</a>
+            </p>
+        </div>
         <form action="{{ URL_PREFIX + url_for('upload.upload_files') }}" method="post" enctype="multipart/form-data" id="runForm">
             <div style="display: flex; align-items: center">
                 <label for="audioFile">Upload video or audio file:</label>
                 <input type="file" id="audioFile" name="audioFile" class="fileInput" multiple accept=".mp4,video/mp4,.wav,audio/wav,.mp3,audio/mpeg">
                 <div id="errorMessage" style="color: #FF0000;"></div>
                 <button type="button" id="runButton" style="padding: 5px 10px;
-    margin: 0 5px;
-    border: none;
-    background: #007bff;
-    color: white;
-    cursor: pointer;
-    border-radius: 5px;">Upload</button>
+                    margin: 0 5px;
+                    border: none;
+                    background: #007bff;
+                    color: white;
+                    cursor: pointer;
+                    border-radius: 5px;">Upload</button>
             </div>
         </form>
         <div class="file-header">
@@ -33,6 +47,7 @@
             <div class="col status sortable">Status<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
             <div class="col duration sortable">Duration<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
             <div class="col size sortable">Size<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
+            <div class="col lastAnnotationSaveTime sortable">Last AnnotateTime<span class="sort-icons"><i class="sort-arrow up"></i><i class="sort-arrow down"></i></span></div>
         </div>
         <ul id="fileList"></ul>
         <div class="pagination">
@@ -51,6 +66,15 @@
         {% if message %}
             alert("{{ message }}");
         {% endif %}
+
+        const link = document.getElementById('helpLink');
+        const panel = document.getElementById('instructions');
+        link.addEventListener('click', () => {
+            const show = panel.style.display !== 'block';
+            panel.style.display = show ? 'block' : 'none';
+            link.title = show ? 'Hide instructions' : 'Show instructions';
+        });
+
         const audioInput = document.getElementById('audioFile');
         const runButton = document.getElementById('runButton');
         const errorMessage = document.getElementById('errorMessage');
@@ -169,7 +193,8 @@
                 type: "type",
                 status: "status",
                 duration: "duration",
-                size: "size"
+                size: "size",
+                lastAnnotationSaveTime: "lastAnnotationSaveTime"
             };
 
             // Request the server to get the user's files
@@ -208,6 +233,7 @@
                 if (key === "status") return file.status === "Annotated" ? 1 : 0;
                 if (key === "duration") return parseFloat(file.duration);
                 if (key === "size") return parseFloat(file.size);
+                if (key === "lastAnnotationSaveTime") return file.lastAnnotationSaveTime === "----" ? 0 : new Date(file.lastAnnotationSaveTime).getTime(); // Potential iOS risk: "%Y-%m-%d %H:%M:%S" is not ISO 8601, may fail in Safari.
                 return file.name;
             }
 
@@ -256,6 +282,11 @@
                     sizeDiv.classList.add("col", "size");
                     sizeDiv.textContent = file.size;
 
+                    // Create last annotation save time label
+                    let lastSaveDiv = document.createElement("div");
+                    lastSaveDiv.classList.add("col", "lastAnnotationSaveTime");
+                    lastSaveDiv.textContent = file.lastAnnotationSaveTime;
+
                     fileItem.appendChild(fileIcon);
                     fileItem.appendChild(nameDiv);
                     fileItem.appendChild(typeDiv);
@@ -263,6 +294,7 @@
                     fileItem.appendChild(durationDiv);
                     fileItem.appendChild(sizeDiv);
                     fileList.appendChild(fileItem);
+                    fileItem.appendChild(lastSaveDiv)
                 });
                 updatePaginationControls();
             }

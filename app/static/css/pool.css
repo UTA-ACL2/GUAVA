@@ -86,6 +86,7 @@
 .file-item .type,
 .file-item .status,
 .file-item .duration,
+.file-item .lastAnnotationSaveTime,
 .file-item .size {
     flex: 1;
     text-align: left;
@@ -174,4 +175,26 @@
 
 .context-menu li:hover {
     background-color: #f5f5f5;
+}
+
+#helpLink {
+    margin-left: 10px;
+    cursor: pointer;
+    color: #007bff;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+#helpLink:hover {
+    color: #0056b3;
+}
+
+#instructions {
+    display: none;
+    background: #fff8dc;
+    border: 1px solid #f0ad4e;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin: 8px 0 14px;
+    text-align: left;
 }

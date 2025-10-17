@@ -2,9 +2,9 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link href="{{ URL_PREFIX + url_for('static', filename='css/viewer.css') }}" rel="stylesheet" type="text/css"/>
     <link href="{{ URL_PREFIX + url_for('static', filename='css/general.css') }}" rel="stylesheet" type="text/css"/>
     <link href="{{ URL_PREFIX + url_for('static', filename='css/annotation.css') }}" rel="stylesheet" type="text/css"/>
@@ -18,9 +18,11 @@
     </div>
     <div class="container-fluid" style="text-align: center">
         <div style="display: flex">
-            <div style="flex: 1; min-width: 150px;">
+            <div style="flex: 1; min-width: 150px; text-align: left;">
                 <p><strong>User:</strong> {{ userName }}</p>
                 <p><strong>File:</strong> {{ fileName }}</p>
+                <p><strong>Tiers:</strong> <span id="tierCount">0</span></p>
+                <p><strong>Total Annotations:</strong> <span id="annotationCount">0</span></p>
             </div>
             <div style="display: flex; flex-direction: column; margin-left: 20px; gap: 10px;">
                 <a href="{{ URL_PREFIX + url_for('login.logout') }}" class="btn btn-primary">Logout</a>
@@ -48,7 +50,7 @@
         text-align: center;">Waveform</div>
             <div id="waveform-yaxis" style="
     position: absolute;
-    left: 85px;
+    left: 55px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -56,9 +58,9 @@
     font-size: 15px;
     color: black;
 ">
-                <div>1</div>
+                <div id="waveform-y-max">1</div>
                 <div>0</div>
-                <div>-1</div>
+                <div id="waveform-y-min">-1</div>
             </div>
             <div id="spectrogram-label" style="  position: absolute;
         top: 200px;
@@ -73,20 +75,20 @@
         text-align: center;">Spectrogram</div>
             <div id="spectrogram-yaxis" style="
     position: absolute;
-    top: 145px;
+    top: 127px;
     left: 67px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 110px;
+    height: 135px;
     font-size: 13px;
-    color: black;
+    color: blue;
 ">
-                <div>5k Hz</div>
+                <div id="spectrogram-y-max">5kHz</div>
                 {#                <div>4k Hz</div>#}
-                <div>3k Hz</div>
+                <div id="spectrogram-y-mid">3kHz</div>
                 {#                <div>2k Hz</div>#}
-                <div>1k Hz</div>
+                <div id="spectrogram-y-min">0kHz</div>
             </div>
             <div id="waveform" ></div>
         </div>
@@ -110,13 +112,13 @@
 
         <p class="row">
         <div class="col-xs-1">
-            <i class="glyphicon glyphicon-zoom-out icon-large" style="cursor: pointer"></i>
+            <i class="glyphicon glyphicon-zoom-out icon-large" ></i>
         </div>
         <div class="col-xs-10">
-            <input id="slider" type="range" min="50" max="80000" value="50" style="width: 100%" />
+            <input id="slider" type="range" min="50" max="80000" value="50" style="width: 100%" disabled />
         </div>
         <div class="col-xs-1">
-            <i class="glyphicon glyphicon-zoom-in icon-large" style="cursor: pointer"></i>
+            <i class="glyphicon glyphicon-zoom-in icon-large" ></i>
         </div>
 
         <div id="tier-container">
@@ -142,6 +144,7 @@
                 <li id="menu3">Option</li>
                 <li id="menu4" class="show-tiers-button">Show Tiers</li>
                 <li id="menu5">Delete Tier</li>
+                <li id="menu6">Spectrogram Setting</li>
             </ul>
         </div>
         <div id="annotation-menu" class="context-menu">
@@ -170,12 +173,6 @@
                 <button class="okButton">OK</button>
                 <button class="deleteButton">Delete</button>
             </div>
-        </div>
-        <div id="category-select-menu" class="context-menu">
-            <ul>
-                <li data-category="Emotion">Emotion</li>
-                <li data-category="Behavior">Behavioral Intent</li>
-            </ul>
         </div>
         <div id="tier-submenu" class="context-submenu" style="display: none;"></div>
 
@@ -247,17 +244,31 @@
         <div class="col-xs-6 text-right" style="width: 40%; justify-content: space-between;" >
             <button id="downloadTextGrid" class="btn btn-textgrid btn-lg">Export</button>
         </div>
+
+        <div id="spectrogramDialog" class="overlay" style="display: none;">
+            <div class="dialog">
+                <h3>Spectrogram Settings</h3>
+                <label for="specMinHz">Frequency Min (Hz):</label>
+                <input type="number" id="specMinHz" placeholder="e.g. 0">
+                <label for="specMaxHz">Frequency Max (Hz):</label>
+                <input type="number" id="specMaxHz" placeholder="e.g. 5000">
+                <button id="saveSpectrogram">Save</button>
+                <button id="cancelSpectrogram">Cancel</button>
+            </div>
+        </div>
+
     </div>
 </div>
 <script src="//d3js.org/d3.v3.js"></script>
 <script type="module">
 
-    {#import WaveSurfer from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/wavesurfer.esm.js'#}
-    {#import Spectrogram from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/spectrogram.esm.js'#}
-    {#import TimelinePlugin from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/timeline.esm.js'#}
-    {#import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/regions.esm.js'#}
-    {#import ZoomPlugin from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/zoom.esm.js'#}
-    {#import Hover from 'https://unpkg.com/wavesurfer.js@7.9.4/dist/plugins/hover.esm.js'#}
+    {#import WaveSurfer from 'https://unpkg.com/wavesurfer.js@7.10.1/dist/wavesurfer.esm.js'#}
+    {#import Spectrogram from 'https://unpkg.com/wavesurfer.js@7.10.1/dist/plugins/spectrogram.esm.js'#}
+    {#import TimelinePlugin from 'https://unpkg.com/wavesurfer.js@7.10.1/dist/plugins/timeline.esm.js'#}
+    {#import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@7.10.1/dist/plugins/regions.esm.js'#}
+    {#import ZoomPlugin from 'https://unpkg.com/wavesurfer.js@7.10.1/dist/plugins/zoom.esm.js'#}
+    {#import Hover from 'https://unpkg.com/wavesurfer.js@7.10.1/dist/plugins/hover.esm.js'#}
+    import Spectrowindow from 'https://unpkg.com/wavesurfer.js@7.10.1/dist/plugins/spectrogram-windowed.esm.js'
 
     import WaveSurfer from "{{ URL_PREFIX + url_for('static', filename='js/wavesurfer.esm.js') }}"
     import Spectrogram from "{{ URL_PREFIX + url_for('static', filename='js/spectrogram.esm.js') }}"
@@ -267,7 +278,6 @@
     import ZoomPlugin from "{{ URL_PREFIX + url_for('static', filename='js/zoom.esm.js') }}"
     import Hover from "{{ URL_PREFIX + url_for('static', filename='js/hover.esm.js') }}"
 
-    var soundSeconds = 0;
     var timeline;
     var videoDuration;
     let selectedTier = null;
@@ -323,17 +333,38 @@
     const hover = Hover.create({
         lineColor: '#ff0000',
         lineWidth: 2,
-        labelBackground: '#555',
+        labelBackground: 'rgba(0,0,0,0.5)',
         labelColor: '#fff',
         labelSize: '11px',
         formatTimeCallback: (seconds) => {
             return seconds.toFixed(5) + "s";  // example：0.12345s
         },
+        getStats: (time) => {
+            const { pitch, intensity } = samplePIAt(time);
+            return {
+                amplitude: ampAtTime_left(time),
+                pitch,
+                intensity
+            };
+        }
     })
 
     const spectrogramPlugin = spectrogram_emu.create({
         height: 128,
     });
+
+    const SpectrowindowPlugin = Spectrowindow.create({
+        height: 130,
+        fftSamples: 256,
+        scale: 'linear',
+        frequencyMax: 5000,
+        frequencyMin: 0,
+        colorMap: 'gray',
+        {#labels: true,#}
+        labelsBackground: 'rgba(0, 0, 0, 0.1)',
+        splitChannels: false,
+        useWebWorker: true,
+    })
 
     var wavesurfer = WaveSurfer.create({
         normalize: true,
@@ -343,7 +374,7 @@
         waveColor: 'rgb(200, 0, 200)',
         progressColor: 'rgb(100, 0, 100)',
         media: document.querySelector('video'),
-        sampleRate: 11025,
+        sampleRate: 15000,
         minPxPerSec: 100,
         plugins: [
             topTimeline,
@@ -351,7 +382,8 @@
             regions,
             zoomPlugin,
             hover,
-            spectrogramPlugin
+            {#spectrogramPlugin,#}
+            SpectrowindowPlugin
         ],
     });
 
@@ -395,9 +427,9 @@
 
     wavesurfer.on('interaction', () => {
         regions.clearRegions()
-        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
+        {#const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;#}
         const pitchDiv = document.getElementById('chart');
-        [spectrogramDiv, pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
+        [ pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
     })
 
     regions.enableDragSelection({
@@ -526,9 +558,10 @@
                 annotationMenu.style.display = 'none'; // Click OK to hide the menu
                 selectedTier.removeChild(div);
                 regions.clearRegions();
-                const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
+                {#const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;#}
                 const pitchDiv = document.getElementById('chart');
-                [spectrogramDiv, pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
+                [ pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
+                countTiersAndAnnotations()
             });
         });
 
@@ -553,10 +586,10 @@
             container.appendChild(overlay);
         };
         // Get two containers
-        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
+        {#const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;#}
         const pitchDiv = document.getElementById('chart');
         // Create two overlays
-        if (spectrogramDiv) createOverlay(spectrogramDiv, region);
+        {#if (spectrogramDiv) createOverlay(spectrogramDiv, region);#}
         if (pitchDiv) createOverlay(pitchDiv, region);
 
     })
@@ -585,9 +618,37 @@
         downloadTextGrid()
     }
 
+    let leftPeaks = [];
+    let peaksPerSec = 0;
     wavesurfer.on('ready', function () {
         videoDuration = wavesurfer.getDuration();
+        var totalPixels = $("#waveform").innerWidth() - 140;
+        pxPerSec = totalPixels / videoDuration;
+        wavesurfer.zoom(pxPerSec);
+        currentZoom = pxPerSec
+        setGraphParams(totalPixels);
+        initializeGraph();
+        $('#slider').attr("min", pxPerSec);
+        $('#slider').val(pxPerSec);
+        const peaks = wavesurfer.exportPeaks()
+        const allPeaks = peaks.flat()
+        leftPeaks = peaks[0];                     // Only use channel 0 (left channel) from the audio data
+        peaksPerSec = leftPeaks.length / wavesurfer.getDuration();
+        {#console.log('peaks',peaks)#}
+
+        const max = Math.max(...allPeaks.map(Math.abs)) || 1
+        document.getElementById('waveform-y-max').textContent = max.toFixed(3)
+        document.getElementById('waveform-y-min').textContent = (-max).toFixed(3)
     });
+
+    function ampAtTime_left(tSec) {
+        if (!leftPeaks.length) return 0;
+        const i = Math.max(
+            0,
+            Math.min(leftPeaks.length - 1, Math.round(tSec * peaksPerSec))
+        );
+        return leftPeaks[i];
+    }
 
     function updatePlayLine1() {
         var timeRatio = videoPlayer.currentTime / wavesurfer.getDuration();
@@ -627,9 +688,9 @@
     function updateAllRegionOverlays() {
         const regionsList = regions.getRegions();
         const duration = wavesurfer.getDuration();
-        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
+        {#const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;#}
         const pitchDiv = document.getElementById('chart');
-        const containers = [spectrogramDiv, pitchDiv];
+        const containers = [ pitchDiv];
         const scrollLeft = wavesurfer.getScroll();
         const scrollWidth = wavesurfer.getWrapper().scrollWidth;
         regionsList.forEach(region => {
@@ -646,35 +707,25 @@
         });
     }
 
-    wavesurfer.on('ready', function () {
-        soundSeconds = wavesurfer.getDuration();
-        var totalPixels = $("#waveform").innerWidth() - 140;
-        pxPerSec = totalPixels / soundSeconds;
-        wavesurfer.zoom(pxPerSec);
-        currentZoom = pxPerSec
-        setGraphParams(totalPixels);
-        initializeGraph();
-        $('#slider').attr("min", pxPerSec);
-        $('#slider').val(pxPerSec);
-    });
+
 
     // Listen for mouse wheel events to achieve zooming
-    document.getElementById('drawings').addEventListener('wheel', function(event) {
-        event.preventDefault();
-        let newZoom = event.deltaY < 0 ? currentZoom + 500 : currentZoom - 500; // Scroll wheel up to zoom in, scroll wheel down to zoom out
-        newZoom = Math.max(pxPerSec, Math.min(80000, newZoom)); // Limit zoom range
-        wavesurfer.zoom(newZoom);
-        $('#slider').val(newZoom);
-        zoom(soundSeconds * newZoom);
-        currentZoom = newZoom;
-        updatePlayLine1();
-        updatePlayLine2();
-    });
+    {#document.getElementById('drawings').addEventListener('wheel', function(event) {#}
+    {#    event.preventDefault();#}
+    {#    let newZoom = event.deltaY < 0 ? currentZoom + 500 : currentZoom - 500; // Scroll wheel up to zoom in, scroll wheel down to zoom out#}
+    {#    newZoom = Math.max(pxPerSec, Math.min(80000, newZoom)); // Limit zoom range#}
+    {#    wavesurfer.zoom(newZoom);#}
+    {#    $('#slider').val(newZoom);#}
+    {#    zoom(soundSeconds * newZoom);#}
+    {#    currentZoom = newZoom;#}
+    {#    updatePlayLine1();#}
+    {#    updatePlayLine2();#}
+    {#});#}
 
     wavesurfer.on('zoom', function (pxPerSec) {
-        $(".interval-tier, .point-tier").css("width", (soundSeconds * pxPerSec) + "px");
+        $(".interval-tier, .point-tier").css("width", (videoDuration * pxPerSec) + "px");
         $('#slider').val(pxPerSec)
-        zoom(soundSeconds * pxPerSec)
+        zoom(videoDuration * pxPerSec)
         currentZoom = pxPerSec
         updatePlayLine1();
         updatePlayLine2();
@@ -693,37 +744,37 @@
     });
 
     var slider = document.querySelector('#slider');
-    slider.oninput = function () {
-        var zoomLevel = Number(slider.value);
-        currentZoom = zoomLevel
-        wavesurfer.zoom(zoomLevel);
-        zoom(soundSeconds * zoomLevel);
-        updatePlayLine1();
-        updatePlayLine2();
-    };
+    {#slider.oninput = function () {#}
+    {#    var zoomLevel = Number(slider.value);#}
+    {#    currentZoom = zoomLevel#}
+    {#    wavesurfer.zoom(zoomLevel);#}
+    {#    zoom(soundSeconds * zoomLevel);#}
+    {#    updatePlayLine1();#}
+    {#    updatePlayLine2();#}
+    {#};#}
 
-    const zoomInBtn = document.querySelector(".glyphicon-zoom-in");
-    const zoomOutBtn = document.querySelector(".glyphicon-zoom-out");
-
-    zoomInBtn.addEventListener("click", () => {
-        const newValue = Number(slider.value) + 800;
-        currentZoom = newValue
-        wavesurfer.zoom(newValue);
-        zoom(soundSeconds * newValue);
-        updatePlayLine1();
-        updatePlayLine2();
-    });
-
-    zoomOutBtn.addEventListener("click", () => {
-        const newValue = Number(slider.value) - 800;
-        if (newValue>pxPerSec) {
-            currentZoom = newValue
-            wavesurfer.zoom(newValue);
-            zoom(soundSeconds * newValue);
-            updatePlayLine1();
-            updatePlayLine2();
-        }
-    });
+    {#const zoomInBtn = document.querySelector(".glyphicon-zoom-in");#}
+    {#const zoomOutBtn = document.querySelector(".glyphicon-zoom-out");#}
+    {##}
+    {#zoomInBtn.addEventListener("click", () => {#}
+    {#    const newValue = Number(slider.value) + 800;#}
+    {#    currentZoom = newValue#}
+    {#    wavesurfer.zoom(newValue);#}
+    {#    zoom(soundSeconds * newValue);#}
+    {#    updatePlayLine1();#}
+    {#    updatePlayLine2();#}
+    {#});#}
+    {##}
+    {#zoomOutBtn.addEventListener("click", () => {#}
+    {#    const newValue = Number(slider.value) - 800;#}
+    {#    if (newValue>pxPerSec) {#}
+    {#        currentZoom = newValue#}
+    {#        wavesurfer.zoom(newValue);#}
+    {#        zoom(soundSeconds * newValue);#}
+    {#        updatePlayLine1();#}
+    {#        updatePlayLine2();#}
+    {#    }#}
+    {#});#}
 
     videoPlayer.addEventListener('seeked', () => {
         if (slider.value > 1000) {
@@ -797,6 +848,8 @@
             .append("g");
     }
 
+    let graphData = null;
+    let bisectTime = d3.bisector(d => d.time).left;
     function initializeGraph() {
         d3.tsv("{{ graphData }}", function (error, data)  {
             if (error) throw error;
@@ -807,6 +860,7 @@
                 d.intensity = +d.intensity;
             });
 
+            graphData = data;
             x.domain(d3.extent(data, function (d) {
                 return d.time;
             }));
@@ -866,6 +920,30 @@
             .attr("stroke", "black")
             .attr("stroke-width", 0.8);
     }
+
+    function samplePIAt(timeSec) {
+        if (!graphData || graphData.length === 0) return { pitch: null, intensity: null };
+
+        const t = timeSec * 1000;
+        let i = bisectTime(graphData, t);
+        if (i <= 0)   return { pitch: graphData[0].pitch, intensity: graphData[0].intensity };
+        if (i >= graphData.length) {
+            const last = graphData[graphData.length - 1];
+            return { pitch: last.pitch, intensity: last.intensity };
+        }
+
+        const a = graphData[i - 1], b = graphData[i];
+        const k = (t - a.time) / (b.time - a.time);
+        const lerp = (x, y) => x + (y - x) * k;
+
+        return {
+            pitch: lerp(a.pitch, b.pitch),
+            intensity: lerp(a.intensity, b.intensity)
+        };
+    }
+    {#wavesurfer.on('timeupdate', (t) => {#}
+    {#    const { pitch, intensity } = samplePIAt(t);#}
+    {#});#}
 
     // Waveform synchronization, update the position of the vertical line
     wavesurfer.on('timeupdate', function (currentTime) {
@@ -1023,7 +1101,7 @@
     };
     const fileName = "{{ fileName }}";
     // File download logic
-    const downloadTextGrid = () => {
+    function downloadTextGrid() {
         const annotations = collectAnnotations();
         const textGridContent = generateTextGridContent(annotations, videoDuration);
         const blob = new Blob([textGridContent], { type: "text/plain" });
@@ -1044,6 +1122,7 @@
         const bindTierClickEvent = (tier, tierType) => {
             let clickTimeout;
             tier.addEventListener("click", (event) => {
+                selectedTier = tier;
                 if (event.target.classList.contains("handle-left") || event.target.classList.contains("handle-right")) {
                     // Get the parent element interval
                     const intervalElement = event.target.parentElement;
@@ -1134,6 +1213,7 @@
                 div.style.left = timePercentage + "%";
             }
             tier.appendChild(div);
+            countTiersAndAnnotations();
 
             const annotationMenu = document.getElementById("annotation-menu").cloneNode(true);
             document.body.appendChild(annotationMenu); // Add to page
@@ -1257,9 +1337,10 @@
                     annotationMenu.style.display = 'none';
                     tier.removeChild(div);
                     regions.clearRegions();
-                    const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;
+                    {#const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling;#}
                     const pitchDiv = document.getElementById('chart');
-                    [spectrogramDiv, pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
+                    [ pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
+                    countTiersAndAnnotations()
                 });
             });
         };
@@ -1302,7 +1383,6 @@
         }
 
 
-        let targetTier = null; // The target Tier of the current right click
         const contextMenu = document.getElementById("context-menu");
         const tierSubmenu = document.getElementById("tier-submenu");
         // Add Interval Tier button logic
@@ -1315,17 +1395,22 @@
                 index++;
             } while (document.getElementById(newTierId));
             const newTier = document.createElement("div");
-            newTier.style.width = (soundSeconds * currentZoom) + "px";
+            newTier.style.width = (videoDuration * currentZoom) + "px";
             newTier.style.left = -wavesurfer.getScroll() + 'px';
             newTier.id = newTierId;
             newTier.className = "interval-tier"; // Added as interval-tier
             newTier.dataset.category = Category
             addTierNames(newTier); // Add a name for each tier
             tierContainer.appendChild(newTier);
+            countTiersAndAnnotations()
             bindTierClickEvent(newTier, "interval"); // Bind click event
             const tierInput = document.getElementById(`${newTier.id}name`);
             tierInput.setAttribute('title', Category); // set title
             tierInput.setAttribute('value', TierName);
+            document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
+            document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
+            newTier.classList.add('selected');
+            selectedTier = newTier;
             newTier.addEventListener('click', () => {
                 // Clear the previous selection
                 document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
@@ -1333,64 +1418,38 @@
                 // Set the current tier to selected
                 newTier.classList.add('selected');
                 selectedTier = newTier; // Get the selected tier ID
-                {#console.log('selectedTier',selectedTier);#}
             });
-
-            document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
-            document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
-            newTier.classList.add('selected');
-            selectedTier = newTier; // Get the selected tier ID
-
             newTier.addEventListener("contextmenu", (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 closeAllMenus();
-                const categoryMenu = document.getElementById('category-select-menu');
-                if (!newTier.dataset.category) {
-                    categoryMenu.style.display = 'block';
-                    categoryMenu.style.left = `${event.clientX}px`;
-                    categoryMenu.style.top = `${event.clientY}px`;
-                    const handleCategorySelect = (e) => {
-                        if (e.target.tagName === 'LI') {
-                            newTier.dataset.category = e.target.dataset.category;
-                            categoryMenu.style.display = 'none';
-                            categoryMenu.removeEventListener('click', handleCategorySelect);
-                            // Get the corresponding input box
-                            const tierInput = document.getElementById(`${newTier.id}name`);
-                            {#console.log('tierInput',tierInput)#}
-                            if (tierInput) {
-                                tierInput.setAttribute('title', e.target.dataset.category); // set title
-                            }
-                        }
-                    };
-                    categoryMenu.addEventListener('click', handleCategorySelect);
-                } else {
-                    let menuX = event.clientX;
-                    let menuY = event.clientY;
-                    contextMenu.style.display = 'block';
-                    let menuWidth = contextMenu.offsetWidth;
-                    let menuHeight = contextMenu.offsetHeight;
-                    if (menuX + menuWidth > window.innerWidth) {
-                        menuX = window.innerWidth - menuWidth - 10; // Leave a 10px gap
-                    }
-                    if (menuY + menuHeight > window.innerHeight) {
-                        menuY = window.innerHeight - menuHeight - 10; // Leave a 10px gap
-                    }
-                    contextMenu.style.top = `${menuY}px`;
-                    contextMenu.style.left = `${menuX}px`;
-                    contextMenu.style.display = "block";
-                    targetTier = newTier; // Save the current right-click Tier
-                    menu0.style.display = "none";
-                    menu1.style.display = "none";
-                    menu2.style.display = "none";
-                    menu3.style.display = "block";
-                    menu3.textContent = "Hide This Tier";
-                    menu4.style.display = "block";
-                    menu5.style.display = "block";
-                    updateTierSubmenu();
+                let menuX = event.clientX;
+                let menuY = event.clientY;
+                contextMenu.style.display = 'block';
+                let menuWidth = contextMenu.offsetWidth;
+                let menuHeight = contextMenu.offsetHeight;
+                if (menuX + menuWidth > window.innerWidth) {
+                    menuX = window.innerWidth - menuWidth - 10; // Leave a 10px gap
                 }
-                document.addEventListener('click', () => categoryMenu.style.display = 'none', { once: true });
-                document.addEventListener("scroll", () => categoryMenu.style.display = 'none', { once: true });
+                if (menuY + menuHeight > window.innerHeight) {
+                    menuY = window.innerHeight - menuHeight - 10; // Leave a 10px gap
+                }
+                contextMenu.style.top = `${menuY}px`;
+                contextMenu.style.left = `${menuX}px`;
+                contextMenu.style.display = "block";
+                document.querySelectorAll('.interval-tier').forEach(t => t.classList.remove('selected'));
+                document.querySelectorAll('.point-tier').forEach(t => t.classList.remove('selected'));
+                newTier.classList.add('selected');
+                selectedTier = newTier;
+                menu0.style.display = "none";
+                menu1.style.display = "none";
+                menu2.style.display = "none";
+                menu3.style.display = "block";
+                menu3.textContent = "Hide This Tier";
+                menu4.style.display = "block";
+                menu5.style.display = "block";
+                menu6.style.display = "none";
+                updateTierSubmenu();
             });
             return newTier;
         };
@@ -1401,7 +1460,7 @@
             const existingTiers = tierContainer.children.length;
             const newTierId = `tier${existingTiers + 1}`; // The ID of the new tier
             const newTier = document.createElement("div");
-            newTier.style.width = (soundSeconds * currentZoom) + "px";
+            newTier.style.width = (videoDuration * currentZoom) + "px";
             newTier.id = newTierId;
             newTier.className = "point-tier"; // Add as point-tier
             addTierNames(newTier, existingTiers); // Add a name for each tier
@@ -1414,7 +1473,7 @@
                 contextMenu.style.top = `${event.clientY}px`;
                 contextMenu.style.left = `${event.clientX}px`;
                 contextMenu.style.display = "block";
-                targetTier = newTier; // Save the current right-click Tier
+                selectedTier = newTier
                 menu0.style.display = "none";
                 menu1.style.display = "none";
                 menu2.style.display = "none";
@@ -1456,11 +1515,11 @@
         }
 
         menu3.addEventListener("click", () => {
-            if (targetTier) {
-                const tierId = targetTier.id; // Get the tier ID
+            if (selectedTier) {
+                const tierId = selectedTier.id; // Get the tier ID
                 const tierNameInput = document.getElementById(`${tierId}name`); // Get the corresponding tierName input box
                 // Hide Tier and corresponding Name
-                targetTier.style.display = "none";
+                selectedTier.style.display = "none";
                 tierNameInput.style.display = "none"; // Hide input box
                 contextMenu.style.display = "none"; // Hide menu
                 updateTierSubmenu();
@@ -1468,8 +1527,8 @@
         });
 
         menu5.addEventListener("click", () => {
-            if (targetTier) {
-                const tierNameInput = document.getElementById(`${targetTier.id}name`);
+            if (selectedTier) {
+                const tierNameInput = document.getElementById(`${selectedTier.id}name`);
                 document.getElementById('deleteTierDialogText').innerHTML = `Are you sure you want to delete <strong>"${tierNameInput.value}"</strong>?`
                 document.getElementById('deleteTierConfirmDialog').style.display = 'flex';
                 contextMenu.style.display = "none";
@@ -1477,14 +1536,18 @@
         });
 
         document.getElementById('confirmDeleteTier').addEventListener('click', function() {
-            const tierId = targetTier.id;  // Get the tier ID
+            const tierId = selectedTier.id;  // Get the tier ID
             const tierNameInput = document.getElementById(`${tierId}name`); // Get the corresponding input box
             // Remove the Tier and the corresponding Name
-            targetTier.remove();
+            selectedTier.remove();
+            selectedTier = null;
             if (tierNameInput) tierNameInput.remove();
             regions.clearRegions();
+            const pitchDiv = document.getElementById('chart');
+            [ pitchDiv].forEach(c => c?.querySelectorAll('.region-overlay')?.forEach(e => e.remove()));
             contextMenu.style.display = "none";
             document.getElementById('deleteTierConfirmDialog').style.display = 'none';
+            countTiersAndAnnotations()
         });
 
         document.getElementById('cancelDeleteTier').addEventListener('click', function(){
@@ -1520,7 +1583,7 @@
                 contextMenu.style.top = `${menuY}px`;
                 contextMenu.style.left = `${menuX}px`;
                 contextMenu.style.display = "block";
-                targetTier = tier; // Save the current right-click Tier
+                selectedTier = tier; // Save the current right-click Tier
                 menu0.style.display = "none";
                 menu1.style.display = "none";
                 menu2.style.display = "none";
@@ -1528,6 +1591,7 @@
                 menu3.textContent = "Hide This Tier";
                 menu4.style.display = "block";
                 menu5.style.display = "block";
+                menu6.style.display = "none";
                 updateTierSubmenu();
             })
         }
@@ -1619,6 +1683,17 @@
         });
     };
 
+    function countTiersAndAnnotations() {
+        // Count the number of tiers
+        const tiers = document.querySelectorAll("#tier-control .interval-tier");
+        const tierCount = tiers.length;
+        // Count the number of annotations
+        const annotations = document.querySelectorAll("#tier-control .interval-tier .interval");
+        const annotationCount = annotations.length;
+        document.getElementById("tierCount").textContent = tierCount;
+        document.getElementById("annotationCount").textContent = annotationCount;
+    }
+
     function closeAllMenus() {
         const menus = document.querySelectorAll(".context-menu"); // Select all possible top-level menus
         menus.forEach((menu) => {
@@ -1634,8 +1709,8 @@
         const drawingslabel = document.querySelector("#drawings-label");
         const waveform = document.querySelector("#waveform");
         const canvasesDiv = wavesurfer.getWrapper().querySelector('.canvases'); //waveform
-        const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling
-        hover.attachToContainer(spectrogramDiv);
+        {#const spectrogramDiv = wavesurfer.getWrapper().parentElement.nextElementSibling#}
+        {#hover.attachToContainer(spectrogramDiv);#}
         const drawings = document.querySelector("#drawings");
         hover.attachToContainer(document.querySelector("#chart"));
         const menu0 = document.querySelector("#menu0");
@@ -1645,9 +1720,9 @@
         const menu2 = document.querySelector("#menu2");
         menu2.textContent = "Hide Pitch & Intensity";
         const menu3 = document.querySelector("#menu3"); // Used to hide Tier
-        let targetTier = null; // The target Tier of the current right-click
         const menu4 = document.querySelector("#menu4"); // Used to show hidden Tiers
         const menu5 = document.querySelector("#menu5"); // Used to delete Tier
+        const menu6 = document.querySelector("#menu6");
         const tierSubmenu = document.getElementById("tier-submenu"); // submenu container
         // Bind right-click event
         waveform.addEventListener("contextmenu", (event) => {
@@ -1659,21 +1734,21 @@
             event.preventDefault();
             closeAllMenus();
         });
-        spectrogramDiv.addEventListener("contextmenu", (event) => {
-            event.stopPropagation()
-            event.preventDefault();
-            closeAllMenus();
-            contextMenu.style.top = `${event.clientY}px`;
-            contextMenu.style.left = `${event.clientX}px`;
-            contextMenu.style.display = "block";
-            menu0.style.display = "none";
-            menu1.style.display = "block";
-            menu2.style.display = "none";
-            menu3.style.display = "none";
-            menu4.style.display = "none";
-            menu5.style.display = "none";
-            updateTierSubmenu();
-        });
+        {#spectrogramDiv.addEventListener("contextmenu", (event) => {#}
+        {#    event.stopPropagation()#}
+        {#    event.preventDefault();#}
+        {#    closeAllMenus();#}
+        {#    contextMenu.style.top = `${event.clientY}px`;#}
+        {#    contextMenu.style.left = `${event.clientX}px`;#}
+        {#    contextMenu.style.display = "block";#}
+        {#    menu0.style.display = "none";#}
+        {#    menu1.style.display = "block";#}
+        {#    menu2.style.display = "none";#}
+        {#    menu3.style.display = "none";#}
+        {#    menu4.style.display = "none";#}
+        {#    menu5.style.display = "none";#}
+        {#    updateTierSubmenu();#}
+        {#});#}
         spectrogramlabel.addEventListener("contextmenu", (event) => {
             event.stopPropagation()
             event.preventDefault();
@@ -1682,11 +1757,12 @@
             contextMenu.style.left = `${event.clientX}px`;
             contextMenu.style.display = "block";
             menu0.style.display = "none";
-            menu1.style.display = "block";
+            menu1.style.display = "none";
             menu2.style.display = "none";
             menu3.style.display = "none";
             menu4.style.display = "none";
             menu5.style.display = "none";
+            menu6.style.display = "block";
             updateTierSubmenu();
         });
         drawings.addEventListener("contextmenu", (event) => {
@@ -1702,6 +1778,7 @@
             menu3.style.display = "none";
             menu4.style.display = "none";
             menu5.style.display = "none";
+            menu6.style.display = "none";
             updateTierSubmenu();
         });
         // Hide menu
@@ -1728,33 +1805,33 @@
             }
             contextMenu.style.display = "none";
         });
-        menu1.addEventListener("click", () => {
-            const plugins = wavesurfer.getActivePlugins();
-            let hasSpectrogram = false;
+        {#menu1.addEventListener("click", () => {#}
+        {#    const plugins = wavesurfer.getActivePlugins();#}
+        {#    let hasSpectrogram = false;#}
             {#console.log('wavesurfer.getPlugin',plugins)#}
-            for (const plugin of plugins) {
-                if (plugin instanceof spectrogram_emu) {
-                    spectrogramlabel.style.display = "none";
-                    spectrogramyaxis.style.display = "none";
-                    menu1.textContent = "Show Spectrogram";
-                    hasSpectrogram = true;
-                    plugin.destroy();
-                    wavesurfer.plugins = wavesurfer.plugins.filter(p => p !== plugin);
-                    return;
-                }
-            }
-            if (!hasSpectrogram) {
-                spectrogramlabel.style.display = "block";
-                spectrogramyaxis.style.display = "flex";
-                menu1.textContent = "Hide Spectrogram";
-                const spectrogramPlugin = spectrogram_emu.create({
-                    height: 128,
-                });
-                hover.attachToContainer(spectrogramDiv);
-                wavesurfer.registerPlugin(spectrogramPlugin);
-                spectrogramPlugin.render();  // Manually trigger rendering
-            }
-        });
+        {#    for (const plugin of plugins) {#}
+        {#        if (plugin instanceof spectrogram_emu) {#}
+        {#            spectrogramlabel.style.display = "none";#}
+        {#            spectrogramyaxis.style.display = "none";#}
+        {#            menu1.textContent = "Show Spectrogram";#}
+        {#            hasSpectrogram = true;#}
+        {#            plugin.destroy();#}
+        {#            wavesurfer.plugins = wavesurfer.plugins.filter(p => p !== plugin);#}
+        {#            return;#}
+        {#        }#}
+        {#    }#}
+        {#    if (!hasSpectrogram) {#}
+        {#        spectrogramlabel.style.display = "block";#}
+        {#        spectrogramyaxis.style.display = "flex";#}
+        {#        menu1.textContent = "Hide Spectrogram";#}
+        {#        const spectrogramPlugin = spectrogram_emu.create({#}
+        {#            height: 128,#}
+        {#        });#}
+        {#        hover.attachToContainer(spectrogramDiv);#}
+        {#        wavesurfer.registerPlugin(spectrogramPlugin);#}
+        {#        spectrogramPlugin.render();  // Manually trigger rendering#}
+        {#    }#}
+        {#});#}
         menu2.addEventListener("click", () => {
             if (drawings.style.display === "none") {
                 drawings.style.display = "block";
@@ -1787,6 +1864,65 @@
             tierSubmenu.style.left = `${submenuX}px`;
             tierSubmenu.style.top = `${submenuY}px`;
         });
+        const M = document.getElementById('spectrogramDialog')
+        const specMinInput = document.getElementById('specMinHz')
+        const specMaxInput = document.getElementById('specMaxHz')
+        menu6.addEventListener("click", () => {
+            for (const plugin of wavesurfer.plugins) {
+                if ('frequencyMin' in plugin && 'frequencyMax' in plugin) {
+                    specMinInput.value = plugin.frequencyMin
+                    specMaxInput.value = plugin.frequencyMax
+                    break;
+                }
+            }
+            M.style.display = 'flex'
+        });
+        document.getElementById('cancelSpectrogram').onclick = () => (M.style.display = 'none')
+        M.addEventListener('click', (e) => { if (e.target === M) M.style.display = 'none' })
+        {#console.log('wavesurfer.plugins_2',wavesurfer.plugins)#}
+        document.getElementById('saveSpectrogram').addEventListener('click', () => {
+            // Validate inputs
+            if (isNaN(Number(specMinInput.value)) || isNaN(Number(specMaxInput.value))) {
+                alert("Please enter valid numbers for frequency range!")
+                return
+            }
+            if (Number(specMinInput.value) >= Number(specMaxInput.value)) {
+                alert("Minimum frequency must be smaller than maximum frequency!")
+                return
+            }
+
+            for (const plugin of wavesurfer.plugins) {
+                if ('frequencyMin' in plugin && 'frequencyMax' in plugin) {
+                    plugin.destroy();
+                    wavesurfer.plugins = wavesurfer.plugins.filter(p => p !== plugin);
+                    break;
+                }
+            }
+            const SpectrowindowPlugin = Spectrowindow.create({
+                height: 130,
+                fftSamples: 256,
+                scale: 'linear',
+                frequencyMax: Number(specMaxInput.value),
+                frequencyMin: Number(specMinInput.value),
+                colorMap: 'gray',
+                {#labels: true,#}
+                labelsBackground: 'rgba(0, 0, 0, 0.1)',
+                splitChannels: false,
+                useWebWorker: true,
+            })
+            wavesurfer.registerPlugin(SpectrowindowPlugin)
+            const minHz = Number(specMinInput.value)
+            const maxHz = Number(specMaxInput.value)
+            const midHz = (maxHz - minHz) / 2 + minHz
+            document.getElementById('spectrogram-y-max').textContent =
+                maxHz >= 1000 ? (maxHz / 1000).toFixed(1) + 'kHz' : maxHz + 'Hz'
+            document.getElementById('spectrogram-y-mid').textContent =
+                midHz >= 1000 ? (midHz / 1000).toFixed(1) + 'kHz' : midHz + 'Hz'
+            document.getElementById('spectrogram-y-min').textContent =
+                minHz >= 1000 ? (minHz / 1000).toFixed(1) + 'kHz' : minHz + 'Hz'
+            M.style.display = 'none'
+        })
+
         function updateTierSubmenu() {
             const tiers = document.querySelectorAll(".interval-tier, .point-tier"); // Get all tiers
             tierSubmenu.innerHTML = ""; // Clear submenu
@@ -1854,11 +1990,12 @@
                 contextMenu.style.top = `${menuY}px`;
                 contextMenu.style.display = "block";
                 menu0.style.display = "none";
-                menu1.style.display = "block";
+                menu1.style.display = "none";
                 menu2.style.display = "block";
                 menu3.style.display = "none";
                 menu4.style.display = "block";
                 menu5.style.display = "none";
+                menu6.style.display = "block";
                 updateTierSubmenu();
             } else {
                 {#contextMenu.style.display = "none";#}
@@ -1951,7 +2088,7 @@
 
     function prepareAnnotationPayload() {
         const rawAnnotations = collectAnnotations();
-        if (!rawAnnotations || !Array.isArray(rawAnnotations) || rawAnnotations.length === 0) return null;
+        {#if (!rawAnnotations || !Array.isArray(rawAnnotations) || rawAnnotations.length === 0) return null;#}
 
         const filtered = JSON.parse(JSON.stringify(
             rawAnnotations
@@ -1966,7 +2103,7 @@
                 }))
         ));
 
-        if (filtered.length === 0) return null;
+        {#if (filtered.length === 0) return null;#}
 
         return {
             username: currentUsername,
@@ -2248,6 +2385,5 @@
         }
     });
 </script>
-{#<script src="{{ URL_PREFIX + url_for('static', filename='js/viewer.js') }}"></script>#}
 </body>
 </html>

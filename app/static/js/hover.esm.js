@@ -62,7 +62,8 @@ function i(t, e, i) {
 const n = {
     lineWidth: 1,
     labelSize: 11,
-    formatTimeCallback: t => `${Math.floor(t / 60)}:${`0${Math.floor(t) % 60}`.slice(-2)}`
+    formatTimeCallback: t => `${Math.floor(t / 60)}:${`0${Math.floor(t) % 60}`.slice(-2)}`,
+    getStats: null
 };
 
 class r extends e {
@@ -74,7 +75,18 @@ class r extends e {
                 n = Math.min(1, Math.max(0, i / s)), r = Math.min(s - this.options.lineWidth - 1, i);
             this.wrapper.style.transform = `translateX(${r}px)`, this.wrapper.style.opacity = "1";
             const o = this.wavesurfer.getDuration() || 0;
-            this.label.textContent = this.options.formatTimeCallback(o * n);
+            // this.label.textContent = this.options.formatTimeCallback(o * n);
+            const timeSec = o * n;
+            const timeText = this.options.formatTimeCallback(timeSec);
+            if (this.options.getStats) {
+                const { amplitude, pitch, intensity } = this.options.getStats(timeSec) || {};
+                this.label.innerHTML =
+                    `${timeText}<br>` +
+                    `Amp: ${amplitude != null ? amplitude.toFixed(2) : '--'}<br>`;
+            } else {
+                this.label.textContent = timeText;
+            }
+
             const a = this.label.offsetWidth;
             this.label.style.transform = r + a > s ? `translateX(-${a + this.options.lineWidth}px)` : "",
 
@@ -102,9 +114,17 @@ class r extends e {
                     const label = clone.querySelector('span');
                     if (label) {
                         const duration = this.wavesurfer.getDuration() || 0;
-                        const relRatio = posX / mainWidth;
-                        const timeText = this.options.formatTimeCallback(duration * relRatio);
-                        label.textContent = timeText;
+                        const relRatio  = posX / mainWidth;
+                        const cloneTime = duration * relRatio;
+
+                        if (this.options.getStats) {
+                            const { pitch, intensity } = this.options.getStats(cloneTime) || {};
+                            label.innerHTML =
+                                `Pitch(Hz): ${pitch != null ? pitch.toFixed(2) : '--'}<br>` +
+                                `Intensity(dB): ${intensity != null ? intensity.toFixed(2) : '--'}`;
+                        } else {
+                            label.textContent = this.options.formatTimeCallback(cloneTime);
+                        }
 
                         const labelWidth = label.offsetWidth;
                         label.style.transform =

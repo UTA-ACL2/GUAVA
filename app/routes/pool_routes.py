@@ -32,11 +32,7 @@ def get_user_files(username):
     username = username.lower()
     folder = os.path.join(POOL_DIR, username)
     annotation_folder = os.path.join(folder, "annotation")  # Annotation file directory
-
     print(f"Username: {username}, Folder Path: {folder}")
-    os.makedirs(folder, exist_ok=True)
-    if not folder or not os.path.exists(folder):
-        return jsonify({"error": "User not found or folder does not exist"}), 404
 
     allowed_extensions = {'.mp4': 'MP4', '.wav': 'WAV', '.mp3': 'MP3'}
     files_info = []
@@ -49,7 +45,23 @@ def get_user_files(username):
             duration = get_video_duration(file_path)
             # Check if annotation exists
             annotation_path = os.path.join(annotation_folder, file_name.rsplit('.', 1)[0], "annotations.json")
-            is_annotated = os.path.exists(annotation_path)
+
+            is_annotated = False
+            last_annotation_save_time = "----"
+            if os.path.exists(annotation_path):
+                try:
+                    with open(annotation_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        # Data must be a list and not empty
+                        if isinstance(data, list) and len(data) > 0:
+                            is_annotated = True
+
+                    mtime = os.path.getmtime(annotation_path)
+                    last_annotation_save_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime))
+
+                except Exception as e:
+                    print(f"[WARN] Failed to read {annotation_path}: {e}")
+
             status = "Annotated" if is_annotated else "Not Annotated"
 
             files_info.append({
@@ -59,6 +71,7 @@ def get_user_files(username):
                 "size": f"{round(file_stat.st_size / 1024 / 1024, 2)} MB",  # File size (MB)
                 "status": status,  # Whether annotated
                 "duration": f"{duration} sec" if duration != "Unknown" else "Unknown",  # Duration
+                "lastAnnotationSaveTime": last_annotation_save_time
             })
 
     # files = [f for f in os.listdir(folder) if f.endswith('.mp4')]
